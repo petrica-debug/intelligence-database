@@ -5,7 +5,7 @@ import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/cn";
 import {
   LayoutDashboard, Search, PenSquare, Users, Building2, Phone, MapPin, Car,
-  Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog
+  Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog, Globe, BarChart3
 } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -16,13 +16,15 @@ const NAV: NavItem[] = [
   { href: "/search", label: "Search", icon: <Search size={16} /> },
   { href: "/new-entry", label: "New Entry", icon: <PenSquare size={16} /> },
   { href: "/network", label: "Network Graph", icon: <Network size={16} /> },
+  { href: "/geo", label: "Geographic Intel", icon: <Globe size={16} /> },
+  { href: "/analytics", label: "Analytics", icon: <BarChart3 size={16} /> },
   { href: "/timeline", label: "Timeline", icon: <Clock size={16} /> },
 ];
 
 const CATS: NavItem[] = [
   { href: "/persons", label: "Persons", icon: <Users size={16} /> },
-  { href: "/companies", label: "Companies", icon: <Building2 size={16} /> },
-  { href: "/mobile", label: "Mobile Numbers", icon: <Phone size={16} /> },
+  { href: "/companies", label: "Organizations", icon: <Building2 size={16} /> },
+  { href: "/mobile", label: "Contact Numbers", icon: <Phone size={16} /> },
   { href: "/addresses", label: "Addresses", icon: <MapPin size={16} /> },
   { href: "/vehicles", label: "Vehicles", icon: <Car size={16} /> },
 ];
@@ -44,9 +46,9 @@ function NLink({ item, pathname }: { item: NavItem; pathname: string }) {
   return (
     <Link href={item.href} className={cn(
       "flex items-center gap-3 px-4 py-2 text-[13px] rounded-lg mx-2 transition-all",
-      a ? "text-accent bg-accent-muted font-medium" : "text-text-2 hover:text-text hover:bg-surface-2"
+      a ? "text-white bg-accent font-medium shadow-sm" : "text-text-2 hover:text-text hover:bg-surface-2"
     )}>
-      <span className={cn(a ? "text-accent" : "text-text-3")}>{item.icon}</span>
+      <span className={cn(a ? "text-white" : "text-text-3")}>{item.icon}</span>
       {item.label}
     </Link>
   );
@@ -61,7 +63,7 @@ export function Sidebar({ pathname }: { pathname: string }) {
   const pending = db.pendingValidations.filter((v) => !v.resolved).length;
 
   return (
-    <aside className="w-[240px] bg-surface border-r border-border flex flex-col shrink-0 max-md:hidden shadow-sm">
+    <aside className="w-[240px] bg-surface border-r border-border flex flex-col shrink-0 max-md:hidden">
       <div className="flex-1 py-3 overflow-y-auto">
         <Label>Navigation</Label>
         {NAV.map((i) => <NLink key={i.href} item={i} pathname={pathname} />)}
@@ -88,6 +90,7 @@ export function Sidebar({ pathname }: { pathname: string }) {
           <div className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
           <span className="text-[11px] text-text-3">System Online</span>
         </div>
+        <div className="text-[10px] text-text-3 mt-1">{db.entries.length} entities · {db.entries.reduce((s, e) => s + e.linkedTo.length, 0)} links</div>
       </div>
     </aside>
   );

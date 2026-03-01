@@ -8,8 +8,9 @@ import { PageHeader, Card, Badge, Button, Input, Select, Textarea, useToast } fr
 import { ArrowRight, ArrowLeft, Link2, Send, SkipForward, CheckCircle2 } from "lucide-react";
 import type { EntityCategory, ContextAssessment, DetectedEntity } from "@/types";
 
-const CATS = [{ value: "person", label: "Person" }, { value: "company", label: "Company" }, { value: "mobile", label: "Mobile Number" }, { value: "address", label: "Address / Place" }, { value: "vehicle", label: "Vehicle" }];
+const CATS = [{ value: "person", label: "Person" }, { value: "company", label: "Organization" }, { value: "mobile", label: "Contact Number" }, { value: "address", label: "Address / Place" }, { value: "vehicle", label: "Vehicle" }];
 const CTX = [{ value: "confirmed", label: "Confirmed" }, { value: "likely", label: "Very Likely True" }, { value: "rumor", label: "Rumors / Personal Opinion" }];
+const COUNTRIES = [{ value: "", label: "Select Country" }, { value: "Romania", label: "Romania" }, { value: "Bulgaria", label: "Bulgaria" }, { value: "Hungary", label: "Hungary" }, { value: "Czech Republic", label: "Czech Republic" }, { value: "International", label: "International" }];
 
 export default function NewEntryPage() {
   const { db, currentUser, updateDb } = useApp();
@@ -18,6 +19,8 @@ export default function NewEntryPage() {
   const [category, setCategory] = useState<EntityCategory>("person");
   const [name, setName] = useState("");
   const [context, setContext] = useState<ContextAssessment>("confirmed");
+  const [country, setCountry] = useState("");
+  const [tags, setTags] = useState("");
   const [narrative, setNarrative] = useState("");
   const [detected, setDetected] = useState<DetectedEntity[]>([]);
   const [step, setStep] = useState<"form" | "review">("form");
@@ -41,8 +44,9 @@ export default function NewEntryPage() {
       if (d.action === "link" && d.existing) linkIds.push(d.existing.id);
       else if (d.action === "validate") pvs.push({ targetName: name, suggestedLink: d.value, suggestedLinkId: d.existing?.id ?? null, reason: d.value + " - " + (valReason || "Needs admin review") });
     });
+    const tagList = tags.split(",").map((t) => t.trim()).filter(Boolean);
     updateDb((d) => {
-      d.entries.push({ id: newId, category, name: name.trim(), context, narrative: narrative.trim(), createdBy: currentUser!.username, createdAt: new Date().toISOString(), linkedTo: linkIds });
+      d.entries.push({ id: newId, category, name: name.trim(), context, narrative: narrative.trim(), createdBy: currentUser!.username, createdAt: new Date().toISOString(), linkedTo: linkIds, country: country || undefined, tags: tagList.length > 0 ? tagList : undefined });
       linkIds.forEach((lid) => { const t = d.entries.find((e) => e.id === lid); if (t && !t.linkedTo.includes(newId)) t.linkedTo.push(newId); });
       pvs.forEach((p) => {
         const pvId = d.pendingValidations.length > 0 ? Math.max(...d.pendingValidations.map((x) => x.id)) + 1 : 1;
@@ -62,7 +66,7 @@ export default function NewEntryPage() {
       <>
         <PageHeader title="Review & Link" description="Review detected entities and decide how to handle matches" />
         <Card className="mb-4">
-          <div className="flex items-center gap-3 mb-2"><h3 className="text-lg font-semibold">{name}</h3><Badge variant={category as never}>{category}</Badge><Badge variant={context as never}>{context}</Badge></div>
+          <div className="flex items-center gap-3 mb-2"><h3 className="text-lg font-semibold">{name}</h3><Badge variant={category as never}>{category}</Badge><Badge variant={context as never}>{context}</Badge>{country && <span className="text-[11px] text-text-3 bg-surface-3 px-2 py-0.5 rounded">{country}</span>}</div>
           <p className="text-[13px] text-text-2 leading-relaxed">{narrative}</p>
         </Card>
         {withExisting.length > 0 ? (
@@ -93,14 +97,18 @@ export default function NewEntryPage() {
 
   return (
     <>
-      <PageHeader title="New Entry" description="Add new intelligence data to the database" />
+      <PageHeader title="New Entry" description="Add new data to the database" />
       <Card>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <Select id="cat" label="Category" value={category} onChange={(e) => setCategory(e.target.value as EntityCategory)} options={CATS} />
           <Select id="ctx" label="Context Assessment" value={context} onChange={(e) => setContext(e.target.value as ContextAssessment)} options={CTX} />
+          <Select id="country" label="Country" value={country} onChange={(e) => setCountry(e.target.value)} options={COUNTRIES} />
         </div>
-        <div className="mb-4"><Input id="name" label="Name / Identifier" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., John Smith, +40 712 345 678, B-123-ABC" /></div>
-        <div className="mb-6"><Textarea id="narr" label="Narrative / Intelligence" value={narrative} onChange={(e) => setNarrative(e.target.value)} placeholder="Enter intelligence data. Include names, numbers, addresses - the system will detect and suggest links." className="min-h-[180px]" /></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <Input id="name" label="Name / Identifier" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., John Smith, +40 712 345 678" />
+          <Input id="tags" label="Tags (comma-separated)" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="e.g., advocacy, education, policy" />
+        </div>
+        <div className="mb-6"><Textarea id="narr" label="Narrative / Intelligence" value={narrative} onChange={(e) => setNarrative(e.target.value)} placeholder="Enter data. Include names, numbers, addresses - the system will detect and suggest links." className="min-h-[180px]" /></div>
         <Button onClick={handleDetect} size="lg"><ArrowRight size={14} /> Analyze & Review Links</Button>
       </Card>
     </>

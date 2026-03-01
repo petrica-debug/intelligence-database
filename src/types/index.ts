@@ -20,6 +20,8 @@ export interface Entry {
   createdBy: string;
   createdAt: string;
   linkedTo: number[];
+  country?: string;
+  tags?: string[];
 }
 
 export interface PendingValidation {
