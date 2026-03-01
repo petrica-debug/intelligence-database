@@ -5,11 +5,13 @@ import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import type { Entry } from "@/types";
+import type { Entry, SensitivityLevel } from "@/types";
+import { SENSITIVITY_MIN_CLEARANCE, CLEARANCE_LABELS } from "@/types";
 import {
   Users, Building2, Link2, Globe, TrendingUp, ArrowUpRight,
   Shield, Zap, Eye, Target, ChevronRight, AlertTriangle,
-  Crosshair, MapPin, Share2, Radio, Bookmark, FileWarning, Lock
+  Crosshair, MapPin, Share2, Radio, Bookmark, FileWarning, Lock,
+  FileText, Brain
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip,
@@ -99,7 +101,7 @@ function SH({ children }: { children: React.ReactNode }) {
 /* ═══════════════════════════════════════════════════ */
 
 export default function DashboardPage() {
-  const { db, currentUser } = useApp();
+  const { db, currentUser, canView, userClearance } = useApp();
   const router = useRouter();
   const go = (id: number) => router.push(`/entry/${id}`);
 
@@ -607,7 +609,118 @@ export default function DashboardPage() {
         </B>
       </div>
 
-      {/* ═══ ROW 5: Reliability Breakdown + Category Distribution ═══ */}
+      {/* ═══ ROW 5: Reports + AI Inferences ═══ */}
+      <div className="grid grid-cols-12 gap-3">
+
+        {/* Recent Reports */}
+        <B className="col-span-12 md:col-span-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <FileText size={13} className="text-accent" />
+              <span className="text-[10px] font-semibold text-text-3 uppercase tracking-[0.08em]">Recent Reports</span>
+            </div>
+            <button onClick={() => router.push("/reports")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">View All</button>
+          </div>
+          {db.reports.length === 0 ? (
+            <p className="text-[12px] text-text-3 py-4 text-center">No reports yet</p>
+          ) : (
+            <div className="space-y-1.5">
+              {db.reports
+                .filter(r => canView(r.overallSensitivity))
+                .slice(0, 5)
+                .map((report) => {
+                  const sensColors: Record<SensitivityLevel, string> = {
+                    standard: "text-emerald",
+                    sensitive: "text-amber",
+                    confidential: "text-red",
+                    "top-secret": "text-purple",
+                  };
+                  return (
+                    <div key={report.id} onClick={() => router.push("/reports")}
+                      className="flex items-center gap-3 py-2 px-2 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
+                      <div className="w-7 h-7 rounded-lg bg-accent/8 flex items-center justify-center shrink-0">
+                        <FileText size={12} className="text-accent" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-semibold group-hover:text-accent transition-colors truncate">{report.title}</div>
+                        <div className="text-[9px] text-text-3">{report.createdBy} &middot; {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &middot; {report.sections.length} sections</div>
+                      </div>
+                      <span className={cn("text-[9px] font-bold uppercase", sensColors[report.overallSensitivity])}>
+                        {report.overallSensitivity}
+                      </span>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </B>
+
+        {/* AI Inferences */}
+        <B className="col-span-12 md:col-span-6">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Brain size={13} className="text-purple" />
+              <span className="text-[10px] font-semibold text-text-3 uppercase tracking-[0.08em]">AI-Inferred Connections</span>
+            </div>
+            <button onClick={() => router.push("/intelligence")} className="text-[10px] text-purple font-medium hover:underline cursor-pointer">View All</button>
+          </div>
+          {db.inferredConnections.length === 0 ? (
+            <p className="text-[12px] text-text-3 py-4 text-center">No inferred connections yet</p>
+          ) : (
+            <div className="space-y-1.5">
+              {db.inferredConnections
+                .filter(ic => ic.status === "new")
+                .sort((a, b) => b.confidence - a.confidence)
+                .slice(0, 5)
+                .map((ic) => {
+                  const entityA = entries.find(e => e.id === ic.entityA);
+                  const entityB = entries.find(e => e.id === ic.entityB);
+                  if (!entityA || !entityB) return null;
+                  const confPctVal = Math.round(ic.confidence * 100);
+                  return (
+                    <div key={ic.id} onClick={() => router.push("/intelligence")}
+                      className="flex items-center gap-3 py-2 px-2 rounded-xl hover:bg-purple/[0.03] transition-all cursor-pointer group">
+                      <div className="w-7 h-7 rounded-lg bg-purple/8 flex items-center justify-center shrink-0">
+                        <Brain size={12} className="text-purple" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[11px] font-semibold truncate">
+                          <span className="group-hover:text-accent transition-colors">{entityA.name}</span>
+                          <span className="text-text-3 mx-1">&harr;</span>
+                          <span className="group-hover:text-purple transition-colors">{entityB.name}</span>
+                        </div>
+                        <div className="text-[9px] text-text-3">{ic.category.replace(/-/g, " ")} &middot; {ic.evidence.length} evidence points</div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className={cn("text-[12px] font-bold tabular-nums",
+                          confPctVal >= 80 ? "text-emerald" : confPctVal >= 60 ? "text-amber" : "text-red"
+                        )}>{confPctVal}%</div>
+                        <div className="text-[7px] text-text-3 uppercase">Conf</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              {db.inferredConnections.filter(ic => ic.status === "new").length === 0 && (
+                <p className="text-[12px] text-text-3 py-4 text-center">All connections have been reviewed</p>
+              )}
+            </div>
+          )}
+          {/* Stats row */}
+          <div className="flex items-center gap-3 mt-3 pt-2 border-t border-border/30">
+            <span className="flex items-center gap-1 text-[9px] text-text-3">
+              <span className="w-2 h-2 rounded-sm bg-purple" />{db.inferredConnections.filter(ic => ic.status === "new").length} New
+            </span>
+            <span className="flex items-center gap-1 text-[9px] text-text-3">
+              <span className="w-2 h-2 rounded-sm bg-emerald" />{db.inferredConnections.filter(ic => ic.status === "confirmed").length} Confirmed
+            </span>
+            <span className="flex items-center gap-1 text-[9px] text-text-3">
+              <span className="w-2 h-2 rounded-sm bg-red" />{db.inferredConnections.filter(ic => ic.status === "dismissed").length} Dismissed
+            </span>
+          </div>
+        </B>
+      </div>
+
+      {/* ═══ ROW 6: Reliability Breakdown + Category Distribution ═══ */}
       <div className="grid grid-cols-12 gap-3">
 
         {/* Reliability by Region */}

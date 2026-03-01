@@ -2,267 +2,429 @@
 
 import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
-import { PageHeader, Card, GlassCard, Badge, Button } from "@/components/ui";
+import { PageHeader, Card, GlassCard, Badge } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { TrendingUp, Network, Target, Brain, Link2, ArrowRight, BarChart3, Shield } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+import { Shield, Brain, Users, FileText, AlertTriangle, CheckCircle2, XCircle, TrendingUp, Activity, Lock, Eye, BarChart3, Clock, Database } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, RadialBarChart, RadialBar, Legend } from "recharts";
+import type { SensitivityLevel } from "@/types";
+import { SENSITIVITY_MIN_CLEARANCE, CLEARANCE_LABELS } from "@/types";
+
+const tooltipStyle = {
+  background: "rgba(255,255,255,0.96)", backdropFilter: "blur(12px)",
+  border: "1px solid rgba(0,0,0,0.06)", borderRadius: 12,
+  fontSize: 11, padding: "8px 14px",
+  boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
+};
+
+const C = {
+  navy: "#1e3a5f", blue: "#3b82f6", purple: "#7c3aed",
+  emerald: "#059669", amber: "#d97706", red: "#dc2626",
+  cyan: "#0891b2", slate: "#64748b",
+};
 
 export default function AnalyticsPage() {
-  const { db } = useApp();
+  const { db, currentUser, canView, userClearance } = useApp();
   const router = useRouter();
+  const entries = db.entries;
 
-  // ── Network Centrality: most connected entities ──
-  const centrality = db.entries
-    .map((e) => {
-      const inbound = db.entries.filter((x) => x.linkedTo.includes(e.id)).length;
-      const outbound = e.linkedTo.length;
-      return { ...e, connections: inbound + outbound, inbound, outbound };
-    })
-    .sort((a, b) => b.connections - a.connections);
+  // ── Data Quality Metrics ──
+  const withCountry = entries.filter(e => e.country).length;
+  const withTags = entries.filter(e => (e.tags || []).length > 0).length;
+  const withLinks = entries.filter(e => e.linkedTo.length > 0).length;
+  const confirmed = entries.filter(e => e.context === "confirmed").length;
+  const qualityScore = Math.round(
+    ((withCountry / entries.length) * 25 +
+    (withTags / entries.length) * 25 +
+    (withLinks / entries.length) * 25 +
+    (confirmed / entries.length) * 25)
+  );
 
-  const topNodes = centrality.slice(0, 10);
+  const qualityMetrics = [
+    { name: "Geo-tagged", value: Math.round((withCountry / entries.length) * 100), fill: C.blue },
+    { name: "Tagged", value: Math.round((withTags / entries.length) * 100), fill: C.purple },
+    { name: "Linked", value: Math.round((withLinks / entries.length) * 100), fill: C.cyan },
+    { name: "Confirmed", value: Math.round((confirmed / entries.length) * 100), fill: C.emerald },
+  ];
 
-  // ── Tag Distribution ──
-  const tagMap = new Map<string, number>();
-  db.entries.forEach((e) => {
-    (e.tags || []).forEach((t) => tagMap.set(t, (tagMap.get(t) || 0) + 1));
+  // ── Inference Performance ──
+  const totalInferences = db.inferredConnections.length;
+  const confirmedInferences = db.inferredConnections.filter(ic => ic.status === "confirmed").length;
+  const dismissedInferences = db.inferredConnections.filter(ic => ic.status === "dismissed").length;
+  const pendingInferences = db.inferredConnections.filter(ic => ic.status === "new").length;
+  const accuracyRate = totalInferences > 0 && (confirmedInferences + dismissedInferences) > 0
+    ? Math.round((confirmedInferences / (confirmedInferences + dismissedInferences)) * 100)
+    : 0;
+  const avgConfidence = totalInferences > 0
+    ? Math.round(db.inferredConnections.reduce((s, ic) => s + ic.confidence, 0) / totalInferences * 100)
+    : 0;
+
+  const inferenceByCategory = (() => {
+    const m = new Map<string, { total: number; confirmed: number; dismissed: number }>();
+    db.inferredConnections.forEach(ic => {
+      const cat = ic.category;
+      const cur = m.get(cat) || { total: 0, confirmed: 0, dismissed: 0 };
+      cur.total++;
+      if (ic.status === "confirmed") cur.confirmed++;
+      if (ic.status === "dismissed") cur.dismissed++;
+      m.set(cat, cur);
+    });
+    return Array.from(m.entries()).map(([name, data]) => ({
+      name: name.replace(/-/g, " "),
+      total: data.total,
+      confirmed: data.confirmed,
+      dismissed: data.dismissed,
+      accuracy: (data.confirmed + data.dismissed) > 0 ? Math.round((data.confirmed / (data.confirmed + data.dismissed)) * 100) : 0,
+    })).sort((a, b) => b.total - a.total);
+  })();
+
+  // ── Sensitivity Distribution ──
+  const sensitivityDist = (() => {
+    const counts: Record<SensitivityLevel, number> = { standard: 0, sensitive: 0, confidential: 0, "top-secret": 0 };
+    entries.forEach(e => { counts[e.sensitivity ?? "standard"]++; });
+    return [
+      { name: "Standard", value: counts.standard, fill: C.emerald },
+      { name: "Sensitive", value: counts.sensitive, fill: C.amber },
+      { name: "Confidential", value: counts.confidential, fill: C.red },
+      { name: "Top Secret", value: counts["top-secret"], fill: C.purple },
+    ].filter(d => d.value > 0);
+  })();
+
+  // ── User Activity Audit ──
+  const userActivity = (() => {
+    const m = new Map<string, { searches: number; views: number; entries: number; logins: number; total: number }>();
+    db.logs.forEach(log => {
+      const cur = m.get(log.user) || { searches: 0, views: 0, entries: 0, logins: 0, total: 0 };
+      cur.total++;
+      if (log.action === "SEARCH") cur.searches++;
+      else if (log.action === "VIEW") cur.views++;
+      else if (log.action === "ENTRY") cur.entries++;
+      else if (log.action === "LOGIN") cur.logins++;
+      m.set(log.user, cur);
+    });
+    return Array.from(m.entries())
+      .map(([user, stats]) => ({ user, ...stats }))
+      .sort((a, b) => b.total - a.total);
+  })();
+
+  // ── Reports Analytics ──
+  const totalReports = db.reports.length;
+  const avgSections = totalReports > 0 ? (db.reports.reduce((s, r) => s + r.sections.length, 0) / totalReports).toFixed(1) : "0";
+  const reportsBySensitivity = (() => {
+    const counts: Record<SensitivityLevel, number> = { standard: 0, sensitive: 0, confidential: 0, "top-secret": 0 };
+    db.reports.forEach(r => counts[r.overallSensitivity]++);
+    return counts;
+  })();
+
+  // ── Validation Queue ──
+  const pendingValidations = db.pendingValidations.filter(v => !v.resolved).length;
+  const resolvedValidations = db.pendingValidations.filter(v => v.resolved).length;
+  const approvedValidations = db.pendingValidations.filter(v => v.approved === true).length;
+
+  // ── Activity Timeline (30 days, broken by action type) ──
+  const activityTimeline = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date(); d.setDate(d.getDate() - (29 - i));
+    const dayStr = d.toDateString();
+    const dayLogs = db.logs.filter(l => new Date(l.ts).toDateString() === dayStr);
+    return {
+      day: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+      searches: dayLogs.filter(l => l.action === "SEARCH").length,
+      entries: dayLogs.filter(l => l.action === "ENTRY").length,
+      views: dayLogs.filter(l => l.action === "VIEW").length,
+      other: dayLogs.filter(l => !["SEARCH", "ENTRY", "VIEW"].includes(l.action)).length,
+    };
   });
-  const tagData = Array.from(tagMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 12)
-    .map(([name, value]) => ({ name, value }));
 
-  // ── Country Distribution ──
-  const countryMap = new Map<string, number>();
-  db.entries.forEach((e) => {
-    if (e.country) countryMap.set(e.country, (countryMap.get(e.country) || 0) + 1);
+  // ── Orphaned entities (no links) ──
+  const orphaned = entries.filter(e => {
+    const hasOutbound = e.linkedTo.length > 0;
+    const hasInbound = entries.some(x => x.linkedTo.includes(e.id));
+    return !hasOutbound && !hasInbound;
   });
-  const countryColors: Record<string, string> = {
-    "Romania": "#1e3a5f", "Bulgaria": "#047857", "Hungary": "#b91c1c", "Czech Republic": "#5b21b6", "International": "#b45309"
-  };
-  const countryData = Array.from(countryMap.entries())
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, value]) => ({ name, value, color: countryColors[name] || "#7b8da4" }));
-
-  // ── Predicted Connections: entities with shared tags/country but no direct link ──
-  const predictions: { a: typeof db.entries[0]; b: typeof db.entries[0]; score: number; reasons: string[] }[] = [];
-  for (let i = 0; i < db.entries.length; i++) {
-    for (let j = i + 1; j < db.entries.length; j++) {
-      const a = db.entries[i], b = db.entries[j];
-      if (a.linkedTo.includes(b.id) || b.linkedTo.includes(a.id)) continue;
-      let score = 0;
-      const reasons: string[] = [];
-      // Shared tags
-      const sharedTags = (a.tags || []).filter((t) => (b.tags || []).includes(t));
-      if (sharedTags.length > 0) { score += sharedTags.length * 15; reasons.push(`${sharedTags.length} shared tag${sharedTags.length > 1 ? "s" : ""}: ${sharedTags.join(", ")}`); }
-      // Same country
-      if (a.country && a.country === b.country) { score += 10; reasons.push(`Same country: ${a.country}`); }
-      // Mutual connections
-      const mutuals = a.linkedTo.filter((id) => b.linkedTo.includes(id));
-      if (mutuals.length > 0) { score += mutuals.length * 25; reasons.push(`${mutuals.length} mutual connection${mutuals.length > 1 ? "s" : ""}`); }
-      // Both persons or person-company in same country
-      if (a.category === "person" && b.category === "company" && a.country === b.country) { score += 20; reasons.push("Person-organization same country"); }
-      if (score >= 25) predictions.push({ a, b, score, reasons });
-    }
-  }
-  predictions.sort((a, b) => b.score - a.score);
-
-  // ── Activity Trend ──
-  const activityData = Array.from({ length: 14 }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - (13 - i));
-    const day = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    const count = db.logs.filter((l) => new Date(l.ts).toDateString() === d.toDateString()).length;
-    return { day, actions: count || Math.floor(Math.random() * 4) + 1 };
-  });
-
-  // ── Risk/Importance Score ──
-  const riskScores = centrality.slice(0, 8).map((e) => {
-    const hasSignal = db.signals.some((s) => s.entityId === e.id);
-    const recentViews = db.logs.filter((l) => l.detail.includes(e.name) && l.action === "VIEW").length;
-    const recentSearches = db.logs.filter((l) => l.detail.includes(e.name) && l.action === "SEARCH").length;
-    const importance = e.connections * 10 + (hasSignal ? 30 : 0) + recentViews * 5 + recentSearches * 8;
-    return { ...e, importance, hasSignal, recentViews, recentSearches };
-  }).sort((a, b) => b.importance - a.importance);
-
-  // ── Growth projection ──
-  const totalEntries = db.entries.length;
-  const monthlyRate = Math.max(3, Math.round(totalEntries * 0.12));
-  const projections = Array.from({ length: 6 }, (_, i) => ({
-    month: new Date(2026, 2 + i).toLocaleDateString("en-US", { month: "short" }),
-    current: i === 0 ? totalEntries : null,
-    projected: totalEntries + monthlyRate * (i + 1),
-  }));
 
   return (
     <>
-      <PageHeader title="Advanced Analytics" description="Network analysis, predictive intelligence, and strategic insights" />
+      <PageHeader title="Operational Analytics" description="Data quality, inference performance, user activity audit, and security metrics" />
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
         <GlassCard className="py-3 px-4">
-          <div className="flex items-center gap-2 mb-1"><Network size={14} className="text-accent" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Avg Connectivity</span></div>
-          <div className="text-2xl font-bold">{(centrality.reduce((s, e) => s + e.connections, 0) / Math.max(centrality.length, 1)).toFixed(1)}</div>
-          <div className="text-[11px] text-text-3">links per entity</div>
+          <div className="flex items-center gap-2 mb-1"><Database size={14} className="text-accent" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Quality Score</span></div>
+          <div className={cn("text-2xl font-bold", qualityScore >= 80 ? "text-emerald" : qualityScore >= 60 ? "text-amber" : "text-red")}>{qualityScore}%</div>
+          <div className="text-[11px] text-text-3">data completeness</div>
         </GlassCard>
         <GlassCard className="py-3 px-4">
-          <div className="flex items-center gap-2 mb-1"><Target size={14} className="text-amber" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Signals Active</span></div>
-          <div className="text-2xl font-bold">{db.signals.length}</div>
-          <div className="text-[11px] text-text-3">entities monitored</div>
+          <div className="flex items-center gap-2 mb-1"><Brain size={14} className="text-purple" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">AI Accuracy</span></div>
+          <div className={cn("text-2xl font-bold", accuracyRate >= 70 ? "text-emerald" : accuracyRate >= 50 ? "text-amber" : "text-text-2")}>{accuracyRate > 0 ? `${accuracyRate}%` : "N/A"}</div>
+          <div className="text-[11px] text-text-3">{confirmedInferences + dismissedInferences} reviewed</div>
         </GlassCard>
         <GlassCard className="py-3 px-4">
-          <div className="flex items-center gap-2 mb-1"><Brain size={14} className="text-purple" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Predictions</span></div>
-          <div className="text-2xl font-bold">{predictions.length}</div>
-          <div className="text-[11px] text-text-3">potential connections</div>
+          <div className="flex items-center gap-2 mb-1"><FileText size={14} className="text-cyan" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Reports</span></div>
+          <div className="text-2xl font-bold">{totalReports}</div>
+          <div className="text-[11px] text-text-3">avg {avgSections} sections</div>
         </GlassCard>
         <GlassCard className="py-3 px-4">
-          <div className="flex items-center gap-2 mb-1"><TrendingUp size={14} className="text-emerald" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Growth Rate</span></div>
-          <div className="text-2xl font-bold">+{monthlyRate}</div>
-          <div className="text-[11px] text-text-3">projected/month</div>
+          <div className="flex items-center gap-2 mb-1"><AlertTriangle size={14} className="text-amber" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Pending</span></div>
+          <div className="text-2xl font-bold text-amber">{pendingValidations + pendingInferences}</div>
+          <div className="text-[11px] text-text-3">{pendingValidations} validations, {pendingInferences} inferences</div>
+        </GlassCard>
+        <GlassCard className="py-3 px-4">
+          <div className="flex items-center gap-2 mb-1"><Activity size={14} className="text-emerald" /><span className="text-[10px] font-semibold text-text-3 uppercase tracking-wider">Total Actions</span></div>
+          <div className="text-2xl font-bold">{db.logs.length}</div>
+          <div className="text-[11px] text-text-3">by {userActivity.length} users</div>
         </GlassCard>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Country Breakdown */}
+        {/* Data Quality Breakdown */}
         <Card>
-          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">Geographic Distribution</h3>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={countryData} layout="vertical">
-              <XAxis type="number" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis dataKey="name" type="category" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} width={100} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
-              <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                {countryData.map((c, i) => <Cell key={i} fill={c.color} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* Tag Cloud */}
-        <Card>
-          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">Focus Areas</h3>
-          <div className="flex flex-wrap gap-2">
-            {tagData.map((t) => {
-              const size = Math.min(1 + t.value * 0.15, 2);
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <Database size={14} /> Data Quality Assessment
+          </h3>
+          <div className="space-y-3">
+            {[
+              { label: "Geo-tagged", count: withCountry, total: entries.length, color: "bg-blue", desc: "Entries with country assigned" },
+              { label: "Tagged", count: withTags, total: entries.length, color: "bg-purple", desc: "Entries with topic tags" },
+              { label: "Connected", count: withLinks, total: entries.length, color: "bg-cyan", desc: "Entries with at least one link" },
+              { label: "Confirmed", count: confirmed, total: entries.length, color: "bg-emerald", desc: "Verified intelligence" },
+            ].map(m => {
+              const pct = Math.round((m.count / m.total) * 100);
               return (
-                <span key={t.name} className="px-3 py-1.5 rounded-lg bg-accent-muted text-accent font-medium transition-all hover:bg-accent hover:text-white cursor-default"
-                  style={{ fontSize: `${Math.max(11, 10 + t.value)}px` }}>
-                  {t.name} <span className="opacity-60 text-[10px]">{t.value}</span>
-                </span>
+                <div key={m.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <span className="text-[12px] font-semibold text-text">{m.label}</span>
+                      <span className="text-[10px] text-text-3 ml-2">{m.desc}</span>
+                    </div>
+                    <span className="text-[12px] font-bold tabular-nums">{m.count}/{m.total} <span className={cn("ml-1", pct >= 80 ? "text-emerald" : pct >= 60 ? "text-amber" : "text-red")}>{pct}%</span></span>
+                  </div>
+                  <div className="w-full h-2 bg-surface-3 rounded-full overflow-hidden">
+                    <div className={cn("h-full rounded-full transition-all duration-700", m.color)} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
               );
             })}
           </div>
+          {orphaned.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-border/40">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle size={12} className="text-amber" />
+                <span className="text-[10px] font-semibold text-amber uppercase tracking-wider">Orphaned Entities ({orphaned.length})</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {orphaned.slice(0, 8).map(e => (
+                  <span key={e.id} onClick={() => router.push(`/entry/${e.id}`)}
+                    className="text-[10px] px-2 py-0.5 rounded-md bg-amber/8 text-amber border border-amber/15 cursor-pointer hover:bg-amber/15 transition-colors">
+                    {e.name}
+                  </span>
+                ))}
+                {orphaned.length > 8 && <span className="text-[10px] text-text-3 px-2 py-0.5">+{orphaned.length - 8} more</span>}
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Inference Performance */}
+        <Card>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <Brain size={14} /> AI Inference Performance
+          </h3>
+          {totalInferences === 0 ? (
+            <p className="text-[12px] text-text-3 py-8 text-center">No inferences to analyze yet</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-2.5 rounded-xl bg-emerald/[0.04] border border-emerald/10">
+                  <CheckCircle2 size={14} className="text-emerald mx-auto mb-1" />
+                  <div className="text-lg font-bold text-emerald">{confirmedInferences}</div>
+                  <div className="text-[9px] text-text-3 uppercase">Confirmed</div>
+                </div>
+                <div className="text-center p-2.5 rounded-xl bg-amber/[0.04] border border-amber/10">
+                  <Clock size={14} className="text-amber mx-auto mb-1" />
+                  <div className="text-lg font-bold text-amber">{pendingInferences}</div>
+                  <div className="text-[9px] text-text-3 uppercase">Pending</div>
+                </div>
+                <div className="text-center p-2.5 rounded-xl bg-red/[0.04] border border-red/10">
+                  <XCircle size={14} className="text-red mx-auto mb-1" />
+                  <div className="text-lg font-bold text-red">{dismissedInferences}</div>
+                  <div className="text-[9px] text-text-3 uppercase">Dismissed</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-[10px] font-semibold text-text-3 uppercase tracking-wider mb-1">By Category</div>
+                {inferenceByCategory.map(cat => (
+                  <div key={cat.name} className="flex items-center gap-2">
+                    <span className="text-[10px] font-medium text-text-2 w-28 truncate capitalize">{cat.name}</span>
+                    <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden flex">
+                      <div className="h-full bg-emerald" style={{ width: `${cat.total > 0 ? (cat.confirmed / cat.total) * 100 : 0}%` }} />
+                      <div className="h-full bg-red" style={{ width: `${cat.total > 0 ? (cat.dismissed / cat.total) * 100 : 0}%` }} />
+                    </div>
+                    <span className="text-[10px] font-bold text-text-2 w-6 text-right">{cat.total}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 pt-2 border-t border-border/30 flex items-center gap-4">
+                <span className="text-[9px] text-text-3 flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald" />Confirmed</span>
+                <span className="text-[9px] text-text-3 flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-red" />Dismissed</span>
+                <span className="text-[9px] text-text-3 flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-surface-3" />Pending</span>
+                <span className="ml-auto text-[10px] text-text-3">Avg confidence: <span className="font-bold text-text">{avgConfidence}%</span></span>
+              </div>
+            </>
+          )}
         </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        {/* Activity Trend */}
+        {/* Security Classification Distribution */}
         <Card>
-          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">14-Day Activity Trend</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={activityData}>
-              <defs><linearGradient id="aag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a5f" stopOpacity={0.15} /><stop offset="100%" stopColor="#1e3a5f" stopOpacity={0} /></linearGradient></defs>
-              <XAxis dataKey="day" tick={{ fill: "#3e5068", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#3e5068", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
-              <Area type="monotone" dataKey="actions" stroke="#1e3a5f" fill="url(#aag)" strokeWidth={2} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Card>
-
-        {/* Growth Projection */}
-        <Card>
-          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">6-Month Growth Projection</h3>
-          <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={projections}>
-              <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#047857" stopOpacity={0.15} /><stop offset="100%" stopColor="#047857" stopOpacity={0} /></linearGradient></defs>
-              <XAxis dataKey="month" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
-              <Area type="monotone" dataKey="projected" stroke="#047857" fill="url(#pg)" strokeWidth={2} strokeDasharray="6 3" />
-            </AreaChart>
-          </ResponsiveContainer>
-          <p className="text-[11px] text-text-3 mt-2 text-center">Projected at {monthlyRate} entries/month based on current growth</p>
-        </Card>
-      </div>
-
-      {/* Network Centrality */}
-      <Card className="mb-6">
-        <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
-          <BarChart3 size={14} /> Strategic Importance Ranking
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead><tr className="border-b border-border">
-              {["Rank", "Entity", "Type", "Country", "Connections", "Signal", "Importance"].map((h) => (
-                <th key={h} className="text-left text-[11px] font-medium text-text-3 uppercase tracking-wider pb-3 pr-4">{h}</th>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <Shield size={14} /> Security Classification Distribution
+          </h3>
+          <div className="flex items-center gap-6">
+            <ResponsiveContainer width="50%" height={180}>
+              <PieChart>
+                <Pie data={sensitivityDist} cx="50%" cy="50%" innerRadius={40} outerRadius={65}
+                  paddingAngle={3} dataKey="value" strokeWidth={0} cornerRadius={4}>
+                  {sensitivityDist.map((d, i) => <Cell key={i} fill={d.fill} />)}
+                </Pie>
+                <Tooltip contentStyle={tooltipStyle} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex-1 space-y-2">
+              {sensitivityDist.map(d => (
+                <div key={d.name} className="flex items-center gap-2">
+                  <div className="w-2.5 h-2.5 rounded-sm" style={{ background: d.fill }} />
+                  <span className="text-[11px] font-medium text-text-2 flex-1">{d.name}</span>
+                  <span className="text-[12px] font-bold text-text">{d.value}</span>
+                  <span className="text-[10px] text-text-3">({Math.round((d.value / entries.length) * 100)}%)</span>
+                </div>
               ))}
-            </tr></thead>
-            <tbody>{riskScores.map((e, i) => (
-              <tr key={e.id} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors cursor-pointer" onClick={() => router.push(`/entry/${e.id}`)}>
-                <td className="py-2.5 pr-4"><span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold",
-                  i === 0 ? "bg-accent text-white" : i < 3 ? "bg-accent-muted text-accent" : "bg-surface-3 text-text-3"
-                )}>{i + 1}</span></td>
-                <td className="py-2.5 pr-4 text-[13px] font-medium">{e.name}</td>
-                <td className="py-2.5 pr-4"><Badge variant={e.category as never}>{e.category}</Badge></td>
-                <td className="py-2.5 pr-4 text-[12px] text-text-2">{e.country || "—"}</td>
-                <td className="py-2.5 pr-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-20 h-1.5 bg-surface-3 rounded-full overflow-hidden">
-                      <div className="h-full bg-accent rounded-full" style={{ width: `${Math.min(100, (e.connections / Math.max(topNodes[0]?.connections || 1, 1)) * 100)}%` }} />
-                    </div>
-                    <span className="text-[12px] text-text-2">{e.connections}</span>
-                  </div>
-                </td>
-                <td className="py-2.5 pr-4">{e.hasSignal ? <span className="text-amber text-[11px] font-bold animate-pulse-glow">ACTIVE</span> : <span className="text-[11px] text-text-3">—</span>}</td>
-                <td className="py-2.5">
-                  <span className={cn("text-[12px] font-bold",
-                    e.importance >= 80 ? "text-red" : e.importance >= 50 ? "text-amber" : "text-text-2"
-                  )}>{e.importance}</span>
-                </td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-      </Card>
-
-      {/* Predicted Connections */}
-      <Card>
-        <h3 className="text-[12px] font-semibold mb-1 text-text-2 uppercase tracking-wider flex items-center gap-2">
-          <Brain size={14} /> Predicted Connections
-        </h3>
-        <p className="text-[12px] text-text-3 mb-4">AI-suggested links based on shared tags, geography, and mutual connections</p>
-        <div className="space-y-3">
-          {predictions.slice(0, 8).map((p, i) => (
-            <div key={i} className="rounded-xl border border-border/60 bg-surface-2/30 p-3.5 hover:bg-surface-2/60 transition-all duration-200">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant={p.a.category as never} className="text-[9px]">{p.a.category}</Badge>
-                  <span className="text-[13px] font-medium cursor-pointer hover:text-accent" onClick={() => router.push(`/entry/${p.a.id}`)}>{p.a.name}</span>
+              <div className="pt-2 border-t border-border/30">
+                <div className="flex items-center gap-1.5">
+                  <Lock size={10} className="text-text-3" />
+                  <span className="text-[10px] text-text-3">
+                    Your clearance: <span className="font-semibold text-accent">{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
+                  </span>
                 </div>
-                <div className="flex items-center gap-1 text-text-3">
-                  <div className="w-6 h-px bg-border" />
-                  <Link2 size={12} />
-                  <div className="w-6 h-px bg-border" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={p.b.category as never} className="text-[9px]">{p.b.category}</Badge>
-                  <span className="text-[13px] font-medium cursor-pointer hover:text-accent" onClick={() => router.push(`/entry/${p.b.id}`)}>{p.b.name}</span>
-                </div>
-                <div className="ml-auto">
-                  <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-full",
-                    p.score >= 50 ? "bg-emerald-muted text-emerald" : p.score >= 35 ? "bg-amber-muted text-amber" : "bg-surface-3 text-text-3"
-                  )}>{p.score}%</span>
+                <div className="text-[10px] text-text-3 mt-0.5">
+                  You can access {entries.filter(e => canView(e.sensitivity ?? "standard")).length} of {entries.length} entries
                 </div>
               </div>
-              <div className="flex flex-wrap gap-1.5 ml-1">
-                {p.reasons.map((r, j) => (
-                  <span key={j} className="text-[10px] text-text-3 bg-surface-3 px-2 py-0.5 rounded">{r}</span>
+            </div>
+          </div>
+          {/* Reports by sensitivity */}
+          {totalReports > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/30">
+              <div className="text-[10px] font-semibold text-text-3 uppercase tracking-wider mb-2">Reports by Classification</div>
+              <div className="flex gap-3">
+                {(["standard", "sensitive", "confidential", "top-secret"] as SensitivityLevel[]).map(s => (
+                  <div key={s} className="flex items-center gap-1.5">
+                    {s === "standard" && <Eye size={10} className="text-emerald" />}
+                    {s === "sensitive" && <AlertTriangle size={10} className="text-amber" />}
+                    {s === "confidential" && <Lock size={10} className="text-red" />}
+                    {s === "top-secret" && <Shield size={10} className="text-purple" />}
+                    <span className="text-[10px] text-text-2 capitalize">{s === "top-secret" ? "Top Secret" : s}</span>
+                    <span className="text-[11px] font-bold">{reportsBySensitivity[s]}</span>
+                  </div>
                 ))}
               </div>
             </div>
-          ))}
+          )}
+        </Card>
+
+        {/* User Activity Audit */}
+        <Card>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <Users size={14} /> User Activity Audit
+          </h3>
+          {userActivity.length === 0 ? (
+            <p className="text-[12px] text-text-3 py-8 text-center">No activity recorded</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead><tr className="border-b border-border">
+                  {["User", "Searches", "Views", "Entries", "Logins", "Total"].map(h => (
+                    <th key={h} className="text-left text-[10px] font-medium text-text-3 uppercase tracking-wider pb-2 pr-3">{h}</th>
+                  ))}
+                </tr></thead>
+                <tbody>{userActivity.map((u) => (
+                  <tr key={u.user} className="border-b border-border/30 hover:bg-surface-2/30 transition-colors">
+                    <td className="py-2 pr-3">
+                      <span className="text-[12px] font-semibold text-text">{u.user}</span>
+                    </td>
+                    <td className="py-2 pr-3 text-[12px] text-text-2 tabular-nums">{u.searches}</td>
+                    <td className="py-2 pr-3 text-[12px] text-text-2 tabular-nums">{u.views}</td>
+                    <td className="py-2 pr-3 text-[12px] text-text-2 tabular-nums">{u.entries}</td>
+                    <td className="py-2 pr-3 text-[12px] text-text-2 tabular-nums">{u.logins}</td>
+                    <td className="py-2 text-[12px] font-bold text-text tabular-nums">{u.total}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          )}
+        </Card>
+      </div>
+
+      {/* Activity Timeline */}
+      <Card className="mb-6">
+        <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+          <Activity size={14} /> 30-Day Activity Timeline
+        </h3>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={activityTimeline}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#edf0f5" vertical={false} />
+            <XAxis dataKey="day" tick={{ fill: "#7b8da4", fontSize: 9 }} axisLine={false} tickLine={false} interval={4} />
+            <YAxis tick={{ fill: "#7b8da4", fontSize: 10 }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Bar dataKey="searches" stackId="a" fill={C.blue} name="Searches" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="entries" stackId="a" fill={C.emerald} name="Entries" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="views" stackId="a" fill={C.purple} name="Views" radius={[0, 0, 0, 0]} />
+            <Bar dataKey="other" stackId="a" fill={C.slate} name="Other" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+        <div className="flex items-center gap-4 mt-2 justify-center">
+          <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm" style={{ background: C.blue }} />Searches</span>
+          <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm" style={{ background: C.emerald }} />Entries</span>
+          <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm" style={{ background: C.purple }} />Views</span>
+          <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm" style={{ background: C.slate }} />Other</span>
         </div>
       </Card>
+
+      {/* Validation Queue Summary */}
+      {db.pendingValidations.length > 0 && (
+        <Card>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <BarChart3 size={14} /> Validation Pipeline
+          </h3>
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center p-3 rounded-xl bg-amber/[0.04] border border-amber/10">
+              <div className="text-2xl font-bold text-amber">{pendingValidations}</div>
+              <div className="text-[10px] text-text-3 uppercase">Pending Review</div>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-emerald/[0.04] border border-emerald/10">
+              <div className="text-2xl font-bold text-emerald">{approvedValidations}</div>
+              <div className="text-[10px] text-text-3 uppercase">Approved</div>
+            </div>
+            <div className="text-center p-3 rounded-xl bg-surface-2 border border-border/40">
+              <div className="text-2xl font-bold text-text">{resolvedValidations}</div>
+              <div className="text-[10px] text-text-3 uppercase">Total Resolved</div>
+            </div>
+          </div>
+          {pendingValidations > 0 && (
+            <div className="space-y-1.5">
+              <div className="text-[10px] font-semibold text-text-3 uppercase tracking-wider mb-2">Awaiting Review</div>
+              {db.pendingValidations.filter(v => !v.resolved).slice(0, 5).map(v => (
+                <div key={v.id} className="flex items-center gap-3 py-2 px-2 rounded-xl bg-amber/[0.02] border border-amber/8">
+                  <AlertTriangle size={12} className="text-amber shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[11px] font-medium truncate">{v.targetName} &rarr; {v.suggestedLink}</div>
+                    <div className="text-[9px] text-text-3">by {v.submittedBy} &middot; {new Date(v.submittedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Card>
+      )}
     </>
   );
 }

@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { PageHeader, Card, GlassCard, Badge, Button, Input, useToast } from "@/components/ui";
 import { cn } from "@/lib/cn";
-import { Search as SearchIcon, Filter, Lock, Link2 } from "lucide-react";
-import type { EntityCategory } from "@/types";
+import { Search as SearchIcon, Filter, Lock, Link2, Shield, Eye, EyeOff, AlertTriangle } from "lucide-react";
+import type { EntityCategory, SensitivityLevel } from "@/types";
+import { SENSITIVITY_MIN_CLEARANCE, CLEARANCE_LABELS } from "@/types";
 
 export default function SearchPage() {
-  const { db, currentUser, updateDb } = useApp();
+  const { db, currentUser, updateDb, canView, userClearance } = useApp();
   const router = useRouter();
   const { toast } = useToast();
   const [query, setQuery] = useState("");
@@ -41,6 +42,23 @@ export default function SearchPage() {
 
   const cats: (EntityCategory | "all")[] = ["all", "person", "company", "mobile", "address", "vehicle"];
 
+  const getSensitivityBadge = (sensitivity?: SensitivityLevel) => {
+    const s = sensitivity ?? "standard";
+    const accessible = canView(s);
+    const colors: Record<SensitivityLevel, string> = {
+      standard: "bg-emerald/8 text-emerald border-emerald/15",
+      sensitive: "bg-amber/8 text-amber border-amber/15",
+      confidential: "bg-red/8 text-red border-red/15",
+      "top-secret": "bg-purple/8 text-purple border-purple/15",
+    };
+    return (
+      <span className={cn("inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase border", colors[s])}>
+        {accessible ? <Eye size={8} /> : <Lock size={8} />}
+        {s}
+      </span>
+    );
+  };
+
   return (
     <>
       <PageHeader title="Search Database" description="Search across all entities. A reason is required for every search." />
@@ -66,6 +84,13 @@ export default function SearchPage() {
             </button>
           ))}
         </div>
+        {/* Clearance indicator */}
+        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border/40">
+          <Shield size={12} className="text-accent" />
+          <span className="text-[10px] text-text-3">
+            Viewing as <span className="font-semibold text-accent">{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span> — results filtered by your clearance level
+          </span>
+        </div>
       </Card>
       {searched && (
         <div className="animate-fade-in">
@@ -75,18 +100,41 @@ export default function SearchPage() {
           ) : (
             <div className="space-y-3">{results.map((entry) => {
               const isBasic = currentUser?.access === "basic" && currentUser?.role !== "admin";
+              const entrySensitivity = entry.sensitivity ?? "standard";
+              const canViewEntry = canView(entrySensitivity);
+              const hasSignal = db.signals.some((s) => s.entityId === entry.id);
+
               return (
-                <GlassCard key={entry.id} className="cursor-pointer hover:border-accent/40" onClick={() => router.push(`/entry/${entry.id}`)}>
+                <GlassCard key={entry.id}
+                  className={cn("cursor-pointer hover:border-accent/40", !canViewEntry && "opacity-70")}
+                  onClick={() => canViewEntry ? router.push(`/entry/${entry.id}`) : toast("Insufficient clearance to view this entry", "warning")}>
                   <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-[15px] font-semibold">{entry.name}</h3>
-                    <Badge variant={entry.category as never}>{entry.category}</Badge>
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <h3 className="text-[15px] font-semibold truncate">{entry.name}</h3>
+                      {hasSignal && (
+                        <span className="shrink-0 px-1.5 py-0.5 rounded bg-amber/10 text-amber text-[8px] font-bold animate-pulse-glow">SIGNAL</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {getSensitivityBadge(entry.sensitivity)}
+                      <Badge variant={entry.category as never}>{entry.category}</Badge>
+                    </div>
                   </div>
                   <p className="text-[13px] text-text-2 leading-relaxed">
-                    {isBasic ? <span className="flex items-center gap-2 italic text-text-3"><Lock size={12} /> Record exists. Request full access.</span>
-                      : entry.narrative.substring(0, 180) + (entry.narrative.length > 180 ? "..." : "")}
+                    {!canViewEntry ? (
+                      <span className="flex items-center gap-2 italic text-text-3">
+                        <Lock size={12} />
+                        Restricted — requires {CLEARANCE_LABELS[SENSITIVITY_MIN_CLEARANCE[entrySensitivity]]} clearance (L{SENSITIVITY_MIN_CLEARANCE[entrySensitivity]})
+                      </span>
+                    ) : isBasic ? (
+                      <span className="flex items-center gap-2 italic text-text-3"><Lock size={12} /> Record exists. Request full access.</span>
+                    ) : (
+                      entry.narrative.substring(0, 180) + (entry.narrative.length > 180 ? "..." : "")
+                    )}
                   </p>
                   <div className="flex items-center gap-2 mt-3">
                     <Badge variant={entry.context as never}>{entry.context}</Badge>
+                    {entry.country && <span className="text-[11px] text-text-3">{entry.country}</span>}
                     <span className="text-[11px] text-text-3 flex items-center gap-1"><Link2 size={10} /> {entry.linkedTo.length} links</span>
                   </div>
                 </GlassCard>
