@@ -4,188 +4,88 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { detectEntities } from "@/lib/entity-detection";
+import { PageHeader, Card, Badge, Button, Input, Select, Textarea, useToast } from "@/components/ui";
+import { ArrowRight, ArrowLeft, Link2, Send, SkipForward, CheckCircle2 } from "lucide-react";
 import type { EntityCategory, ContextAssessment, DetectedEntity } from "@/types";
+
+const CATS = [{ value: "person", label: "Person" }, { value: "company", label: "Company" }, { value: "mobile", label: "Mobile Number" }, { value: "address", label: "Address / Place" }, { value: "vehicle", label: "Vehicle" }];
+const CTX = [{ value: "confirmed", label: "Confirmed" }, { value: "likely", label: "Very Likely True" }, { value: "rumor", label: "Rumors / Personal Opinion" }];
 
 export default function NewEntryPage() {
   const { db, currentUser, updateDb } = useApp();
   const router = useRouter();
+  const { toast } = useToast();
   const [category, setCategory] = useState<EntityCategory>("person");
   const [name, setName] = useState("");
   const [context, setContext] = useState<ContextAssessment>("confirmed");
   const [narrative, setNarrative] = useState("");
   const [detected, setDetected] = useState<DetectedEntity[]>([]);
   const [step, setStep] = useState<"form" | "review">("form");
-  const [validationReason, setValidationReason] = useState("");
-  const [validationIdx, setValidationIdx] = useState<number | null>(null);
+  const [valReason, setValReason] = useState("");
+  const [valIdx, setValIdx] = useState<number | null>(null);
 
   const handleDetect = () => {
-    if (!name.trim() || !narrative.trim()) {
-      alert("Please fill in all fields.");
-      return;
-    }
-    const entities = detectEntities(narrative, db.entries);
-    setDetected(entities.map((e) => ({ ...e, action: e.existing ? undefined : "skip" })));
+    if (!name.trim() || !narrative.trim()) { toast("Please fill in all fields.", "warning"); return; }
+    const ents = detectEntities(narrative, db.entries);
+    setDetected(ents.map((e) => ({ ...e, action: e.existing ? undefined : "skip" })));
     setStep("review");
   };
 
+  const setAction = (idx: number, action: DetectedEntity["action"]) => setDetected((p) => p.map((d, i) => i === idx ? { ...d, action } : d));
+
   const handleSubmit = () => {
     const newId = db.nextId;
-    const linkedIds: number[] = [];
-    const pendingValidations: { targetName: string; suggestedLink: string; suggestedLinkId: number | null; reason: string }[] = [];
-
+    const linkIds: number[] = [];
+    const pvs: { targetName: string; suggestedLink: string; suggestedLinkId: number | null; reason: string }[] = [];
     detected.forEach((d) => {
-      if (d.action === "link" && d.existing) {
-        linkedIds.push(d.existing.id);
-      } else if (d.action === "validate") {
-        pendingValidations.push({
-          targetName: name,
-          suggestedLink: d.value,
-          suggestedLinkId: d.existing?.id ?? null,
-          reason: d.value + " - " + (validationReason || "Needs admin review"),
-        });
-      }
+      if (d.action === "link" && d.existing) linkIds.push(d.existing.id);
+      else if (d.action === "validate") pvs.push({ targetName: name, suggestedLink: d.value, suggestedLinkId: d.existing?.id ?? null, reason: d.value + " - " + (valReason || "Needs admin review") });
     });
-
     updateDb((d) => {
-      d.entries.push({
-        id: newId,
-        category,
-        name: name.trim(),
-        context,
-        narrative: narrative.trim(),
-        createdBy: currentUser!.username,
-        createdAt: new Date().toISOString(),
-        linkedTo: linkedIds,
+      d.entries.push({ id: newId, category, name: name.trim(), context, narrative: narrative.trim(), createdBy: currentUser!.username, createdAt: new Date().toISOString(), linkedTo: linkIds });
+      linkIds.forEach((lid) => { const t = d.entries.find((e) => e.id === lid); if (t && !t.linkedTo.includes(newId)) t.linkedTo.push(newId); });
+      pvs.forEach((p) => {
+        const pvId = d.pendingValidations.length > 0 ? Math.max(...d.pendingValidations.map((x) => x.id)) + 1 : 1;
+        d.pendingValidations.push({ id: pvId, entryId: newId, ...p, submittedBy: currentUser!.username, submittedAt: new Date().toISOString() });
+        d.notifications.push({ message: `Validation request: ${p.targetName} → ${p.suggestedLink}`, forUser: "admin", ts: new Date().toISOString(), read: false });
       });
-
-      // Add reverse links
-      linkedIds.forEach((lid) => {
-        const target = d.entries.find((e) => e.id === lid);
-        if (target && !target.linkedTo.includes(newId)) {
-          target.linkedTo.push(newId);
-        }
-      });
-
-      // Add pending validations
-      pendingValidations.forEach((pv) => {
-        const pvId = d.pendingValidations.length > 0
-          ? Math.max(...d.pendingValidations.map((p) => p.id)) + 1
-          : 1;
-        d.pendingValidations.push({
-          id: pvId,
-          entryId: newId,
-          ...pv,
-          submittedBy: currentUser!.username,
-          submittedAt: new Date().toISOString(),
-        });
-        d.notifications.push({
-          message: `New validation request from ${currentUser!.username}: ${pv.targetName} → ${pv.suggestedLink}`,
-          forUser: "admin",
-          ts: new Date().toISOString(),
-          read: false,
-        });
-      });
-
-      d.logs.unshift({
-        ts: new Date().toISOString(),
-        user: currentUser!.username,
-        action: "ENTRY",
-        detail: `Created new entry: ${name.trim()} (${category})`,
-      });
-
+      d.logs.unshift({ ts: new Date().toISOString(), user: currentUser!.username, action: "ENTRY", detail: `Created: ${name.trim()} (${category})` });
       d.nextId = newId + 1;
     });
-
+    toast("Entry created successfully!", "success");
     router.push(`/entry/${newId}`);
   };
 
-  const setEntityAction = (idx: number, action: DetectedEntity["action"]) => {
-    setDetected((prev) => prev.map((d, i) => (i === idx ? { ...d, action } : d)));
-  };
-
-  const categories: EntityCategory[] = ["person", "company", "mobile", "address", "vehicle"];
-  const contexts: ContextAssessment[] = ["confirmed", "likely", "rumor"];
-
   if (step === "review") {
-    const hasExistingMatches = detected.some((d) => d.existing);
-    const hasUnlinkedDetections = detected.filter((d) => d.existing).length > 0;
-    const allDecided = detected.filter((d) => d.existing).every((d) => d.action);
-
+    const withExisting = detected.filter((d) => d.existing);
     return (
       <>
-        <h2 style={{ marginBottom: 20 }}>Review & Link</h2>
-        <div className="recent-section">
-          <h3>New Entry: {name}</h3>
-          <p style={{ color: "var(--text2)", margin: "8px 0" }}>
-            <span className={`badge badge-${category}`}>{category}</span>{" "}
-            <span className={`badge badge-${context}`}>{context}</span>
-          </p>
-          <p style={{ fontSize: 13, color: "var(--text2)", marginTop: 8 }}>{narrative}</p>
-        </div>
-
-        {hasExistingMatches ? (
-          <div className="recent-section">
-            <h3>Detected Entities</h3>
-            <p style={{ color: "var(--text2)", fontSize: 13, marginBottom: 12 }}>
-              Choose how to handle each detected entity match:
-            </p>
-            {detected.filter((d) => d.existing).map((d, idx) => (
-              <div key={idx} className="link-suggestion" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <span className={`badge badge-${d.type}`}>{d.type}</span>{" "}
-                    <strong>{d.value}</strong>
-                    {d.existing && (
-                      <span style={{ color: "var(--text2)", fontSize: 12, marginLeft: 8 }}>
-                        (matches existing: {d.existing.name})
-                      </span>
-                    )}
+        <PageHeader title="Review & Link" description="Review detected entities and decide how to handle matches" />
+        <Card className="mb-4">
+          <div className="flex items-center gap-3 mb-2"><h3 className="text-lg font-semibold">{name}</h3><Badge variant={category as never}>{category}</Badge><Badge variant={context as never}>{context}</Badge></div>
+          <p className="text-[13px] text-text-2 leading-relaxed">{narrative}</p>
+        </Card>
+        {withExisting.length > 0 ? (
+          <Card className="mb-4">
+            <h3 className="text-sm font-semibold mb-3 text-text-2 uppercase tracking-wider">Detected Entity Matches</h3>
+            <div className="space-y-3">{withExisting.map((d, idx) => {
+              const ri = detected.indexOf(d);
+              return (
+                <div key={idx} className="rounded-lg border border-border bg-surface-2 p-4">
+                  <div className="flex items-center gap-2 mb-3"><Badge variant={d.type as never}>{d.type}</Badge><strong className="text-sm">{d.value}</strong>{d.existing && <span className="text-[11px] text-text-3">(matches: {d.existing.name})</span>}</div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant={d.action === "link" ? "success" : "secondary"} onClick={() => setAction(ri, "link")}><Link2 size={12} /> Link</Button>
+                    <Button size="sm" variant={d.action === "validate" ? "warning" : "secondary"} onClick={() => { setAction(ri, "validate"); setValIdx(ri); }}><Send size={12} /> Validate</Button>
+                    <Button size="sm" variant={d.action === "skip" ? "danger" : "secondary"} onClick={() => setAction(ri, "skip")}><SkipForward size={12} /> Skip</Button>
                   </div>
-                  <div className="link-actions">
-                    <button
-                      className={`btn btn-sm ${d.action === "link" ? "btn-success" : "btn-secondary"}`}
-                      onClick={() => setEntityAction(detected.indexOf(d), "link")}
-                    >
-                      Link
-                    </button>
-                    <button
-                      className={`btn btn-sm ${d.action === "validate" ? "btn-warning" : "btn-secondary"}`}
-                      onClick={() => { setEntityAction(detected.indexOf(d), "validate"); setValidationIdx(detected.indexOf(d)); }}
-                    >
-                      Send for Validation
-                    </button>
-                    <button
-                      className={`btn btn-sm ${d.action === "skip" ? "btn-danger" : "btn-secondary"}`}
-                      onClick={() => setEntityAction(detected.indexOf(d), "skip")}
-                    >
-                      Skip
-                    </button>
-                  </div>
-                </div>
-                {d.action === "validate" && validationIdx === detected.indexOf(d) && (
-                  <div className="form-group" style={{ marginBottom: 0, marginTop: 4 }}>
-                    <label>Assumptions / Basis for link</label>
-                    <textarea
-                      value={validationReason}
-                      onChange={(e) => setValidationReason(e.target.value)}
-                      placeholder="Explain why you think these may be connected..."
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="recent-section">
-            <p style={{ color: "var(--text2)" }}>No existing entity matches detected. This will be entered as a new standalone record.</p>
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
-          <button className="btn btn-secondary" onClick={() => setStep("form")}>Back</button>
-          <button className="btn btn-primary" onClick={handleSubmit}>
-            {hasUnlinkedDetections && !allDecided ? "Enter (decide on all matches first)" : "Confirm & Enter"}
-          </button>
+                  {d.action === "validate" && valIdx === ri && <div className="mt-3"><Textarea label="Assumptions / Basis" value={valReason} onChange={(e) => setValReason(e.target.value)} placeholder="Explain the connection..." /></div>}
+                </div>);
+            })}</div>
+          </Card>
+        ) : <Card className="mb-4"><p className="text-text-3 text-center py-4">No existing matches. This will be a standalone record.</p></Card>}
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => setStep("form")}><ArrowLeft size={14} /> Back</Button>
+          <Button onClick={handleSubmit}><CheckCircle2 size={14} /> Confirm & Enter</Button>
         </div>
       </>
     );
@@ -193,52 +93,16 @@ export default function NewEntryPage() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}>New Entry</h2>
-      <div className="recent-section">
-        <div className="form-group">
-          <label>Category</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value as EntityCategory)}>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
-            ))}
-          </select>
+      <PageHeader title="New Entry" description="Add new intelligence data to the database" />
+      <Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <Select id="cat" label="Category" value={category} onChange={(e) => setCategory(e.target.value as EntityCategory)} options={CATS} />
+          <Select id="ctx" label="Context Assessment" value={context} onChange={(e) => setContext(e.target.value as ContextAssessment)} options={CTX} />
         </div>
-
-        <div className="form-group">
-          <label>Name / Identifier</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., John Smith, +40 712 345 678, B-123-ABC"
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Context Assessment</label>
-          <select value={context} onChange={(e) => setContext(e.target.value as ContextAssessment)}>
-            {contexts.map((c) => (
-              <option key={c} value={c}>
-                {c === "confirmed" ? "Confirmed" : c === "likely" ? "Very Likely True" : "Rumors / Personal Opinion"}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label>Narrative / Intelligence</label>
-          <textarea
-            value={narrative}
-            onChange={(e) => setNarrative(e.target.value)}
-            placeholder="Enter the intelligence data here. Include names, phone numbers, addresses, etc. The system will try to detect and link entities automatically."
-            style={{ minHeight: 150 }}
-          />
-        </div>
-
-        <button className="btn btn-primary" onClick={handleDetect}>
-          Analyze & Review Links
-        </button>
-      </div>
+        <div className="mb-4"><Input id="name" label="Name / Identifier" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., John Smith, +40 712 345 678, B-123-ABC" /></div>
+        <div className="mb-6"><Textarea id="narr" label="Narrative / Intelligence" value={narrative} onChange={(e) => setNarrative(e.target.value)} placeholder="Enter intelligence data. Include names, numbers, addresses - the system will detect and suggest links." className="min-h-[180px]" /></div>
+        <Button onClick={handleDetect} size="lg"><ArrowRight size={14} /> Analyze & Review Links</Button>
+      </Card>
     </>
   );
 }

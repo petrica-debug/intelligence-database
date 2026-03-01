@@ -18,9 +18,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   if (!currentUser) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "var(--text2)" }}>
-        Loading...
-      </div>
+      <div className="flex items-center justify-center min-h-screen text-text-2 text-sm">Loading...</div>
     );
   }
 
@@ -28,9 +26,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <>
       <Topbar />
       <NotificationPanel />
-      <div className="layout">
+      <div className="flex min-h-[calc(100vh-56px)]">
         <Sidebar pathname={pathname} />
-        <main className="main">{children}</main>
+        <main className="flex-1 p-7 overflow-y-auto max-h-[calc(100vh-56px)]">
+          <div className="animate-fade-in">{children}</div>
+        </main>
       </div>
     </>
   );
