@@ -1,6 +1,6 @@
 import type { Database } from "@/types";
 
-const STORAGE_KEY = "rfe_db_v3";
+const STORAGE_KEY = "rfe_db_v4";
 
 const seedData: () => Database = () => ({
   users: [
@@ -66,7 +66,7 @@ const seedData: () => Database = () => ({
 
     // ── PERSONS: International / OSF / RFE ──
     { id: 16, category: "person", name: "Zeljko Jovanovic", context: "confirmed", country: "International", tags: ["policy", "leadership", "strategy"],
-      narrative: "Director of Open Society Roma Initiatives Office, the largest private funder of Roma inclusion efforts globally. Serbian-Roma background. Architect of OSF's Roma strategy across Europe. Key liaison between Roma civil society and EU institutions. Board member of Roma Foundations for Europe. Instrumental in shaping EU Roma Strategic Framework 2020-2030. One of the most influential Roma policy figures in Europe.",
+      narrative: "Director of Open Society Roma Initiatives Office, the largest private funder of Roma inclusion efforts globally. Serbian-Roma background. Architect of OSF's Roma strategy across Europe. Key liaison between Roma civil society and EU institutions. Chair of Roma Foundations for Europe. Instrumental in shaping EU Roma Strategic Framework 2020-2030. One of the most influential Roma policy figures in Europe.",
       createdBy: "admin", createdAt: "2025-12-28T10:00:00", linkedTo: [25, 26, 34, 39] },
     { id: 17, category: "person", name: "Bernard Rorke", context: "confirmed", country: "International", tags: ["policy", "research", "advocacy"],
       narrative: "Policy and Advocacy Director at ERGO Network. Formerly with Open Society Foundations Roma Initiatives. Expert on EU Roma policy implementation. Published extensively on Roma inclusion monitoring. Key contributor to shadow reporting on Roma rights to European Commission. Connected to Roma civil society organizations across all EU member states.",
@@ -98,8 +98,8 @@ const seedData: () => Database = () => ({
       narrative: "Part of Open Society Foundations. Largest private funder of Roma inclusion globally. Based in Budapest/Berlin. Directed by Zeljko Jovanovic. Annual grantmaking: ~€15M. Funds Roma civil society across 12+ countries. Key architect of Decade of Roma Inclusion. Supports advocacy, education, health, and housing programs. Connected to all major Roma organizations in Europe.",
       createdBy: "admin", createdAt: "2025-12-18T09:00:00", linkedTo: [16, 17, 7, 34, 39] },
     { id: 26, category: "company", name: "Roma Foundations for Europe", context: "confirmed", country: "International", tags: ["policy", "strategy", "coordination"],
-      narrative: "Pan-European Roma advocacy network. Headquarters: Brussels. Executive Director: Elena Stanescu. Board includes Nicoleta Bitu, Deyan Kolev, Zeljko Jovanovic. Focus: EU-level policy advocacy, coordination of national Roma platforms, grant-making to grassroots organizations. Key partner of European Commission DG Justice. Annual budget: ~€5M. Staff: 18 across 6 offices.",
-      createdBy: "admin", createdAt: "2025-12-17T09:00:00", linkedTo: [19, 2, 6, 16, 20, 35] },
+      narrative: "Pan-European Roma advocacy network. Headquarters: Avenue des Jardins 44, 1030 Brussels (shared with REDI International). Chaired by Zeljko Jovanovic. Vice-President: Kinga Rethy. Executive Director: Elena Stanescu. Board includes Nicoleta Bitu, Deyan Kolev, Petrica Dulgheru. Focus: EU-level policy advocacy, coordination of national Roma platforms, grant-making to grassroots organizations. Key partner of European Commission DG Justice. Annual budget: ~€5M. Staff: 18 across 6 offices.",
+      createdBy: "admin", createdAt: "2025-12-17T09:00:00", linkedTo: [19, 2, 6, 16, 20, 35, 73, 74] },
     { id: 27, category: "company", name: "Roma Education Fund", context: "confirmed", country: "International", tags: ["education", "funding", "youth"],
       narrative: "International foundation supporting Roma education. Based in Budapest. Provides scholarships, supports school desegregation, funds tutoring programs. Operates in 16 countries. Has supported over 100,000 Roma students. Connected to Roma Foundations for Europe, Open Society Foundations, and World Bank. Key implementing partner for EU Roma education initiatives.",
       createdBy: "analyst1", createdAt: "2025-12-16T09:00:00", linkedTo: [5, 10, 12, 24, 25] },
@@ -126,9 +126,9 @@ const seedData: () => Database = () => ({
     { id: 34, category: "address", name: "OSF Roma Initiatives, Október 6. u. 12, Budapest 1051, Hungary", context: "confirmed", country: "International", tags: ["office", "headquarters"],
       narrative: "Budapest office of Open Society Roma Initiatives. Central hub for Roma program coordination. Hosts meetings with Roma civil society leaders from across Europe. Houses program and grants management teams.",
       createdBy: "admin", createdAt: "2025-12-09T09:00:00", linkedTo: [16, 25] },
-    { id: 35, category: "address", name: "Roma Foundations for Europe, Rue de Trèves 45, Brussels 1040, Belgium", context: "confirmed", country: "International", tags: ["office", "headquarters"],
-      narrative: "Brussels headquarters of Roma Foundations for Europe. Located in EU quarter near European Parliament. Houses executive office, EU policy team, and grants administration. Key location for EU-level Roma advocacy meetings.",
-      createdBy: "admin", createdAt: "2025-12-08T09:00:00", linkedTo: [19, 26] },
+    { id: 35, category: "address", name: "Avenue des Jardins 44, 1030 Brussels, Belgium", context: "confirmed", country: "Belgium", tags: ["office", "headquarters", "shared-address"],
+      narrative: "Shared Brussels headquarters of Roma Foundations for Europe and REDI International. Also residential address of Petrica Dulgheru (REDI board member). Located in Schaerbeek commune, Brussels. Houses RFE executive office, EU policy team, grants administration, and REDI's entrepreneurship programs coordination. Key location for EU-level Roma advocacy and economic empowerment initiatives.",
+      createdBy: "admin", createdAt: "2025-12-08T09:00:00", linkedTo: [19, 26, 45, 73, 74] },
     { id: 36, category: "address", name: "Romani CRISS, Str. Buzești 19, Bucharest 011011, Romania", context: "confirmed", country: "Romania", tags: ["office", "headquarters"],
       narrative: "Headquarters of Romani CRISS in central Bucharest. Office space for legal team, monitoring staff, and administration. Contact point for Roma rights documentation in Romania.",
       createdBy: "analyst1", createdAt: "2025-12-07T09:00:00", linkedTo: [3, 21] },
@@ -162,9 +162,9 @@ const seedData: () => Database = () => ({
       createdBy: "admin", createdAt: "2025-11-29T09:00:00", linkedTo: [26, 35] },
 
     // ── NEW ORGANIZATIONS ──
-    { id: 45, category: "company", name: "REDI (Roma Entrepreneurship Development Initiative)", context: "confirmed", country: "International", tags: ["entrepreneurship", "funding", "youth"],
-      narrative: "Initiative supporting Roma entrepreneurs across Europe. Connected to Open Society Foundations ecosystem. Provides mentoring, seed funding, and business training for Roma-led startups. Operates in Romania, Bulgaria, Hungary, Slovakia, and Czech Republic. Focus on breaking cycles of poverty through economic empowerment.",
-      createdBy: "admin", createdAt: "2025-11-28T09:00:00", linkedTo: [25, 26, 27, 51] },
+    { id: 45, category: "company", name: "REDI International", context: "confirmed", country: "Belgium", tags: ["entrepreneurship", "funding", "youth", "economic-empowerment"],
+      narrative: "Roma Entrepreneurship Development Initiative. Registered at Avenue des Jardins 44, 1030 Brussels (shared address with Roma Foundations for Europe). Board member: Petrica Dulgheru. Staff includes Kinga Rethy. Connected to Open Society Foundations ecosystem. Provides mentoring, seed funding, and business training for Roma-led startups. Operates in Romania, Bulgaria, Hungary, Slovakia, and Czech Republic. Focus on breaking cycles of poverty through economic empowerment. Annual grantmaking for Roma entrepreneurs: ~€2M.",
+      createdBy: "admin", createdAt: "2025-11-28T09:00:00", linkedTo: [25, 26, 27, 51, 35, 73, 74] },
     { id: 46, category: "company", name: "Roma for Democracy", context: "confirmed", country: "International", tags: ["democracy", "political-participation", "advocacy"],
       narrative: "Platform promoting Roma political participation and civic engagement across Europe. Supports Roma candidates in local and national elections. Provides training on democratic processes, voter registration drives, and political leadership development. Connected to Roma Foundations for Europe and OSCE Roma Contact Point.",
       createdBy: "admin", createdAt: "2025-11-27T09:00:00", linkedTo: [26, 25, 48] },
@@ -255,9 +255,113 @@ const seedData: () => Database = () => ({
     { id: 71, category: "address", name: "Council of Europe, Avenue de l'Europe, 67075 Strasbourg, France", context: "confirmed", country: "International", tags: ["institutional", "headquarters"],
       narrative: "Headquarters of the Council of Europe. Houses the Roma and Travellers Team within the Secretariat. Location of ERTF meetings and Roma policy coordination. Key institutional address for European Roma rights monitoring and policy development.",
       createdBy: "admin", createdAt: "2025-11-02T09:00:00", linkedTo: [48, 59] },
-    { id: 72, category: "address", name: "Roma Education Fund, Teréz körút 46, 1066 Budapest, Hungary", context: "confirmed", country: "International", tags: ["office", "headquarters"],
+    { id: 72, category: "address", name: "Roma Education Fund, Teréz körút 46, 1066 Budapest, Hungary", context: "confirmed", country: "Hungary", tags: ["office", "headquarters"],
       narrative: "Budapest headquarters of Roma Education Fund. Central office for managing scholarship programs across 16 countries. Houses program management, grants administration, and research teams. Key location for Roma education policy coordination in Central Europe.",
       createdBy: "analyst1", createdAt: "2025-11-01T09:00:00", linkedTo: [27, 51, 54] },
+
+    // ── KEY PERSONS: RFE / REDI Brussels ──
+    { id: 73, category: "person", name: "Petrica Dulgheru", context: "confirmed", country: "Belgium", tags: ["entrepreneurship", "leadership", "community-development"],
+      narrative: "Board member of REDI International (Roma Entrepreneurship Development Initiative). Resides at Avenue des Jardins 44, 1030 Brussels — same address as RFE and REDI headquarters. Active in Roma economic empowerment initiatives. Connected to Roma Foundations for Europe network through REDI board position. Engaged in Brussels-based Roma advocacy and community organizing. Liaison between Roma entrepreneurship programs and EU institutional stakeholders.",
+      createdBy: "admin", createdAt: "2025-10-30T09:00:00", linkedTo: [45, 26, 35] },
+    { id: 74, category: "person", name: "Kinga Rethy", context: "confirmed", country: "Belgium", tags: ["leadership", "policy", "strategy", "entrepreneurship"],
+      narrative: "Vice-President of Roma Foundations for Europe. Also active within REDI International at the shared Brussels headquarters. Hungarian-Roma background with extensive experience in European Roma policy coordination. Works alongside Chair Zeljko Jovanovic and Executive Director Elena Stanescu to shape RFE's pan-European strategy. Expertise in Roma economic inclusion, EU funding mechanisms, and cross-border program coordination. Key bridge between RFE policy work and REDI's entrepreneurship programs.",
+      createdBy: "admin", createdAt: "2025-10-29T09:00:00", linkedTo: [26, 45, 16, 19, 35] },
+
+    // ── ADDITIONAL PERSONS: Expanded European Network ──
+    { id: 75, category: "person", name: "Sara Giménez", context: "confirmed", country: "Spain", tags: ["legal", "political-participation", "leadership"],
+      narrative: "Spanish Roma lawyer and former member of Spanish Congress of Deputies (2019-2023). First Roma woman to serve in Spanish Parliament. Legal advisor to Fundación Secretariado Gitano. Expert on anti-discrimination law and Roma rights in Iberian Peninsula. Connected to Roma Foundations for Europe through international policy network. Advocate for Roma visibility in Southern European political institutions.",
+      createdBy: "analyst1", createdAt: "2025-10-28T09:00:00", linkedTo: [26, 87] },
+    { id: 76, category: "person", name: "Klára Orgovánová", context: "confirmed", country: "Slovakia", tags: ["policy", "leadership", "strategy"],
+      narrative: "Former Government Plenipotentiary for Roma Communities in Slovakia. Pioneering Roma policy maker in Central Europe. Led development of Slovakia's National Roma Integration Strategy. Advisor to Roma Education Fund and Open Society Foundations on Slovak Roma programs. Connected to Roma Foundations for Europe board network. Currently advises EU institutions on Roma inclusion monitoring.",
+      createdBy: "analyst1", createdAt: "2025-10-27T09:00:00", linkedTo: [27, 26, 25] },
+    { id: 77, category: "person", name: "Osman Balić", context: "confirmed", country: "Serbia", tags: ["advocacy", "community-development", "leadership"],
+      narrative: "Executive Director of Yurom Center in Niš, Serbia. Leading Roma civil society figure in Western Balkans. Coordinator of Roma civic initiatives in Serbia. Connected to European Roma Rights Centre through joint monitoring programs. Advocates for Roma inclusion in EU accession processes for Western Balkans. Engages with OSCE on Roma rights in post-conflict settings.",
+      createdBy: "analyst2", createdAt: "2025-10-26T09:00:00", linkedTo: [28, 81] },
+    { id: 78, category: "person", name: "Bajram Haliti", context: "confirmed", country: "North Macedonia", tags: ["political-participation", "advocacy", "culture"],
+      narrative: "Romani politician and activist from North Macedonia. Former member of Macedonian Parliament representing Roma community interests. Advocate for Roma political representation in Western Balkans. Connected to Roma Education Fund scholarship programs in the region. Active in cross-border Roma civil society coordination between North Macedonia, Kosovo, and Serbia.",
+      createdBy: "analyst2", createdAt: "2025-10-25T09:00:00", linkedTo: [27, 48] },
+    { id: 79, category: "person", name: "Petra Rosenberg", context: "confirmed", country: "Germany", tags: ["civil-rights", "holocaust", "education"],
+      narrative: "Chairwoman of the Association of German Sinti and Roma Berlin-Brandenburg. Daughter of Otto Rosenberg, Holocaust survivor and author. Prominent voice in Sinti and Roma memorial culture in Germany. Connected to Romani Rose and Central Council of German Sinti and Roma. Active in education programs about the Porajmos (Roma Holocaust). Engages with German federal government on Sinti and Roma recognition policies.",
+      createdBy: "analyst1", createdAt: "2025-10-24T09:00:00", linkedTo: [64, 47] },
+    { id: 80, category: "person", name: "William Acker", context: "confirmed", country: "France", tags: ["research", "legal", "advocacy"],
+      narrative: "French Romani researcher and legal advocate. Author of 'Où sont les gens du voyage?' — groundbreaking study on designated halting sites in France. Campaigns against discriminatory municipal policies targeting Travellers and Roma in France. Connected to European Roma Rights Centre through French litigation cases. Emerging voice in French Roma rights discourse.",
+      createdBy: "analyst2", createdAt: "2025-10-23T09:00:00", linkedTo: [28] },
+    { id: 81, category: "person", name: "Orhan Usein", context: "confirmed", country: "Serbia", tags: ["policy", "development", "research"],
+      narrative: "Team Leader of the Roma Integration Action Team at the Regional Cooperation Council, Sarajevo. Oversees implementation of the Declaration of Western Balkans Partners on Roma Integration within EU Enlargement Process. Connected to OSCE Roma Contact Point and Council of Europe Roma programmes. Expert on Roma socioeconomic indicators in Western Balkans region.",
+      createdBy: "admin", createdAt: "2025-10-22T09:00:00", linkedTo: [48, 77, 50] },
+    { id: 82, category: "person", name: "Pedro Aguilera Cortés", context: "likely", country: "Spain", tags: ["education", "youth", "community-development"],
+      narrative: "Roma education specialist based in Seville. Connected to Fundación Secretariado Gitano education programs. Works on school retention and university access initiatives for Roma youth in Andalusia. Likely connected to Roma Education Fund through pan-European scholarship coordination. Reported participation in EU Roma Platform meetings.",
+      createdBy: "analyst2", createdAt: "2025-10-21T09:00:00", linkedTo: [87, 27] },
+    { id: 83, category: "person", name: "Grattan Puxon", context: "confirmed", country: "International", tags: ["advocacy", "history", "civil-rights"],
+      narrative: "Veteran Roma and Traveller rights activist. Co-founded the first World Romani Congress in London (1971). Key figure in establishing international Romani political movement. Connected to Ian Hancock through early Romani rights organizing. Historical figure in the movement for Roma self-determination. Based in UK/Ireland.",
+      createdBy: "analyst1", createdAt: "2025-10-20T09:00:00", linkedTo: [65] },
+    { id: 84, category: "person", name: "Nicolae Gheorghe", context: "confirmed", country: "Romania", tags: ["leadership", "policy", "memorial"],
+      narrative: "Pioneering Romanian Roma sociologist and human rights defender (1946-2013). Former OSCE Contact Point for Roma Issues. Founded Romani CRISS. Instrumental in bringing Roma rights to international attention. His legacy continues to shape European Roma policy. Posthumously recognized by multiple institutions. Memorial events held annually. Connected to virtually all major Roma organizations through his foundational work.",
+      createdBy: "admin", createdAt: "2025-10-19T09:00:00", linkedTo: [21, 28, 25] },
+    { id: 85, category: "person", name: "Kemal Vural Tarlan", context: "likely", country: "Germany", tags: ["media", "culture", "advocacy"],
+      narrative: "Roma media professional based in Germany. Produces documentary content on Roma communities across Europe. Likely involved in ERIAC media programs. Connected to German Sinti and Roma media network. Reported collaboration with European Roma media platforms on content distribution and Roma narrative representation.",
+      createdBy: "analyst2", createdAt: "2025-10-18T09:00:00", linkedTo: [47, 64] },
+    { id: 86, category: "person", name: "Isabela Mihalache", context: "confirmed", country: "International", tags: ["women-rights", "advocacy", "research"],
+      narrative: "Roma women's rights advocate. Former program officer at Open Society Roma Initiatives. Expert on intersectional discrimination facing Roma women. Connected to Romani CRISS and European Roma Rights Centre through joint gender programs. Published research on Roma women's access to healthcare and education. Active in UN mechanisms on minority women's rights.",
+      createdBy: "analyst1", createdAt: "2025-10-17T09:00:00", linkedTo: [25, 21, 28, 2] },
+
+    // ── ADDITIONAL ORGANIZATIONS ──
+    { id: 87, category: "company", name: "Fundación Secretariado Gitano", context: "confirmed", country: "Spain", tags: ["education", "employment", "advocacy"],
+      narrative: "Spain's largest Roma inclusion organization. Founded 1982 in Madrid. Programs: Acceder (employment), Promociona (education), health mediation. Operates in 14 Spanish regions and 6 EU countries. Staff: 600+. Annual budget: ~€20M. Key partner of Spanish government on Roma inclusion. Connected to EU Roma Network and Roma Foundations for Europe. Model for employment-focused Roma integration across Europe.",
+      createdBy: "admin", createdAt: "2025-10-16T09:00:00", linkedTo: [75, 82, 26, 91] },
+    { id: 88, category: "company", name: "OSCE Contact Point for Roma and Sinti Issues", context: "confirmed", country: "International", tags: ["policy", "monitoring", "human-rights"],
+      narrative: "Established within OSCE Office for Democratic Institutions and Human Rights (ODIHR), Warsaw. Mandated to promote Roma and Sinti rights across 57 OSCE participating States. Focus: combating discrimination, improving political participation, addressing security challenges. Works with civil society on monitoring mechanisms. Connected to Council of Europe Roma team and EU DG Justice. Founded in legacy of Nicolae Gheorghe.",
+      createdBy: "admin", createdAt: "2025-10-15T09:00:00", linkedTo: [84, 48, 49, 77] },
+    { id: 89, category: "company", name: "Phiren Amenca International Network", context: "confirmed", country: "International", tags: ["youth", "volunteering", "education"],
+      narrative: "International network of Roma and non-Roma youth organizations promoting voluntary service and intercultural learning. Based in Brussels and Budapest. Runs European Voluntary Service programs for Roma youth. Connected to Roma Education Fund and ERIAC. Facilitates youth exchanges across 12 European countries. Counters antigypsyism through direct intercultural contact and education.",
+      createdBy: "analyst1", createdAt: "2025-10-14T09:00:00", linkedTo: [27, 47, 26] },
+    { id: 90, category: "company", name: "Pavee Point Traveller & Roma Centre", context: "confirmed", country: "International", tags: ["advocacy", "community-development", "research"],
+      narrative: "Dublin-based organization working with Irish Travellers and Roma communities. Unique focus on both indigenous Traveller and migrant Roma issues. Research center producing data on Traveller and Roma health, education, and accommodation. Connected to Council of Europe through Irish Traveller recognition advocacy. Partner of European Roma Rights Centre on Western European Roma rights.",
+      createdBy: "analyst2", createdAt: "2025-10-13T09:00:00", linkedTo: [28, 48] },
+    { id: 91, category: "company", name: "Association of German Sinti and Roma Berlin-Brandenburg", context: "confirmed", country: "Germany", tags: ["civil-rights", "holocaust", "advocacy"],
+      narrative: "Regional Sinti and Roma civil rights organization in Berlin and Brandenburg. Chaired by Petra Rosenberg. Focus: memorial culture, anti-discrimination advocacy, education programs. Maintains Memorial to the Sinti and Roma Victims of National Socialism in Berlin. Connected to Central Council of German Sinti and Roma. Engages with Berlin Senate on Sinti and Roma inclusion policies.",
+      createdBy: "analyst1", createdAt: "2025-10-12T09:00:00", linkedTo: [79, 64] },
+
+    // ── ADDITIONAL ADDRESSES ──
+    { id: 92, category: "address", name: "Fundación Secretariado Gitano, Calle Ahijones s/n, 28018 Madrid, Spain", context: "confirmed", country: "Spain", tags: ["office", "headquarters"],
+      narrative: "National headquarters of Fundación Secretariado Gitano in Vallecas, Madrid. Houses central program coordination, research department, and administration. Hub for Spain's largest Roma employment and education programs.",
+      createdBy: "analyst1", createdAt: "2025-10-11T09:00:00", linkedTo: [87, 75] },
+    { id: 93, category: "address", name: "OSCE/ODIHR, ul. Miodowa 10, 00-251 Warsaw, Poland", context: "confirmed", country: "International", tags: ["institutional", "headquarters"],
+      narrative: "Office for Democratic Institutions and Human Rights of OSCE in Warsaw. Houses the Contact Point for Roma and Sinti Issues. Location for Roma policy coordination meetings and monitoring program planning across OSCE region.",
+      createdBy: "admin", createdAt: "2025-10-10T09:00:00", linkedTo: [88] },
+
+    // ── ADDITIONAL MOBILE NUMBERS ──
+    { id: 94, category: "mobile", name: "+34 91 422 0960", context: "confirmed", country: "Spain", tags: ["primary-contact"],
+      narrative: "Fundación Secretariado Gitano headquarters main line. Used for program coordination and institutional communications across Spain's 14 regional offices.",
+      createdBy: "analyst1", createdAt: "2025-10-09T09:00:00", linkedTo: [87, 92] },
+    { id: 95, category: "mobile", name: "+32 2 234 7120", context: "confirmed", country: "Belgium", tags: ["primary-contact"],
+      narrative: "REDI International Brussels office line. Shared premises with Roma Foundations for Europe at Avenue des Jardins 44. Used for entrepreneurship program coordination.",
+      createdBy: "admin", createdAt: "2025-10-08T09:00:00", linkedTo: [45, 35] },
+
+    // ── ADDITIONAL VEHICLES ──
+    { id: 96, category: "vehicle", name: "1-ABC-234", context: "confirmed", country: "Belgium", tags: ["organizational"],
+      narrative: "Roma Foundations for Europe Brussels pool vehicle. Belgian registration. Used for travel to EU institutions, Brussels meetings, and Strasbourg European Parliament sessions.",
+      createdBy: "admin", createdAt: "2025-10-07T09:00:00", linkedTo: [26, 35] },
+
+    // ── INTELLIGENCE ENTRIES: Varying reliability ──
+    { id: 97, category: "person", name: "Stefan Ivanov", context: "rumor", country: "Bulgaria", tags: ["funding", "community-development"],
+      narrative: "Reported Roma community organizer in Plovdiv, Bulgaria. Unverified claims of involvement in EU-funded community development projects in Stolipinovo neighborhood. Possibly connected to Center Amalipe regional network. Requires further verification of role and organizational affiliations.",
+      createdBy: "fieldops2", createdAt: "2025-10-06T09:00:00", linkedTo: [22] },
+    { id: 98, category: "person", name: "Maria Dimova", context: "rumor", country: "Bulgaria", tags: ["education", "youth"],
+      narrative: "Reported participant in Roma Education Fund scholarship program from Sofia. Unverified involvement in Roma youth advocacy in Bulgarian capital. Possibly connected to Center Amalipe education network. Initial field report pending corroboration.",
+      createdBy: "fieldops2", createdAt: "2025-10-05T09:00:00", linkedTo: [27] },
+    { id: 99, category: "person", name: "Jozef Horváth", context: "likely", country: "Slovakia", tags: ["community-development", "advocacy"],
+      narrative: "Roma community leader in Košice, Slovakia. Likely involved in local Roma inclusion initiatives and municipal Roma coordination. Reported connections to Roma Education Fund through regional scholarship programs. Emerging figure in Eastern Slovak Roma civil society.",
+      createdBy: "analyst2", createdAt: "2025-10-04T09:00:00", linkedTo: [27, 76] },
+    { id: 100, category: "person", name: "Ana Mirković", context: "likely", country: "Serbia", tags: ["women-rights", "legal", "advocacy"],
+      narrative: "Likely Roma women's rights advocate in Belgrade, Serbia. Reported involvement in legal aid programs for Roma women facing discrimination. Possibly connected to Yurom Center and ERRC monitoring programs. Profile emerging through Western Balkans Roma civil society mapping.",
+      createdBy: "analyst2", createdAt: "2025-10-03T09:00:00", linkedTo: [77, 28] },
+    { id: 101, category: "company", name: "Roma Active Albania", context: "likely", country: "International", tags: ["advocacy", "community-development"],
+      narrative: "Emerging Roma civil society organization reportedly based in Tirana, Albania. Likely focused on Roma inclusion in Albanian national strategy. Reported connections to Regional Cooperation Council Roma Integration program. Requires verification of organizational registration and leadership structure.",
+      createdBy: "analyst2", createdAt: "2025-10-02T09:00:00", linkedTo: [81] },
+    { id: 102, category: "mobile", name: "+359 877 312 498", context: "rumor", country: "Bulgaria", tags: ["field-contact"],
+      narrative: "Unverified contact number reportedly associated with Roma community organizing in Plovdiv region. Flagged in field operations report. Requires verification before operational use.",
+      createdBy: "fieldops2", createdAt: "2025-10-01T09:00:00", linkedTo: [97] },
   ],
   pendingValidations: [
     { id: 1, entryId: 14, targetName: "Karel Holomek", suggestedLink: "Dženo Association", suggestedLinkId: 29, submittedBy: "analyst2", submittedAt: "2026-02-20T10:00:00", reason: "Both active in Czech Roma civil society - possible collaboration" },
@@ -297,7 +401,7 @@ const seedData: () => Database = () => ({
     { message: "Validation request: Daniela Mihaylova → Roma Foundations for Europe", forUser: "admin", ts: "2026-02-18T14:00:00", read: false },
     { message: "Access request from fieldops1 for \"Zeljko Jovanovic\"", forUser: "admin", ts: "2026-02-26T11:30:00", read: false },
   ],
-  nextId: 73,
+  nextId: 103,
 });
 
 function loadFromStorage(): Database | null {

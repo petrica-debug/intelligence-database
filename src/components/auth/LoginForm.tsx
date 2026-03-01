@@ -113,7 +113,7 @@ export function LoginForm() {
 
         {/* Footer */}
         <div className="mt-6 text-center">
-          <p className="text-[9px] text-text-3 font-medium tracking-wide">72 entities &middot; 8 regions &middot; {new Date().getFullYear()} RFE Database</p>
+          <p className="text-[9px] text-text-3 font-medium tracking-wide">102 entities &middot; 12 regions &middot; {new Date().getFullYear()} RFE Database</p>
         </div>
       </div>
     </div>
