@@ -7,8 +7,10 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Search, PenSquare, Users, Building2, Phone, MapPin, Car,
   Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog, Globe, BarChart3,
-  ChevronLeft, ChevronRight, Database
+  ChevronLeft, ChevronRight, Database, FileText, Brain, Shield
 } from "lucide-react";
+import { CLEARANCE_LABELS } from "@/types";
+import type { ClearanceLevel } from "@/types";
 import type { ReactNode } from "react";
 
 interface NavItem { href: string; label: string; icon: ReactNode; badge?: number }
@@ -41,6 +43,8 @@ export function Sidebar({ pathname }: { pathname: string }) {
     { href: "/network", label: "Network", icon: <Network size={20} /> },
     { href: "/geo", label: "Geographic", icon: <Globe size={20} /> },
     { href: "/analytics", label: "Analytics", icon: <BarChart3 size={20} /> },
+    { href: "/reports", label: "Reports", icon: <FileText size={20} />, badge: (db.reports ?? []).length || undefined },
+    { href: "/intelligence", label: "Intelligence", icon: <Brain size={20} />, badge: (db.inferredConnections ?? []).filter(c => c.status === "new").length || undefined },
     { href: "/timeline", label: "Timeline", icon: <Clock size={20} /> },
   ];
 
@@ -165,6 +169,14 @@ export function Sidebar({ pathname }: { pathname: string }) {
               <div className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
               <span className="text-[11px] font-medium text-text-2">System Active</span>
             </div>
+            {currentUser && (
+              <div className="flex items-center gap-1.5 mb-2 px-1">
+                <Shield size={11} className="text-accent" />
+                <span className="text-[10px] font-semibold text-accent">
+                  {CLEARANCE_LABELS[(currentUser.clearance ?? 1) as ClearanceLevel]} (L{currentUser.clearance ?? 1})
+                </span>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-1">
               <div className="text-center bg-surface rounded-lg py-1.5">
                 <div className="text-sm font-bold text-accent">{db.entries.length}</div>

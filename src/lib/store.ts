@@ -1,14 +1,14 @@
 import type { Database } from "@/types";
 
-const STORAGE_KEY = "rfe_db_v4";
+const STORAGE_KEY = "rfe_db_v5";
 
 const seedData: () => Database = () => ({
   users: [
-    { username: "admin", password: "admin", role: "admin", access: "full", active: true },
-    { username: "analyst1", password: "analyst1", role: "user", access: "full", active: true },
-    { username: "analyst2", password: "analyst2", role: "user", access: "full", active: true },
-    { username: "fieldops1", password: "fieldops1", role: "user", access: "basic", active: true },
-    { username: "fieldops2", password: "fieldops2", role: "user", access: "basic", active: true },
+    { username: "admin", password: "admin", role: "admin", access: "full", clearance: 5, active: true, fullName: "Director Operations", department: "Executive" },
+    { username: "analyst1", password: "analyst1", role: "user", access: "full", clearance: 4, active: true, fullName: "Senior Analyst", department: "Intelligence" },
+    { username: "analyst2", password: "analyst2", role: "user", access: "full", clearance: 3, active: true, fullName: "Analyst", department: "Intelligence" },
+    { username: "fieldops1", password: "fieldops1", role: "user", access: "basic", clearance: 2, active: true, fullName: "Field Officer", department: "Field Operations" },
+    { username: "fieldops2", password: "fieldops2", role: "user", access: "basic", clearance: 1, active: true, fullName: "Field Operative", department: "Field Operations" },
   ],
   entries: [
     // ── PERSONS: Romania ──
@@ -400,6 +400,100 @@ const seedData: () => Database = () => ({
     { message: "Validation request: Karel Holomek → Dženo Association", forUser: "admin", ts: "2026-02-20T10:00:00", read: false },
     { message: "Validation request: Daniela Mihaylova → Roma Foundations for Europe", forUser: "admin", ts: "2026-02-18T14:00:00", read: false },
     { message: "Access request from fieldops1 for \"Zeljko Jovanovic\"", forUser: "admin", ts: "2026-02-26T11:30:00", read: false },
+  ],
+  reports: [
+    { id: 1, title: "Brussels Strategy Meeting — Q1 2026 Planning", type: "meeting-debrief", date: "2026-01-20", location: "Avenue des Jardins 44, Brussels",
+      attendees: [16, 19, 74, 73], externalAttendees: ["Maria van der Berg (DG Justice)", "Pierre Fontaine (Belgian Delegation)"],
+      sections: [
+        { title: "Meeting Overview", content: "Quarterly planning session attended by RFE leadership and external EU institutional partners. Discussed Q1 priorities including the upcoming EU Roma Platform meeting in March 2026 and coordination of national advocacy campaigns. Elena Stanescu presented the annual review of RFE grant portfolio performance. Zeljko Jovanovic outlined strategic vision for expanding RFE presence in Western Balkans.", sensitivity: "standard" },
+        { title: "Funding Allocation Discussion", content: "Review of €5.2M grant portfolio. Proposed reallocation of €800K from administrative overhead to direct grassroots support in Romania and Bulgaria. Discussion of new partnership with DG Justice for pilot anti-discrimination monitoring program (€350K). Maria van der Berg indicated informal EU support for expanded Roma education funding in 2027 budget cycle.", sensitivity: "sensitive" },
+        { title: "Strategic Partnerships Under Consideration", content: "Confidential discussions with Pierre Fontaine regarding Belgian government support for Roma inclusion within EU Presidency priorities. Preliminary agreement to co-host ministerial roundtable on Roma integration. Potential partnership with World Bank on Roma economic participation study — awaiting board approval. Zeljko signaled interest in merging advocacy efforts with ERGO Network to consolidate EU lobbying capacity.", sensitivity: "confidential" },
+        { title: "Internal Assessment of Leadership Changes", content: "Discussion of succession planning for key positions. Assessment of organizational restructuring to separate policy and grants functions. Board evaluation of current executive performance — unanimous positive assessment. Confidential intelligence from OSF indicating potential funding strategy shift in 2027 that may affect Roma portfolio allocation by 15-20%.", sensitivity: "top-secret" }
+      ],
+      tags: ["strategy", "funding", "EU-policy", "partnerships"],
+      linkedEntities: [16, 19, 26, 35, 73, 74, 49],
+      createdBy: "admin", createdAt: "2026-01-20T18:00:00", overallSensitivity: "top-secret", status: "reviewed" },
+
+    { id: 2, title: "Field Visit — Center Amalipe, Veliko Tarnovo", type: "field-report", date: "2026-02-05", location: "2 Marno Pole, Veliko Tarnovo, Bulgaria",
+      attendees: [6], externalAttendees: ["Ivanka Petrova (school coordinator)", "Georgi Dimitrov (local council)"],
+      sections: [
+        { title: "Visit Summary", content: "Three-day field visit to Center Amalipe headquarters and partner schools in Veliko Tarnovo region. Met with Deyan Kolev and key staff. Visited 4 partner schools implementing integrated education model. Observed community engagement sessions. Reviewed monitoring data for 2025 school year — 78% retention rate among Roma students in partner schools vs 52% national average.", sensitivity: "standard" },
+        { title: "Community Observations", content: "Roma neighborhoods in Veliko Tarnovo showing signs of improved infrastructure compared to 2024 visit. New community center opened in Lyaskovets with Amalipe support. Local Roma parents increasingly engaged in school governance — 12 new parent representatives elected in partner schools. Youth mentoring program showing promising results with 23 Roma university students serving as mentors.", sensitivity: "standard" },
+        { title: "Sensitive Political Dynamics", content: "Georgi Dimitrov from local council expressed concern about upcoming municipal elections potentially affecting Roma program funding. Current mayor supportive but challenger has made anti-Roma statements in campaign. Deyan Kolev mentioned private discussions with Bulgarian Ministry of Education about potential nationwide scaling of the integrated education model — budget implications of €4M being discussed internally. Not yet public.", sensitivity: "sensitive" }
+      ],
+      tags: ["education", "Bulgaria", "field-visit", "community"],
+      linkedEntities: [6, 22, 31, 97, 98],
+      createdBy: "fieldops1", createdAt: "2026-02-08T14:00:00", overallSensitivity: "sensitive", status: "submitted" },
+
+    { id: 3, title: "Budapest Network Analysis — OSF Roma Initiatives", type: "analysis", date: "2026-02-12", location: "Budapest, Hungary",
+      attendees: [], externalAttendees: [],
+      sections: [
+        { title: "Network Overview", content: "Comprehensive analysis of Open Society Roma Initiatives Office network map. 47 direct organizational partnerships identified across 14 countries. Total annual grantmaking: approximately €15M distributed through 89 active grants. Key geographic concentrations: Romania (23%), Bulgaria (18%), Hungary (14%), Slovakia (12%), Czech Republic (8%). Remaining across Western Balkans and Western Europe.", sensitivity: "standard" },
+        { title: "Key Connections Identified", content: "Zeljko Jovanovic maintains direct relationships with 34 organizational leaders across the network. Strong triangular relationship between OSF RI, Roma Foundations for Europe, and Roma Education Fund — shared board members, co-funded programs, joint advocacy positions. Pattern detected: OSF RI increasingly channeling funding through RFE as intermediary rather than direct grants. This suggests strategic positioning of RFE as autonomous funding entity.", sensitivity: "sensitive" },
+        { title: "Potential Vulnerabilities", content: "Single-point dependency on OSF funding identified for 12 organizations (receiving >60% of budget from OSF). Should OSF reduce Roma portfolio (see Brussels Strategy Meeting notes regarding potential 15-20% cut), these organizations face existential risk. Recommended contingency mapping. Also identified: 3 organizations receiving OSF funding with overlapping geographic mandates — potential consolidation candidates.", sensitivity: "confidential" }
+      ],
+      tags: ["network-analysis", "OSF", "funding", "strategy"],
+      linkedEntities: [16, 25, 26, 27, 34],
+      createdBy: "analyst1", createdAt: "2026-02-14T16:00:00", overallSensitivity: "confidential", status: "reviewed" },
+
+    { id: 4, title: "Western Balkans Roma Integration Assessment", type: "intelligence-brief", date: "2026-02-18", location: "Remote / Multi-country",
+      attendees: [77, 81], externalAttendees: ["Bekim Asani (RCC Roma Integration)", "Lejla Huseinović (OSCE BiH)"],
+      sections: [
+        { title: "Regional Overview", content: "Assessment of Roma integration progress across Western Balkans (Serbia, North Macedonia, Albania, Bosnia-Herzegovina, Kosovo, Montenegro). EU accession process remains primary driver for Roma inclusion policy. Regional Cooperation Council Roma Integration Action Team coordinating implementation of Roma integration commitments. Estimated 1.5-2M Roma population across the region with significant data gaps.", sensitivity: "standard" },
+        { title: "Cross-Border Movement Patterns", content: "Field intelligence indicates increased Roma labor mobility between Serbia and Hungary following seasonal agricultural patterns. Osman Balić reports growing economic migration from Niš region toward EU member states. Bajram Haliti notes similar patterns from North Macedonia. Informal cross-border networks facilitating movement — not necessarily negative but creating challenges for integration program tracking and service delivery continuity.", sensitivity: "sensitive" },
+        { title: "Unverified Source Intelligence", content: "Unverified reports of new Roma political party formation in Serbia — potentially backed by opposition interests. If confirmed, could shift dynamics of Roma political representation. Separate unverified intelligence about a major international development bank considering €50M Roma inclusion investment in Western Balkans, conditional on governance reforms. Source considered reliable but information unconfirmed. Roma Active Albania reportedly expanding operations but organizational structure and funding sources remain unclear.", sensitivity: "confidential" }
+      ],
+      tags: ["western-balkans", "integration", "cross-border", "political"],
+      linkedEntities: [77, 81, 48, 88, 100, 101],
+      createdBy: "analyst2", createdAt: "2026-02-20T10:00:00", overallSensitivity: "confidential", status: "submitted" },
+
+    { id: 5, title: "ERIAC Cultural Programs Impact Review", type: "analysis", date: "2026-02-22", location: "Berlin, Germany",
+      attendees: [55, 56], externalAttendees: [],
+      sections: [
+        { title: "Program Assessment", content: "Review of ERIAC cultural programs 2025 output. 14 exhibitions organized across 8 European cities. 3 major publications released. RomArchive digital platform received 180K unique visitors. Youth art fellowship program in 3rd year with 24 fellows from 11 countries. Growing institutional partnerships with major museums (Tate, MUMOK, Berlinische Galerie).", sensitivity: "standard" },
+        { title: "Strategic Cultural Impact", content: "ERIAC emerging as primary vehicle for Roma cultural soft power in Europe. Analysis indicates correlation between ERIAC cultural events and positive media coverage of Roma communities in host cities. Timea Junghaus building effective network bridging Roma cultural practitioners with mainstream art establishment. Romeo Franz leveraging EP platform to amplify ERIAC cultural agenda. Potential for ERIAC model to be replicated for other marginalized European minorities.", sensitivity: "sensitive" }
+      ],
+      tags: ["culture", "arts", "ERIAC", "impact-review"],
+      linkedEntities: [47, 55, 56, 57, 62, 70],
+      createdBy: "analyst1", createdAt: "2026-02-23T12:00:00", overallSensitivity: "sensitive", status: "reviewed" }
+  ],
+  inferredConnections: [
+    { id: 1, entityA: 73, entityB: 19, confidence: 94, reason: "Shared office address and organizational affiliation",
+      category: "shared-location", evidence: ["Both registered at Avenue des Jardins 44, 1030 Brussels", "Both connected to Roma Foundations for Europe", "Both connected to REDI International", "Daily professional interaction highly probable"],
+      createdAt: "2026-02-25T10:00:00", status: "confirmed" },
+    { id: 2, entityA: 6, entityB: 1, confidence: 82, reason: "Co-attendance at strategy meetings and shared advocacy focus",
+      category: "co-attendance", evidence: ["Both attended Brussels Strategy Meeting Q1 2026 (Report #1)", "Both tagged with 'education' and 'advocacy'", "Both connected to Roma Foundations for Europe board", "Both present at EU Roma Platform 2025 (external records)"],
+      createdAt: "2026-02-26T09:00:00", status: "new" },
+    { id: 3, entityA: 75, entityB: 82, confidence: 78, reason: "Spanish Roma network — shared organizational ties and geographic proximity",
+      category: "organizational", evidence: ["Both connected to Fundación Secretariado Gitano", "Both based in Spain", "Sara Giménez (Madrid/Congress) and Pedro Aguilera Cortés (Seville) — same national network", "Both active in Roma education and legal advocacy in Iberian Peninsula"],
+      createdAt: "2026-02-26T10:00:00", status: "new" },
+    { id: 4, entityA: 16, entityB: 74, confidence: 88, reason: "RFE leadership team — high-frequency professional and social interaction",
+      category: "behavioral", evidence: ["Chair and Vice-President of Roma Foundations for Europe", "Both attend Brussels-based EU policy events regularly", "Children enrolled at European School Brussels III (field observation)", "Both frequent Le Pain Quotidien on Rue de la Loi for working lunches (field observation)"],
+      createdAt: "2026-02-27T08:00:00", status: "new" },
+    { id: 5, entityA: 77, entityB: 78, confidence: 71, reason: "Western Balkans Roma network — cross-border coordination pattern",
+      category: "social-proximity", evidence: ["Adjacent countries (Serbia/North Macedonia)", "Both attend OSCE Roma and Sinti meetings regularly", "Both involved in Regional Cooperation Council Roma Integration activities", "Observed at same Belgrade restaurant during RCC coordination meeting (Oct 2025)"],
+      createdAt: "2026-02-27T09:00:00", status: "new" },
+    { id: 6, entityA: 64, entityB: 79, confidence: 91, reason: "German Sinti & Roma civil rights — organizational and personal connections",
+      category: "behavioral", evidence: ["Romani Rose chairs Central Council; Petra Rosenberg chairs Berlin-Brandenburg association", "Both active in Porajmos memorial culture", "Both walk dogs in Tiergarten area on Sunday mornings (field observation)", "Both members of Berlin memorial committee for Sinti and Roma victims"],
+      createdAt: "2026-02-27T10:00:00", status: "confirmed" },
+    { id: 7, entityA: 2, entityB: 18, confidence: 85, reason: "Romanian Roma women's rights nexus — deep professional and personal ties",
+      category: "social-proximity", evidence: ["Both Romanian Roma women's rights advocates", "Both previously worked at Romani CRISS", "Both serve on international advisory bodies for Roma women", "Children attend same after-school program in Bucharest Sector 2 (field intelligence)"],
+      createdAt: "2026-02-28T08:00:00", status: "new" },
+    { id: 8, entityA: 55, entityB: 62, confidence: 76, reason: "Cultural sector collaboration — ERIAC and European Parliament intersection",
+      category: "pattern-match", evidence: ["Both connected through ERIAC cultural programs", "Both frequent Café Einstein in Berlin for cultural sector meetings", "Romeo Franz champions ERIAC agenda in EP Culture committee", "Both attended Venice Biennale Roma Pavilion events (2024, 2025)"],
+      createdAt: "2026-02-28T09:00:00", status: "new" },
+    { id: 9, entityA: 9, entityB: 10, confidence: 68, reason: "Hungarian Roma education and civil rights overlap",
+      category: "organizational", evidence: ["Both key figures in Hungarian Roma civil society", "Aladár Horváth (civil rights) and Tibor Derdák (education) share mutual connections", "Both connected through Roma Education Fund ecosystem", "Both attend annual Roma civil society gathering in Budapest (December event)"],
+      createdAt: "2026-02-28T10:00:00", status: "new" },
+    { id: 10, entityA: 51, entityB: 73, confidence: 72, reason: "REDI network — shared entrepreneurship focus and organizational ties",
+      category: "organizational", evidence: ["Both connected to REDI International", "Costel Bercuș (former REF director) involved in REDI entrepreneurship initiative", "Petrica Dulgheru on REDI board", "Both attend Brussels Roma economic empowerment roundtables"],
+      createdAt: "2026-02-28T11:00:00", status: "new" },
+    { id: 11, entityA: 59, entityB: 60, confidence: 80, reason: "Council of Europe Roma institutional nexus",
+      category: "co-attendance", evidence: ["Both Council of Europe Roma and Travellers team leadership", "Jeroen Schokkenbroek (Special Representative) works directly with Miranda Vuolasranta (ERTF President)", "Both attend quarterly CoE Roma coordination meetings in Strasbourg", "Both use same gym near Palais de l'Europe (field observation)"],
+      createdAt: "2026-02-28T12:00:00", status: "new" },
+    { id: 12, entityA: 3, entityB: 86, confidence: 74, reason: "Romani CRISS alumni network — gender rights advocacy",
+      category: "pattern-match", evidence: ["Marian Mandache currently leads Romani CRISS", "Isabela Mihalache formerly at Romani CRISS", "Both connected to ERRC through joint gender monitoring programs", "Pattern: Romani CRISS alumni maintain active professional network post-departure"],
+      createdAt: "2026-02-28T13:00:00", status: "new" }
   ],
   nextId: 103,
 });

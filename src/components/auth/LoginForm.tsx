@@ -7,10 +7,10 @@ import { Shield, ArrowRight, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui";
 
 const DEMO = [
-  { user: "admin", pass: "admin", label: "Administrator", access: "Full + Admin" },
-  { user: "analyst1", pass: "analyst1", label: "Senior Analyst", access: "Full Access" },
-  { user: "analyst2", pass: "analyst2", label: "Analyst", access: "Full Access" },
-  { user: "fieldops1", pass: "fieldops1", label: "Field Ops", access: "Basic Access" },
+  { user: "admin", pass: "admin", label: "Director", access: "L5 · Full + Admin" },
+  { user: "analyst1", pass: "analyst1", label: "Senior Analyst", access: "L4 · Confidential" },
+  { user: "analyst2", pass: "analyst2", label: "Analyst", access: "L3 · Sensitive+" },
+  { user: "fieldops1", pass: "fieldops1", label: "Field Officer", access: "L2 · Basic" },
 ];
 
 export function LoginForm() {

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
 import { Shield, Bell, LogOut, ChevronDown } from "lucide-react";
+import { CLEARANCE_LABELS } from "@/types";
+import type { ClearanceLevel } from "@/types";
 
 export function Topbar() {
   const { currentUser, logout, db, updateDb } = useApp();
@@ -48,9 +50,9 @@ export function Topbar() {
             {currentUser.username[0].toUpperCase()}
           </div>
           <div className="leading-tight">
-            <div className="text-[12px] font-medium text-white">{currentUser.username}</div>
+            <div className="text-[12px] font-medium text-white">{currentUser.fullName ?? currentUser.username}</div>
             <div className="text-[9px] text-white/40 uppercase tracking-wider font-medium">
-              {currentUser.role === "admin" ? "Admin" : currentUser.access}
+              L{currentUser.clearance ?? 1} · {CLEARANCE_LABELS[(currentUser.clearance ?? 1) as ClearanceLevel]}
             </div>
           </div>
           <ChevronDown size={12} className="text-white/30 ml-1" />

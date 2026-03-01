@@ -82,6 +82,10 @@ const badgeColors: Record<string, string> = {
   rejected: "bg-red/8 text-red border border-red/10",
   signal: "bg-amber/8 text-amber border border-amber/10",
   info: "bg-cyan/8 text-cyan border border-cyan/10",
+  standard: "bg-emerald/8 text-emerald border border-emerald/10",
+  sensitive: "bg-amber/8 text-amber border border-amber/10",
+  confidential: "bg-red/8 text-red border border-red/10",
+  "top-secret": "bg-purple/8 text-purple border border-purple/10",
   default: "bg-surface-3 text-text-2 border border-border/50",
 };
 

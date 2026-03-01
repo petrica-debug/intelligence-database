@@ -9,7 +9,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { User, Database } from "@/types";
+import type { User, Database, SensitivityLevel, ClearanceLevel } from "@/types";
+import { SENSITIVITY_MIN_CLEARANCE } from "@/types";
 import { getInitialDb, persistDb } from "@/lib/store";
 
 interface AppContextValue {
@@ -19,6 +20,8 @@ interface AppContextValue {
   logout: () => void;
   updateDb: (updater: (db: Database) => void) => void;
   isReady: boolean;
+  canView: (sensitivity: SensitivityLevel) => boolean;
+  userClearance: ClearanceLevel;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -61,16 +64,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const userClearance: ClearanceLevel = currentUser?.clearance ?? 1;
+
+  const canView = useCallback((sensitivity: SensitivityLevel) => {
+    return userClearance >= SENSITIVITY_MIN_CLEARANCE[sensitivity];
+  }, [userClearance]);
+
   const value = useMemo(
     () => ({
       currentUser,
-      db: db ?? { users: [], entries: [], pendingValidations: [], logs: [], signals: [], notifications: [], nextId: 1 },
+      db: db ?? { users: [], entries: [], pendingValidations: [], logs: [], signals: [], notifications: [], reports: [], inferredConnections: [], nextId: 1 },
       login,
       logout,
       updateDb,
       isReady,
+      canView,
+      userClearance,
     }),
-    [currentUser, db, login, logout, updateDb, isReady]
+    [currentUser, db, login, logout, updateDb, isReady, canView, userClearance]
   );
 
   if (!isReady) {
