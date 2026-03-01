@@ -69,42 +69,43 @@ export default function EntryDetailPage() {
       <Button variant="ghost" size="sm" onClick={() => router.back()} className="mb-4"><ArrowLeft size={14} /> Back</Button>
 
       {/* Dossier Header */}
-      <div className={cn("rounded-t-xl p-6 text-white", BG_COLORS[entry.category] || "bg-accent")}>
-        <div className="flex items-start justify-between">
+      <div className={cn("rounded-t-2xl p-6 text-white relative overflow-hidden", BG_COLORS[entry.category] || "bg-accent")}>
+        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+        <div className="relative flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">{entry.category}</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full">{entry.context}</span>
-              {signal && <span className="text-[10px] font-bold uppercase tracking-wider bg-white/30 px-2 py-0.5 rounded-full animate-pulse-glow">Signal Active</span>}
+            <div className="flex items-center gap-1.5 mb-3">
+              <span className="text-[9px] font-bold uppercase tracking-wider bg-white/15 px-2 py-0.5 rounded-md backdrop-blur-sm">{entry.category}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wider bg-white/15 px-2 py-0.5 rounded-md backdrop-blur-sm">{entry.context}</span>
+              {signal && <span className="text-[9px] font-bold uppercase tracking-wider bg-white/25 px-2 py-0.5 rounded-md animate-pulse-glow backdrop-blur-sm">Signal Active</span>}
             </div>
-            <h1 className="text-2xl font-bold">{entry.name}</h1>
+            <h1 className="text-[22px] font-bold tracking-tight">{entry.name}</h1>
             {entry.country && (
-              <div className="flex items-center gap-1.5 mt-1 text-white/70 text-[12px]">
+              <div className="flex items-center gap-1.5 mt-1.5 text-white/60 text-[12px] font-medium">
                 <Globe size={12} /> {entry.country}
               </div>
             )}
           </div>
-          <div className="text-right text-[12px] text-white/60 space-y-1">
-            <div className="flex items-center gap-1.5 justify-end"><User size={11} /> {entry.createdBy}</div>
-            <div className="flex items-center gap-1.5 justify-end"><Calendar size={11} /> {formatDate(entry.createdAt)}</div>
-            <div className="flex items-center gap-1.5 justify-end"><Link2 size={11} /> {allLinked.length} connections</div>
-            <div className="text-[10px] mt-1 bg-white/10 px-2 py-0.5 rounded text-white/50">ID: {entry.id}</div>
+          <div className="text-right text-[11px] text-white/50 space-y-1 font-medium">
+            <div className="flex items-center gap-1.5 justify-end"><User size={10} /> {entry.createdBy}</div>
+            <div className="flex items-center gap-1.5 justify-end"><Calendar size={10} /> {formatDate(entry.createdAt)}</div>
+            <div className="flex items-center gap-1.5 justify-end"><Link2 size={10} /> {allLinked.length} connections</div>
+            <div className="text-[9px] mt-1.5 bg-white/10 px-2 py-0.5 rounded-md text-white/40 font-mono">ID: {entry.id}</div>
           </div>
         </div>
       </div>
 
       {/* Tags */}
       {entry.tags && entry.tags.length > 0 && (
-        <div className="bg-surface border-x border-border px-6 py-3 flex items-center gap-2">
-          <Tag size={12} className="text-text-3" />
+        <div className="bg-surface-2/50 border-x border-border px-6 py-3 flex items-center gap-2">
+          <Tag size={11} className="text-text-3" />
           {entry.tags.map((t) => (
-            <span key={t} className="text-[11px] text-accent bg-accent-muted px-2 py-0.5 rounded-full font-medium">{t}</span>
+            <span key={t} className="text-[10px] text-accent bg-accent/6 px-2 py-0.5 rounded-md font-semibold border border-accent/8">{t}</span>
           ))}
         </div>
       )}
 
       {/* Content */}
-      <div className="rounded-b-xl border border-t-0 border-border bg-surface mb-4">
+      <div className="rounded-b-2xl border border-t-0 border-border bg-surface mb-4">
         {canViewFull ? (
           <>
             <div className="p-6 border-b border-border">

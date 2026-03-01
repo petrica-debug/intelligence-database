@@ -42,9 +42,9 @@ export function CategoryList({ category, title, icon, emptyMsg }: Props) {
               <select
                 value={filterCountry}
                 onChange={(e) => setFilterCountry(e.target.value)}
-                className="bg-surface-2 border border-border rounded-lg text-text text-[12px] px-2 py-1.5 outline-none cursor-pointer"
+                className="bg-surface-2 border border-border rounded-xl text-text text-[11px] px-2.5 py-1.5 outline-none cursor-pointer font-medium"
               >
-                <option value="all">All Countries</option>
+                <option value="all">All Regions</option>
                 {countries.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
@@ -52,16 +52,16 @@ export function CategoryList({ category, title, icon, emptyMsg }: Props) {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="bg-surface-2 border border-border rounded-lg text-text text-[12px] px-2 py-1.5 outline-none cursor-pointer"
+              className="bg-surface-2 border border-border rounded-xl text-text text-[11px] px-2.5 py-1.5 outline-none cursor-pointer font-medium"
             >
               <option value="date">Newest</option>
               <option value="name">A-Z</option>
               <option value="links">Most Links</option>
             </select>
             {/* View toggle */}
-            <div className="flex items-center border border-border rounded-lg overflow-hidden">
-              <button onClick={() => setView("card")} className={cn("p-1.5 transition-colors cursor-pointer", view === "card" ? "bg-accent text-white" : "text-text-3 hover:text-text bg-surface-2")}><LayoutGrid size={14} /></button>
-              <button onClick={() => setView("table")} className={cn("p-1.5 transition-colors cursor-pointer", view === "table" ? "bg-accent text-white" : "text-text-3 hover:text-text bg-surface-2")}><List size={14} /></button>
+            <div className="flex items-center border border-border rounded-xl overflow-hidden">
+              <button onClick={() => setView("card")} className={cn("p-1.5 transition-all duration-200 cursor-pointer", view === "card" ? "bg-accent text-white" : "text-text-3 hover:text-text bg-surface-2")}><LayoutGrid size={14} /></button>
+              <button onClick={() => setView("table")} className={cn("p-1.5 transition-all duration-200 cursor-pointer", view === "table" ? "bg-accent text-white" : "text-text-3 hover:text-text bg-surface-2")}><List size={14} /></button>
             </div>
           </div>
         }

@@ -51,7 +51,7 @@ export default function SearchPage() {
             <input type="text" placeholder="Search by name, number, address, or keyword..." value={query}
               onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-10 pr-4 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 placeholder:text-text-3" />
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-2 border border-border rounded-xl text-text text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/10 focus:bg-white placeholder:text-text-3 transition-all duration-200" />
           </div>
           <Button onClick={handleSearch}><SearchIcon size={14} /> Search</Button>
         </div>
@@ -60,8 +60,8 @@ export default function SearchPage() {
           <Filter size={14} className="text-text-3" />
           {cats.map((c) => (
             <button key={c} onClick={() => { setFilter(c); setSearched(false); }}
-              className={cn("px-3 py-1 rounded-full text-[12px] font-medium border transition-all cursor-pointer",
-                filter === c ? "bg-accent text-white border-accent" : "bg-surface-2 text-text-2 border-border hover:border-border-2")}>
+              className={cn("px-3 py-1 rounded-xl text-[11px] font-semibold border transition-all duration-200 cursor-pointer",
+                filter === c ? "bg-accent text-white border-accent shadow-sm shadow-accent/10" : "bg-surface-2 text-text-2 border-border hover:border-accent/30 hover:text-accent")}>
               {c === "all" ? "All" : c.charAt(0).toUpperCase() + c.slice(1)}
             </button>
           ))}

@@ -1,6 +1,6 @@
 import type { Database } from "@/types";
 
-const STORAGE_KEY = "rfe_db_v2";
+const STORAGE_KEY = "rfe_db_v3";
 
 const seedData: () => Database = () => ({
   users: [
@@ -160,6 +160,104 @@ const seedData: () => Database = () => ({
     { id: 44, category: "vehicle", name: "RFE-EU-001", context: "confirmed", country: "International", tags: ["organizational"],
       narrative: "Roma Foundations for Europe Brussels office vehicle. Used for EU institutional meetings and travel between Brussels and Strasbourg for European Parliament sessions.",
       createdBy: "admin", createdAt: "2025-11-29T09:00:00", linkedTo: [26, 35] },
+
+    // ── NEW ORGANIZATIONS ──
+    { id: 45, category: "company", name: "REDI (Roma Entrepreneurship Development Initiative)", context: "confirmed", country: "International", tags: ["entrepreneurship", "funding", "youth"],
+      narrative: "Initiative supporting Roma entrepreneurs across Europe. Connected to Open Society Foundations ecosystem. Provides mentoring, seed funding, and business training for Roma-led startups. Operates in Romania, Bulgaria, Hungary, Slovakia, and Czech Republic. Focus on breaking cycles of poverty through economic empowerment.",
+      createdBy: "admin", createdAt: "2025-11-28T09:00:00", linkedTo: [25, 26, 27, 51] },
+    { id: 46, category: "company", name: "Roma for Democracy", context: "confirmed", country: "International", tags: ["democracy", "political-participation", "advocacy"],
+      narrative: "Platform promoting Roma political participation and civic engagement across Europe. Supports Roma candidates in local and national elections. Provides training on democratic processes, voter registration drives, and political leadership development. Connected to Roma Foundations for Europe and OSCE Roma Contact Point.",
+      createdBy: "admin", createdAt: "2025-11-27T09:00:00", linkedTo: [26, 25, 48] },
+    { id: 47, category: "company", name: "ERIAC (European Roma Institute for Arts and Culture)", context: "confirmed", country: "International", tags: ["culture", "arts", "heritage"],
+      narrative: "European Roma Institute for Arts and Culture. Founded 2017, based in Berlin. Joint initiative of Council of Europe, Open Society Foundations, and Roma leaders. Promotes Roma arts, culture, and history. Counters antigypsyism through cultural production. Executive Director: Timea Junghaus. Organizes exhibitions, film screenings, publications. Partner of Documenta and Venice Biennale programs.",
+      createdBy: "admin", createdAt: "2025-11-26T09:00:00", linkedTo: [55, 56, 57, 58, 12, 62, 64, 67, 70] },
+    { id: 48, category: "company", name: "Council of Europe Roma & Travellers Team", context: "confirmed", country: "International", tags: ["policy", "monitoring", "human-rights"],
+      narrative: "Dedicated team within Council of Europe Secretariat. Implements CoE Strategic Action Plan for Roma and Traveller Inclusion. Headed by Special Representative of Secretary General. Coordinates with ECRI, Commissioner for Human Rights, and Congress of Local Authorities. Monitors Roma rights across 46 member states. Supports European Roma and Travellers Forum (ERTF).",
+      createdBy: "admin", createdAt: "2025-11-25T09:00:00", linkedTo: [59, 60, 64, 68, 71, 28] },
+    { id: 49, category: "company", name: "European Commission DG Justice Roma Policy Unit", context: "confirmed", country: "International", tags: ["policy", "EU", "strategy"],
+      narrative: "Unit within DG Justice and Consumers responsible for EU Roma Strategic Framework 2020-2030. Coordinates National Roma Strategic Frameworks across EU member states. Monitors implementation of Council Recommendation on Roma equality, inclusion and participation. Works with EU Agency for Fundamental Rights (FRA) on Roma surveys. Key institutional partner for Roma civil society organizations.",
+      createdBy: "admin", createdAt: "2025-11-24T09:00:00", linkedTo: [63, 66, 26, 28] },
+    { id: 50, category: "company", name: "World Bank Roma Inclusion Initiative", context: "confirmed", country: "International", tags: ["development", "research", "funding"],
+      narrative: "World Bank program supporting Roma inclusion in Central and Eastern Europe. Provides technical assistance, research, and project financing for Roma integration. Key publications: Roma Inclusion reports, Regional Roma Survey data. Works with governments on education, employment, housing, and health programs. Connected to Roma Education Fund and UNDP Roma programs.",
+      createdBy: "admin", createdAt: "2025-11-23T09:00:00", linkedTo: [66, 27, 25] },
+
+    // ── PERSONS: Roma Education Fund ──
+    { id: 51, category: "person", name: "Costel Bercuș", context: "confirmed", country: "Romania", tags: ["leadership", "education", "funding"],
+      narrative: "Former Executive Director of Roma Education Fund. Romanian Roma leader who built REF into a major international education organization. Oversaw scholarship programs supporting over 100,000 Roma students across 16 countries. Prior experience with Open Society Foundations in Romania. Connected to Roma Foundations for Europe board. Key figure in Roma education policy at EU level. Also involved in REDI entrepreneurship initiative.",
+      createdBy: "analyst1", createdAt: "2025-11-22T09:00:00", linkedTo: [27, 45, 26, 25] },
+    { id: 52, category: "person", name: "Nadir Redzepi", context: "confirmed", country: "International", tags: ["education", "program-management", "youth"],
+      narrative: "Program Director at Roma Education Fund. North Macedonian Roma background. Manages REF country programs in Western Balkans. Expertise in Roma education access and quality improvement. Connected to OSF Roma Initiatives and REDI network. Coordinates with local Roma organizations on scholarship distribution and school desegregation programs.",
+      createdBy: "analyst2", createdAt: "2025-11-21T09:00:00", linkedTo: [27, 25, 45] },
+    { id: 53, category: "person", name: "Laura Surdu", context: "confirmed", country: "Romania", tags: ["research", "education", "data"],
+      narrative: "Research Director formerly at Roma Education Fund. Romanian Roma sociologist specializing in quantitative research on Roma education outcomes. Published key studies on school segregation and educational attainment gaps. Connected to Romani CRISS research programs and Policy Center for Roma and Minorities. Data contributed to EU Roma Strategic Framework indicators.",
+      createdBy: "analyst1", createdAt: "2025-11-20T09:00:00", linkedTo: [27, 21, 30] },
+    { id: 54, category: "person", name: "Judit Szira", context: "confirmed", country: "Hungary", tags: ["education", "communications", "advocacy"],
+      narrative: "Former Communications and External Relations Officer at Roma Education Fund. Hungarian Roma professional with experience in educational advocacy and institutional communications. Connected to OSF Roma Initiatives through REF partnership. Active in promoting Roma education success stories in international media.",
+      createdBy: "analyst2", createdAt: "2025-11-19T09:00:00", linkedTo: [27, 25, 72] },
+
+    // ── PERSONS: ERIAC ──
+    { id: 55, category: "person", name: "Timea Junghaus", context: "confirmed", country: "Hungary", tags: ["culture", "arts", "leadership"],
+      narrative: "Executive Director and co-founder of ERIAC (European Roma Institute for Arts and Culture). Hungarian Roma art historian and curator. First Roma curator at Venice Biennale (2007, Hungarian Pavilion). PhD in art history. Pioneered recognition of contemporary Roma art in mainstream European cultural institutions. Connected to Council of Europe cultural programs and Open Society Foundations.",
+      createdBy: "analyst1", createdAt: "2025-11-18T09:00:00", linkedTo: [47, 25, 48] },
+    { id: 56, category: "person", name: "Anna Mirga-Kruszelnicka", context: "confirmed", country: "International", tags: ["culture", "research", "advocacy"],
+      narrative: "Deputy Director of ERIAC. Polish Roma background. Academic researcher and cultural activist. PhD research on Roma cultural production and identity politics. Former fellow at European University Institute, Florence. Connected to Roma Foundations for Europe. Active in debates on Roma cultural autonomy and anti-discrimination through cultural recognition.",
+      createdBy: "analyst1", createdAt: "2025-11-17T09:00:00", linkedTo: [47, 26] },
+    { id: 57, category: "person", name: "Daniel Baker", context: "confirmed", country: "International", tags: ["arts", "culture", "heritage"],
+      narrative: "Romani artist and academic based in UK. Connected to ERIAC as board advisor. PhD from Royal College of Art. Work explores Romani visual culture, flag design, and identity markers. Exhibited internationally including Tate Britain and Venice Biennale. Lecturer in Romani art history. Key voice in contemporary Romani arts movement.",
+      createdBy: "analyst2", createdAt: "2025-11-16T09:00:00", linkedTo: [47] },
+    { id: 58, category: "person", name: "Ethel Brooks", context: "confirmed", country: "International", tags: ["research", "culture", "women-rights"],
+      narrative: "Professor of Women's and Gender Studies and Sociology at Rutgers University. Romani American scholar. Connected to ERIAC advisory network. Research on Roma women's rights, transnational Romani identity, and globalization. Published 'Unraveling the Garment Industry'. Board member of European Roma Rights Centre. Key academic voice on intersectional Roma identity.",
+      createdBy: "analyst1", createdAt: "2025-11-15T09:00:00", linkedTo: [47, 28] },
+
+    // ── PERSONS: Council of Europe Roma ──
+    { id: 59, category: "person", name: "Jeroen Schokkenbroek", context: "confirmed", country: "International", tags: ["policy", "human-rights", "leadership"],
+      narrative: "Special Representative of the Secretary General of the Council of Europe for Roma Issues. Dutch human rights lawyer. Coordinates CoE Roma and Travellers Team. Oversees implementation of Strategic Action Plan for Roma and Traveller Inclusion. Engages with national governments on Roma rights compliance. Connected to Roma Foundations for Europe and ERRC through institutional partnerships.",
+      createdBy: "admin", createdAt: "2025-11-14T09:00:00", linkedTo: [48, 26, 28] },
+    { id: 60, category: "person", name: "Miranda Vuolasranta", context: "confirmed", country: "International", tags: ["policy", "leadership", "advocacy"],
+      narrative: "President of the European Roma and Travellers Forum (ERTF) at the Council of Europe. Finnish Romani background. Pioneering Roma woman leader in Nordic countries. Advocates for Roma inclusion in EU and CoE policy frameworks. Connected to Roma Foundations for Europe board. Coordinates ERTF advocacy with national Roma platforms across 46 CoE member states.",
+      createdBy: "admin", createdAt: "2025-11-13T09:00:00", linkedTo: [48, 26] },
+
+    // ── PERSONS: EU Parliament / European Politicians ──
+    { id: 61, category: "person", name: "Soraya Post", context: "confirmed", country: "International", tags: ["political-participation", "human-rights", "leadership"],
+      narrative: "Former Member of European Parliament (2014-2019), Sweden. Romani and Afro-Swedish heritage. First Roma woman elected to European Parliament from a Nordic country. Served on Civil Liberties (LIBE) committee. Championed Roma rights, anti-discrimination legislation, and refugee rights. Connected to ERIAC founding. Post-parliamentary work in Roma advocacy and anti-racism.",
+      createdBy: "analyst1", createdAt: "2025-11-12T09:00:00", linkedTo: [47, 48] },
+    { id: 62, category: "person", name: "Romeo Franz", context: "confirmed", country: "International", tags: ["political-participation", "culture", "leadership"],
+      narrative: "Member of European Parliament (Greens/EFA, Germany). German Sinto musician and politician. First Sinto MEP. Professional jazz musician. Serves on Culture and Education (CULT) committee. Advocates for Roma and Sinti cultural recognition and anti-discrimination. Connected to ERIAC cultural programs. Campaigns for recognition of Sinti and Roma persecution history.",
+      createdBy: "analyst1", createdAt: "2025-11-11T09:00:00", linkedTo: [47, 48, 64] },
+    { id: 63, category: "person", name: "Lívia Járóka", context: "confirmed", country: "Hungary", tags: ["political-participation", "policy", "leadership"],
+      narrative: "Vice-President of the European Parliament. Hungarian Roma. First Romani woman to serve as EP Vice-President. Former EU Roma coordinator. Social anthropologist by training. Served multiple terms as MEP (EPP group). Key contact between European institutions and Roma civil society. Connected to DG Justice Roma policy processes and Roma Education Fund.",
+      createdBy: "analyst1", createdAt: "2025-11-10T09:00:00", linkedTo: [49, 27] },
+
+    // ── PERSONS: Other Key Figures ──
+    { id: 64, category: "person", name: "Romani Rose", context: "confirmed", country: "International", tags: ["civil-rights", "holocaust", "leadership"],
+      narrative: "Chairman of the Central Council of German Sinti and Roma. Leading Sinti civil rights figure since 1980s. Instrumental in achieving official German recognition of the Sinti and Roma genocide. Established Documentation and Cultural Centre of German Sinti and Roma in Heidelberg. Connected to Council of Europe Roma work and ERIAC. Key figure in Holocaust remembrance for Roma and Sinti.",
+      createdBy: "admin", createdAt: "2025-11-09T09:00:00", linkedTo: [48, 47, 62] },
+    { id: 65, category: "person", name: "Ian Hancock", context: "confirmed", country: "International", tags: ["research", "linguistics", "advocacy"],
+      narrative: "Professor Emeritus at University of Texas at Austin. British-born Romani scholar. Pioneer of Romani studies as academic discipline. Author of 'We are the Romani People' and 'The Pariah Syndrome'. Former representative to the United Nations for the International Romani Union. Expert on Romani language and history. Connected to European Roma Rights Centre research programs.",
+      createdBy: "analyst2", createdAt: "2025-11-08T09:00:00", linkedTo: [28] },
+    { id: 66, category: "person", name: "Andrey Ivanov", context: "confirmed", country: "International", tags: ["policy", "research", "development"],
+      narrative: "Senior Roma inclusion advisor, formerly with UNDP Regional Bureau for Europe and CIS. Key author of UNDP Roma human development reports. Expert on Roma socioeconomic data and indicators. Currently advises European Commission DG Justice on Roma Strategic Framework implementation. Connected to World Bank Roma programs and OSF Roma Initiatives.",
+      createdBy: "admin", createdAt: "2025-11-07T09:00:00", linkedTo: [49, 50, 25] },
+    { id: 67, category: "person", name: "Hristo Kyuchukov", context: "confirmed", country: "Bulgaria", tags: ["research", "linguistics", "education"],
+      narrative: "Bulgarian Roma academic and psycholinguist. Professor at University of Silesia, Poland. Expert on Romani language acquisition and bilingual education. Author of over 200 publications on Roma education and language. Connected to Center Amalipe and ERIAC cultural programs. Advocate for Romani language preservation and standardization.",
+      createdBy: "analyst2", createdAt: "2025-11-06T09:00:00", linkedTo: [22, 47] },
+    { id: 68, category: "person", name: "Thomas Acton", context: "confirmed", country: "International", tags: ["research", "policy", "advocacy"],
+      narrative: "Professor Emeritus of Romani Studies at University of Greenwich, UK. Leading Romani studies scholar. Extensive publication record on Roma history, politics, and identity. Connected to Council of Europe Roma research programs and European Roma Rights Centre. Advisor to multiple Roma organizations on academic research and policy development.",
+      createdBy: "analyst2", createdAt: "2025-11-05T09:00:00", linkedTo: [28, 48] },
+    { id: 69, category: "person", name: "Juan de Dios Ramírez-Heredia", context: "confirmed", country: "International", tags: ["political-participation", "legal", "leadership"],
+      narrative: "Spanish Roma politician and lawyer. First Roma member of Spanish Parliament (1977) and first Roma MEP (1994). Founded Unión Romaní in Spain. Pioneering figure in Roma political representation. Legal advocate for Roma rights in Spain and at European level. Connected to Roma Foundations for Europe through international Roma policy network.",
+      createdBy: "analyst1", createdAt: "2025-11-04T09:00:00", linkedTo: [26] },
+
+    // ── NEW ADDRESSES ──
+    { id: 70, category: "address", name: "ERIAC, Reinhardtstraße 7, 10117 Berlin, Germany", context: "confirmed", country: "International", tags: ["office", "headquarters"],
+      narrative: "Headquarters of the European Roma Institute for Arts and Culture in central Berlin. Houses exhibition space, office facilities, and cultural event venue. Located near Friedrichstraße, accessible for international visitors and EU institutional contacts.",
+      createdBy: "admin", createdAt: "2025-11-03T09:00:00", linkedTo: [47, 55] },
+    { id: 71, category: "address", name: "Council of Europe, Avenue de l'Europe, 67075 Strasbourg, France", context: "confirmed", country: "International", tags: ["institutional", "headquarters"],
+      narrative: "Headquarters of the Council of Europe. Houses the Roma and Travellers Team within the Secretariat. Location of ERTF meetings and Roma policy coordination. Key institutional address for European Roma rights monitoring and policy development.",
+      createdBy: "admin", createdAt: "2025-11-02T09:00:00", linkedTo: [48, 59] },
+    { id: 72, category: "address", name: "Roma Education Fund, Teréz körút 46, 1066 Budapest, Hungary", context: "confirmed", country: "International", tags: ["office", "headquarters"],
+      narrative: "Budapest headquarters of Roma Education Fund. Central office for managing scholarship programs across 16 countries. Houses program management, grants administration, and research teams. Key location for Roma education policy coordination in Central Europe.",
+      createdBy: "analyst1", createdAt: "2025-11-01T09:00:00", linkedTo: [27, 51, 54] },
   ],
   pendingValidations: [
     { id: 1, entryId: 14, targetName: "Karel Holomek", suggestedLink: "Dženo Association", suggestedLinkId: 29, submittedBy: "analyst2", submittedAt: "2026-02-20T10:00:00", reason: "Both active in Czech Roma civil society - possible collaboration" },
@@ -199,7 +297,7 @@ const seedData: () => Database = () => ({
     { message: "Validation request: Daniela Mihaylova → Roma Foundations for Europe", forUser: "admin", ts: "2026-02-18T14:00:00", read: false },
     { message: "Access request from fieldops1 for \"Zeljko Jovanovic\"", forUser: "admin", ts: "2026-02-26T11:30:00", read: false },
   ],
-  nextId: 45,
+  nextId: 73,
 });
 
 function loadFromStorage(): Database | null {

@@ -2,8 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import { Shield, Bell, LogOut } from "lucide-react";
-import { Button } from "@/components/ui";
+import { Shield, Bell, LogOut, ChevronDown } from "lucide-react";
 
 export function Topbar() {
   const { currentUser, logout, db, updateDb } = useApp();
@@ -24,40 +23,44 @@ export function Topbar() {
   };
 
   return (
-    <header className="h-14 bg-accent border-b border-accent-hover px-5 flex items-center justify-between sticky top-0 z-50 shadow-md">
+    <header className="h-[56px] bg-gradient-to-r from-accent via-accent to-[#253f63] border-b border-white/10 px-5 flex items-center justify-between sticky top-0 z-50 shadow-lg shadow-accent/10">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center">
-          <Shield size={16} className="text-white" />
+        <div className="w-8 h-8 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/10">
+          <Shield size={15} className="text-white" />
         </div>
         <div>
-          <h1 className="text-sm font-bold tracking-tight leading-none text-white">RFE Database</h1>
-          <span className="text-[10px] text-white/60 tracking-wider uppercase">Roma Foundations for Europe</span>
+          <h1 className="text-[13px] font-bold tracking-tight leading-none text-white">RFE Database</h1>
+          <span className="text-[9px] text-white/50 tracking-[1px] uppercase font-medium">Roma Foundations for Europe</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
-          className="relative w-9 h-9 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors cursor-pointer"
+          className="relative w-8 h-8 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/15 transition-all duration-200 cursor-pointer"
           onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
         >
-          <Bell size={16} />
+          <Bell size={15} />
           {unread > 0 && (
-            <span className="absolute -top-1 -right-1 bg-amber text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">{unread}</span>
+            <span className="absolute -top-1 -right-1 bg-amber text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">{unread}</span>
           )}
         </button>
-        <div className="flex items-center gap-2 bg-white/10 border border-white/15 rounded-lg px-3 py-1.5">
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold text-white">
+        <div className="flex items-center gap-2 bg-white/8 border border-white/10 rounded-xl px-3 py-1.5 ml-1">
+          <div className="w-6 h-6 rounded-lg bg-white/15 flex items-center justify-center text-[10px] font-bold text-white">
             {currentUser.username[0].toUpperCase()}
           </div>
           <div className="leading-tight">
-            <div className="text-[13px] font-medium text-white">{currentUser.username}</div>
-            <div className="text-[10px] text-white/50 uppercase tracking-wider">
+            <div className="text-[12px] font-medium text-white">{currentUser.username}</div>
+            <div className="text-[9px] text-white/40 uppercase tracking-wider font-medium">
               {currentUser.role === "admin" ? "Admin" : currentUser.access}
             </div>
           </div>
+          <ChevronDown size={12} className="text-white/30 ml-1" />
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/60 hover:text-amber hover:bg-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-white/40 hover:text-amber hover:bg-white/10 transition-all duration-200 cursor-pointer"
+        >
           <LogOut size={14} />
-        </Button>
+        </button>
       </div>
     </header>
   );

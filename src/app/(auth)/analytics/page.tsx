@@ -124,12 +124,12 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Country Breakdown */}
         <Card>
-          <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">Geographic Distribution</h3>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">Geographic Distribution</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={countryData} layout="vertical">
               <XAxis type="number" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis dataKey="name" type="category" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} width={100} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
               <Bar dataKey="value" radius={[0, 6, 6, 0]}>
                 {countryData.map((c, i) => <Cell key={i} fill={c.color} />)}
               </Bar>
@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
 
         {/* Tag Cloud */}
         <Card>
-          <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">Focus Areas</h3>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">Focus Areas</h3>
           <div className="flex flex-wrap gap-2">
             {tagData.map((t) => {
               const size = Math.min(1 + t.value * 0.15, 2);
@@ -157,13 +157,13 @@ export default function AnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         {/* Activity Trend */}
         <Card>
-          <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">14-Day Activity Trend</h3>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">14-Day Activity Trend</h3>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={activityData}>
               <defs><linearGradient id="aag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a5f" stopOpacity={0.15} /><stop offset="100%" stopColor="#1e3a5f" stopOpacity={0} /></linearGradient></defs>
               <XAxis dataKey="day" tick={{ fill: "#3e5068", fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "#3e5068", fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
               <Area type="monotone" dataKey="actions" stroke="#1e3a5f" fill="url(#aag)" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -171,13 +171,13 @@ export default function AnalyticsPage() {
 
         {/* Growth Projection */}
         <Card>
-          <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">6-Month Growth Projection</h3>
+          <h3 className="text-[12px] font-semibold mb-4 text-text-2 uppercase tracking-wider">6-Month Growth Projection</h3>
           <ResponsiveContainer width="100%" height={180}>
             <AreaChart data={projections}>
               <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#047857" stopOpacity={0.15} /><stop offset="100%" stopColor="#047857" stopOpacity={0} /></linearGradient></defs>
               <XAxis dataKey="month" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} />
+              <Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #e2e8f0", borderRadius: 12, fontSize: 12, padding: "8px 12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }} />
               <Area type="monotone" dataKey="projected" stroke="#047857" fill="url(#pg)" strokeWidth={2} strokeDasharray="6 3" />
             </AreaChart>
           </ResponsiveContainer>
@@ -227,13 +227,13 @@ export default function AnalyticsPage() {
 
       {/* Predicted Connections */}
       <Card>
-        <h3 className="text-sm font-semibold mb-1 text-text-2 uppercase tracking-wider flex items-center gap-2">
+        <h3 className="text-[12px] font-semibold mb-1 text-text-2 uppercase tracking-wider flex items-center gap-2">
           <Brain size={14} /> Predicted Connections
         </h3>
         <p className="text-[12px] text-text-3 mb-4">AI-suggested links based on shared tags, geography, and mutual connections</p>
         <div className="space-y-3">
           {predictions.slice(0, 8).map((p, i) => (
-            <div key={i} className="rounded-lg border border-border bg-surface-2/30 p-3 hover:bg-surface-2/60 transition-colors">
+            <div key={i} className="rounded-xl border border-border/60 bg-surface-2/30 p-3.5 hover:bg-surface-2/60 transition-all duration-200">
               <div className="flex items-center gap-3 mb-2">
                 <div className="flex items-center gap-2">
                   <Badge variant={p.a.category as never} className="text-[9px]">{p.a.category}</Badge>

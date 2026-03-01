@@ -66,10 +66,10 @@ export default function GeoPage() {
               key={cs.country}
               onClick={() => setSelected(isSelected ? null : cs.country)}
               className={cn(
-                "rounded-xl border p-4 cursor-pointer transition-all",
+                "rounded-2xl border p-4 cursor-pointer transition-all duration-200",
                 isSelected
-                  ? "bg-accent text-white border-accent shadow-lg shadow-accent/20"
-                  : "bg-surface border-border hover:border-border-2 hover:shadow-md"
+                  ? "bg-accent text-white border-accent shadow-lg shadow-accent/15"
+                  : "bg-white/80 border-border/60 hover:border-border hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
               )}
             >
               <div className="flex items-center justify-between mb-3">
@@ -99,15 +99,18 @@ export default function GeoPage() {
 
       {/* Cross-Border Connections */}
       <Card className="mb-6">
-        <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider flex items-center gap-2">
-          <Globe size={14} /> Cross-Border Connections ({uniqueCross.size})
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-1 h-4 rounded-full bg-accent" />
+          <h3 className="text-[12px] font-semibold text-text-2 uppercase tracking-wider flex items-center gap-2">
+            <Globe size={14} /> Cross-Border Connections ({uniqueCross.size})
+          </h3>
+        </div>
         {uniqueCross.size === 0 ? (
           <p className="text-text-3 text-sm text-center py-4">No cross-border connections detected.</p>
         ) : (
           <div className="space-y-3">
             {Array.from(uniqueCross.values()).map((conn, i) => (
-              <div key={i} className="rounded-lg border border-border bg-surface-2/50 p-3">
+              <div key={i} className="rounded-xl border border-border/60 bg-surface-2/40 p-3 hover:bg-surface-2/70 transition-colors">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="text-lg">{COUNTRY_META[conn.from]?.flag}</span>
                   <div className="flex-1 h-px bg-border relative">
