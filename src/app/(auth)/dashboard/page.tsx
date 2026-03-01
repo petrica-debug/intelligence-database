@@ -10,17 +10,17 @@ export default function DashboardPage() {
   const { db, currentUser } = useApp();
 
   const catCounts = [
-    { name: "Persons", value: db.entries.filter((e) => e.category === "person").length, color: "#4f7cff" },
-    { name: "Companies", value: db.entries.filter((e) => e.category === "company").length, color: "#8b5cf6" },
-    { name: "Mobile", value: db.entries.filter((e) => e.category === "mobile").length, color: "#10b981" },
-    { name: "Addresses", value: db.entries.filter((e) => e.category === "address").length, color: "#f59e0b" },
-    { name: "Vehicles", value: db.entries.filter((e) => e.category === "vehicle").length, color: "#ef4444" },
+    { name: "Persons", value: db.entries.filter((e) => e.category === "person").length, color: "#1e3a5f" },
+    { name: "Companies", value: db.entries.filter((e) => e.category === "company").length, color: "#5b21b6" },
+    { name: "Mobile", value: db.entries.filter((e) => e.category === "mobile").length, color: "#047857" },
+    { name: "Addresses", value: db.entries.filter((e) => e.category === "address").length, color: "#b45309" },
+    { name: "Vehicles", value: db.entries.filter((e) => e.category === "vehicle").length, color: "#b91c1c" },
   ];
 
   const contextData = [
-    { name: "Confirmed", value: db.entries.filter((e) => e.context === "confirmed").length, color: "#10b981" },
-    { name: "Likely", value: db.entries.filter((e) => e.context === "likely").length, color: "#4f7cff" },
-    { name: "Rumor", value: db.entries.filter((e) => e.context === "rumor").length, color: "#f59e0b" },
+    { name: "Confirmed", value: db.entries.filter((e) => e.context === "confirmed").length, color: "#047857" },
+    { name: "Likely", value: db.entries.filter((e) => e.context === "likely").length, color: "#1e3a5f" },
+    { name: "Rumor", value: db.entries.filter((e) => e.context === "rumor").length, color: "#b45309" },
   ];
 
   const activityData = Array.from({ length: 7 }, (_, i) => {
@@ -37,7 +37,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <PageHeader title="Dashboard" description="Intelligence overview and analytics" />
+      <PageHeader title="Dashboard" description="Overview and analytics" />
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
         <StatCard icon={<Users size={22} />} value={catCounts[0].value} label="Persons" color="text-accent" />
@@ -54,7 +54,7 @@ export default function DashboardPage() {
           <ResponsiveContainer width="100%" height={180}>
             <PieChart><Pie data={catCounts} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value">
               {catCounts.map((c, i) => <Cell key={i} fill={c.color} />)}
-            </Pie><Tooltip contentStyle={{ background: "#181d2e", border: "1px solid #262d45", borderRadius: 8, fontSize: 12 }} /></PieChart>
+            </Pie><Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} /></PieChart>
           </ResponsiveContainer>
           <div className="flex flex-wrap gap-3 mt-2 justify-center">
             {catCounts.map((c) => (<div key={c.name} className="flex items-center gap-1.5 text-[11px] text-text-2"><div className="w-2 h-2 rounded-full" style={{ background: c.color }} />{c.name}</div>))}
@@ -63,13 +63,13 @@ export default function DashboardPage() {
         <Card>
           <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">Reliability Assessment</h3>
           <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={contextData}><XAxis dataKey="name" tick={{ fill: "#8891ad", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#8891ad", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#181d2e", border: "1px solid #262d45", borderRadius: 8, fontSize: 12 }} /><Bar dataKey="value" radius={[6, 6, 0, 0]}>{contextData.map((c, i) => <Cell key={i} fill={c.color} />)}</Bar></BarChart>
+            <BarChart data={contextData}><XAxis dataKey="name" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} /><Bar dataKey="value" radius={[6, 6, 0, 0]}>{contextData.map((c, i) => <Cell key={i} fill={c.color} />)}</Bar></BarChart>
           </ResponsiveContainer>
         </Card>
         <Card>
           <h3 className="text-sm font-semibold mb-4 text-text-2 uppercase tracking-wider">Activity Trend</h3>
           <ResponsiveContainer width="100%" height={180}>
-            <AreaChart data={activityData}><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4f7cff" stopOpacity={0.3} /><stop offset="100%" stopColor="#4f7cff" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="day" tick={{ fill: "#8891ad", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#8891ad", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#181d2e", border: "1px solid #262d45", borderRadius: 8, fontSize: 12 }} /><Area type="monotone" dataKey="actions" stroke="#4f7cff" fill="url(#ag)" strokeWidth={2} /></AreaChart>
+            <AreaChart data={activityData}><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e3a5f" stopOpacity={0.2} /><stop offset="100%" stopColor="#1e3a5f" stopOpacity={0} /></linearGradient></defs><XAxis dataKey="day" tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} /><YAxis tick={{ fill: "#3e5068", fontSize: 11 }} axisLine={false} tickLine={false} /><Tooltip contentStyle={{ background: "#ffffff", border: "1px solid #d0d9e6", borderRadius: 8, fontSize: 12 }} /><Area type="monotone" dataKey="actions" stroke="#1e3a5f" fill="url(#ag)" strokeWidth={2} /></AreaChart>
           </ResponsiveContainer>
         </Card>
       </div>

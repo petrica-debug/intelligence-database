@@ -64,7 +64,7 @@ export default function UsersPage() {
         <div className="overflow-x-auto"><table className="w-full"><thead><tr className="border-b border-border">{["User","Role","Access","Status","Actions"].map((h) => <th key={h} className="text-left text-[11px] font-medium text-text-3 uppercase tracking-wider pb-3 pr-4">{h}</th>)}</tr></thead>
         <tbody>{db.users.map((u) => (
           <tr key={u.username} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
-            <td className="py-3 pr-4"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-accent-muted flex items-center justify-center text-[11px] font-bold text-accent">{u.username[0].toUpperCase()}</div><span className="text-[13px] font-medium">{u.username}</span></div></td>
+            <td className="py-3 pr-4"><div className="flex items-center gap-2"><div className="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center text-[11px] font-bold">{u.username[0].toUpperCase()}</div><span className="text-[13px] font-medium">{u.username}</span></div></td>
             <td className="py-3 pr-4"><Badge variant={u.role === "admin" ? "info" : "default"}>{u.role}</Badge></td>
             <td className="py-3 pr-4">{u.role === "admin" ? <Badge variant="approved">full</Badge> : (
               <select value={u.access} onChange={(e) => changeAccess(u.username, e.target.value as AccessLevel)}

@@ -29,7 +29,6 @@ const DEFAULT_CONFIG = { icon: <Eye size={14} />, color: "text-text-2", bg: "bg-
 export default function TimelinePage() {
   const { db } = useApp();
 
-  // Group logs by date
   const grouped = new Map<string, typeof db.logs>();
   db.logs.forEach((l) => {
     const date = new Date(l.ts).toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
@@ -43,7 +42,6 @@ export default function TimelinePage() {
       <PageHeader title="Timeline" description="Chronological view of all system activity" />
 
       <div className="relative">
-        {/* Timeline line */}
         <div className="absolute left-[23px] top-0 bottom-0 w-px bg-border" />
 
         {Array.from(grouped.entries()).map(([date, logs]) => (

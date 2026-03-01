@@ -17,7 +17,7 @@ export function NotificationPanel() {
   return (
     <div
       id="notifPanel"
-      className="hidden fixed top-14 right-0 w-[380px] bg-surface border-l border-b border-border rounded-bl-xl z-[150] shadow-2xl shadow-black/30 max-h-[70vh] overflow-y-auto animate-scale-in"
+      className="hidden fixed top-14 right-0 w-[380px] bg-surface border-l border-b border-border rounded-bl-xl z-[150] shadow-xl max-h-[70vh] overflow-y-auto animate-scale-in"
     >
       <div className="flex items-center justify-between px-4 py-3 border-b border-border sticky top-0 bg-surface z-10">
         <h3 className="text-sm font-semibold flex items-center gap-2">

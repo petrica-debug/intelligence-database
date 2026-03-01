@@ -6,7 +6,7 @@ import { PageHeader, Card, Badge } from "@/components/ui";
 import { useMemo, useRef, useEffect, useCallback, useState } from "react";
 
 const COLORS: Record<string, string> = {
-  person: "#4f7cff", company: "#8b5cf6", mobile: "#10b981", address: "#f59e0b", vehicle: "#ef4444",
+  person: "#1e3a5f", company: "#5b21b6", mobile: "#047857", address: "#b45309", vehicle: "#b91c1c",
 };
 
 interface Node { id: number; x: number; y: number; vx: number; vy: number; name: string; category: string; }
@@ -63,13 +63,10 @@ export default function NetworkPage() {
     const ed = edgesRef.current;
     const cx = dimensions.w / 2, cy = dimensions.h / 2;
 
-    // Force simulation
     for (let i = 0; i < nodes.length; i++) {
-      // Center gravity
       nodes[i].vx += (cx - nodes[i].x) * 0.001;
       nodes[i].vy += (cy - nodes[i].y) * 0.001;
 
-      // Repulsion
       for (let j = i + 1; j < nodes.length; j++) {
         const dx = nodes[j].x - nodes[i].x;
         const dy = nodes[j].y - nodes[i].y;
@@ -82,7 +79,6 @@ export default function NetworkPage() {
       }
     }
 
-    // Spring force for edges
     ed.forEach((e) => {
       const s = nodes.find((n) => n.id === e.source);
       const t = nodes.find((n) => n.id === e.target);
@@ -96,7 +92,6 @@ export default function NetworkPage() {
       t.vy -= dy / dist * force;
     });
 
-    // Update positions
     nodes.forEach((n) => {
       if (dragRef.current.node?.id === n.id) return;
       n.vx *= 0.85; n.vy *= 0.85;
@@ -116,6 +111,10 @@ export default function NetworkPage() {
 
     ctx.clearRect(0, 0, dimensions.w, dimensions.h);
 
+    // Fill white background
+    ctx.fillStyle = "#f5f7fa";
+    ctx.fillRect(0, 0, dimensions.w, dimensions.h);
+
     // Draw edges
     ed.forEach((e) => {
       const s = nodes.find((n) => n.id === e.source);
@@ -124,7 +123,7 @@ export default function NetworkPage() {
       ctx.beginPath();
       ctx.moveTo(s.x, s.y);
       ctx.lineTo(t.x, t.y);
-      ctx.strokeStyle = hovered && (hovered.id === s.id || hovered.id === t.id) ? "rgba(79,124,255,0.5)" : "rgba(38,45,69,0.6)";
+      ctx.strokeStyle = hovered && (hovered.id === s.id || hovered.id === t.id) ? "rgba(30,58,95,0.5)" : "rgba(208,217,230,0.8)";
       ctx.lineWidth = hovered && (hovered.id === s.id || hovered.id === t.id) ? 2 : 1;
       ctx.stroke();
     });
@@ -134,16 +133,15 @@ export default function NetworkPage() {
       const isHovered = hovered?.id === n.id;
       const isConnected = hovered && ed.some((e) => (e.source === hovered.id && e.target === n.id) || (e.target === hovered.id && e.source === n.id));
       const radius = isHovered ? 14 : isConnected ? 11 : 8;
-      const color = COLORS[n.category] || "#4f7cff";
+      const color = COLORS[n.category] || "#1e3a5f";
 
       // Glow
       if (isHovered || isConnected) {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, radius + 8, 0, Math.PI * 2);
-        ctx.fillStyle = color.replace(")", ",0.15)").replace("rgb", "rgba").replace("#", "");
         const gradient = ctx.createRadialGradient(n.x, n.y, radius, n.x, n.y, radius + 8);
         gradient.addColorStop(0, color + "30");
         gradient.addColorStop(1, "transparent");
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, radius + 8, 0, Math.PI * 2);
         ctx.fillStyle = gradient;
         ctx.fill();
       }
@@ -160,7 +158,7 @@ export default function NetworkPage() {
       // Label
       if (isHovered || isConnected) {
         ctx.font = `${isHovered ? "bold 12px" : "11px"} Inter, sans-serif`;
-        ctx.fillStyle = "#eaedf3";
+        ctx.fillStyle = "#0f1b2d";
         ctx.textAlign = "center";
         ctx.fillText(n.name, n.x, n.y - radius - 8);
       }
@@ -234,7 +232,7 @@ export default function NetworkPage() {
           ref={canvasRef}
           width={dimensions.w}
           height={dimensions.h}
-          className="w-full bg-bg-2 rounded-xl"
+          className="w-full rounded-xl"
           onMouseMove={handleMouseMove}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}

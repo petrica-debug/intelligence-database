@@ -38,24 +38,24 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bg via-bg-2 to-surface relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e8edf5] via-[#f0f4f8] to-[#dce4ef] relative overflow-hidden">
       {/* Background grid pattern */}
-      <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, var(--color-text) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, #1e3a5f 1px, transparent 0)", backgroundSize: "40px 40px" }} />
 
       {/* Glow effects */}
-      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent/5 blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-purple/5 blur-[100px]" />
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-[#1e3a5f]/5 blur-[120px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-amber/5 blur-[100px]" />
 
       <div className="relative z-10 w-[420px] max-w-[90vw] animate-fade-in">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-accent-muted border border-accent/20 flex items-center justify-center mx-auto mb-4">
-            <Shield size={28} className="text-accent" />
+          <div className="w-16 h-16 rounded-2xl bg-accent text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-accent/20">
+            <Shield size={28} />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Intelligence Database</h1>
-          <p className="text-sm text-text-2 mt-1">Secure Information Management System</p>
+          <h1 className="text-2xl font-bold tracking-tight text-accent">Roma Foundations for Europe</h1>
+          <p className="text-sm text-text-2 mt-1">Secure Data Management System</p>
         </div>
 
-        <div className="bg-surface/80 backdrop-blur-xl border border-border rounded-2xl p-8">
+        <div className="bg-surface/90 backdrop-blur-xl border border-border rounded-2xl p-8 shadow-xl">
           <form onSubmit={submit} className="space-y-4">
             <Input
               id="user"
@@ -81,7 +81,7 @@ export function LoginForm() {
           </form>
         </div>
 
-        <div className="mt-6 bg-surface/60 backdrop-blur-sm border border-border/50 rounded-xl p-4">
+        <div className="mt-6 bg-surface/70 backdrop-blur-sm border border-border/50 rounded-xl p-4 shadow-sm">
           <h4 className="text-[10px] font-semibold text-text-3 uppercase tracking-wider mb-3">Quick Access - Demo Accounts</h4>
           <div className="space-y-1.5">
             {DEMO.map((d) => (
@@ -91,7 +91,7 @@ export function LoginForm() {
                 onClick={() => quickLogin(d.user, d.pass)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-accent-muted flex items-center justify-center text-[11px] font-bold text-accent">
+                  <div className="w-7 h-7 rounded-full bg-accent text-white flex items-center justify-center text-[11px] font-bold">
                     {d.user[0].toUpperCase()}
                   </div>
                   <div>

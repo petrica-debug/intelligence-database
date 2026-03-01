@@ -35,7 +35,7 @@ export default function ReverseSearchPage() {
             <input type="text" placeholder="Enter name, number, or keyword..." value={query}
               onChange={(e) => { setQuery(e.target.value); setSearched(false); }}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              className="w-full pl-10 pr-4 py-2.5 bg-bg-2 border border-border rounded-lg text-text text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 placeholder:text-text-3" />
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm outline-none focus:border-accent focus:ring-1 focus:ring-accent/20 placeholder:text-text-3" />
           </div>
           <Button onClick={handleSearch}><Search size={14} /> Search</Button>
         </div>

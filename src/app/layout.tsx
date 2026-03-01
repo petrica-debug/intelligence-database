@@ -4,8 +4,8 @@ import { AppProvider } from "@/context/AppContext";
 import { ToastProvider } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "IntelDB - Intelligence Database Platform",
-  description: "Secure Intelligence Information Management System",
+  title: "RFE - Roma Foundations for Europe Database",
+  description: "Roma Foundations for Europe - Secure Data Management System",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

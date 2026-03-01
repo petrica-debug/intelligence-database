@@ -7,7 +7,7 @@ import { createContext, useContext, useState, useCallback, type ReactNode } from
 /* ─── Card ─── */
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("rounded-xl border border-border bg-surface p-5 transition-colors", className)} {...props}>
+    <div className={cn("rounded-xl border border-border bg-surface p-5 transition-colors shadow-sm", className)} {...props}>
       {children}
     </div>
   );
@@ -17,7 +17,7 @@ export function GlassCard({ className, children, ...props }: React.HTMLAttribute
   return (
     <div
       className={cn(
-        "rounded-xl border border-border/60 bg-surface/80 backdrop-blur-sm p-5 transition-all hover:border-border-2",
+        "rounded-xl border border-border/60 bg-surface/90 backdrop-blur-sm p-5 transition-all hover:border-border-2 shadow-sm",
         className
       )}
       {...props}
@@ -29,10 +29,10 @@ export function GlassCard({ className, children, ...props }: React.HTMLAttribute
 
 /* ─── Button ─── */
 const buttonVariants: Record<string, string> = {
-  primary: "bg-accent text-white hover:bg-accent-hover shadow-lg shadow-accent/10",
+  primary: "bg-accent text-white hover:bg-accent-hover shadow-md shadow-accent/10",
   secondary: "bg-surface-2 text-text border border-border hover:bg-surface-3 hover:border-border-2",
   success: "bg-emerald text-white hover:bg-emerald/90",
-  warning: "bg-amber text-black hover:bg-amber/90",
+  warning: "bg-amber text-white hover:bg-amber/90",
   danger: "bg-red text-white hover:bg-red/90",
   ghost: "text-text-2 hover:text-text hover:bg-surface-2",
 };
@@ -113,8 +113,8 @@ export function Input({ label, className, id, ...props }: InputProps) {
       <input
         id={id}
         className={cn(
-          "w-full px-3.5 py-2.5 bg-bg-2 border border-border rounded-lg text-text text-sm outline-none transition-colors",
-          "focus:border-accent focus:ring-1 focus:ring-accent/30",
+          "w-full px-3.5 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm outline-none transition-colors",
+          "focus:border-accent focus:ring-1 focus:ring-accent/20",
           "placeholder:text-text-3",
           className
         )}
@@ -141,8 +141,8 @@ export function Select({ label, options, className, id, ...props }: SelectProps)
       <select
         id={id}
         className={cn(
-          "w-full px-3.5 py-2.5 bg-bg-2 border border-border rounded-lg text-text text-sm outline-none transition-colors",
-          "focus:border-accent focus:ring-1 focus:ring-accent/30",
+          "w-full px-3.5 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm outline-none transition-colors",
+          "focus:border-accent focus:ring-1 focus:ring-accent/20",
           className
         )}
         {...props}
@@ -171,8 +171,8 @@ export function Textarea({ label, className, id, ...props }: TextareaProps) {
       <textarea
         id={id}
         className={cn(
-          "w-full px-3.5 py-2.5 bg-bg-2 border border-border rounded-lg text-text text-sm outline-none transition-colors resize-y min-h-[100px]",
-          "focus:border-accent focus:ring-1 focus:ring-accent/30",
+          "w-full px-3.5 py-2.5 bg-surface-2 border border-border rounded-lg text-text text-sm outline-none transition-colors resize-y min-h-[100px]",
+          "focus:border-accent focus:ring-1 focus:ring-accent/20",
           "placeholder:text-text-3",
           className
         )}
@@ -195,9 +195,9 @@ export function Modal({ open, onClose, title, children, footer }: ModalProps) {
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div
-        className="relative bg-surface border border-border rounded-2xl w-[600px] max-w-[90vw] max-h-[85vh] overflow-hidden animate-scale-in"
+        className="relative bg-surface border border-border rounded-2xl w-[600px] max-w-[90vw] max-h-[85vh] overflow-hidden animate-scale-in shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
@@ -246,7 +246,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className="animate-slide-in bg-surface-2 border border-border rounded-xl px-4 py-3 shadow-xl flex items-center gap-3 min-w-[280px]"
+            className="animate-slide-in bg-surface border border-border rounded-xl px-4 py-3 shadow-lg flex items-center gap-3 min-w-[280px]"
           >
             <div className={cn("w-2 h-2 rounded-full", iconMap[t.type].replace("text-", "bg-"))} />
             <span className="text-sm text-text">{t.message}</span>

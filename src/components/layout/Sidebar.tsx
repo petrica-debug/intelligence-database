@@ -61,7 +61,7 @@ export function Sidebar({ pathname }: { pathname: string }) {
   const pending = db.pendingValidations.filter((v) => !v.resolved).length;
 
   return (
-    <aside className="w-[240px] bg-surface border-r border-border flex flex-col shrink-0 max-md:hidden">
+    <aside className="w-[240px] bg-surface border-r border-border flex flex-col shrink-0 max-md:hidden shadow-sm">
       <div className="flex-1 py-3 overflow-y-auto">
         <Label>Navigation</Label>
         {NAV.map((i) => <NLink key={i.href} item={i} pathname={pathname} />)}
@@ -74,7 +74,7 @@ export function Sidebar({ pathname }: { pathname: string }) {
               <div key={i.href} className="relative">
                 <NLink item={i} pathname={pathname} />
                 {i.href === "/admin/validations" && pending > 0 && (
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
                     {pending}
                   </span>
                 )}
