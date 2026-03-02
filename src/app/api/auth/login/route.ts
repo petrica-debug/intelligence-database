@@ -13,7 +13,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 200 });
+      return NextResponse.json({ error: error.message }, { status: 401 });
     }
 
     const { data: profile } = await supabase
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     if (profile && !profile.active) {
       await supabase.auth.signOut();
-      return NextResponse.json({ error: "Account disabled" }, { status: 200 });
+      return NextResponse.json({ error: "Account disabled" }, { status: 403 });
     }
 
     return NextResponse.json({ user: data.user, profile });

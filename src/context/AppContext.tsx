@@ -98,21 +98,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
         clearTimeout(timeoutId);
 
         if (res.ok) {
-          const { profile } = await res.json();
-          if (profile) {
+          const body = await res.json();
+          if (body.profile) {
             setCurrentUser({
-              username: profile.username,
+              username: body.profile.username,
               password: "",
-              role: profile.role,
-              access: profile.access,
-              clearance: profile.clearance,
-              active: profile.active,
-              fullName: profile.full_name,
-              department: profile.department,
+              role: body.profile.role,
+              access: body.profile.access,
+              clearance: body.profile.clearance,
+              active: body.profile.active,
+              fullName: body.profile.full_name,
+              department: body.profile.department,
             });
             return true;
           }
         }
+        // Non-ok response or missing profile — fall through to local auth
       } catch {
         // Supabase unavailable or timed out, fall through to localStorage auth
       }

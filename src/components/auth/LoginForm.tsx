@@ -35,6 +35,7 @@ export function LoginForm() {
       router.replace("/dashboard");
     } catch {
       setError("Login failed. Please try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -49,6 +50,8 @@ export function LoginForm() {
       updateDb((db) => { db.logs.unshift({ ts: new Date().toISOString(), user: u, action: "LOGIN", detail: "User logged in" }); });
       router.replace("/dashboard");
     } catch {
+      // ignore
+    } finally {
       setLoading(false);
     }
   };
