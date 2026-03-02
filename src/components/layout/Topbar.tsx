@@ -6,6 +6,7 @@ import { Bell, LogOut, Plus, Search, FileText, Share2, Zap } from "lucide-react"
 import { CLEARANCE_LABELS } from "@/types";
 import type { ClearanceLevel } from "@/types";
 import Link from "next/link";
+import { useMemo } from "react";
 
 export function Topbar() {
   const { currentUser, logout, db, updateDb } = useApp();
@@ -19,8 +20,8 @@ export function Topbar() {
 
   const clearance = (currentUser.clearance ?? 1) as ClearanceLevel;
   const totalLinks = db.entries.reduce((s, e) => s + e.linkedTo.length, 0);
-  const regions = new Set(db.entries.flatMap((e) => e.tags ?? [])).size;
-  const pending = db.pendingValidations.filter((v) => !v.resolved).length;
+  const regions = useMemo(() => new Set(db.entries.map((e) => e.country).filter(Boolean)).size, [db.entries]);
+  const signals = db.signals.length;
 
   const handleLogout = () => {
     updateDb((d) => {
@@ -41,29 +42,34 @@ export function Topbar() {
     { href: "/network", icon: Share2, label: "Network" },
   ];
 
+  const infoPills = [
+    { label: `${dayName}, ${monthDay}` },
+    { label: `${CLEARANCE_LABELS[clearance]} (L${clearance})` },
+    { label: `${db.entries.length} entities`, mono: true },
+    { label: `${regions} regions`, mono: true },
+    { label: `${totalLinks} links`, mono: true },
+  ];
+
   return (
-    <header className="bg-surface border-b border-border/60 px-6 py-3">
-      <div className="flex items-center justify-between">
-        {/* Info bar */}
-        <div className="flex items-center gap-3 text-[12px] text-text-2 font-medium">
-          <span>{dayName}, {monthDay}</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span>{CLEARANCE_LABELS[clearance]} (L{clearance})</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{db.entries.length} entities</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{regions} regions</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{totalLinks} links</span>
-          {pending > 0 && (
-            <span className="ml-1 inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2 py-0.5 rounded-full text-[11px]">
-              <Zap size={10} /> {pending} signal{pending !== 1 ? "s" : ""}
+    <header className="bg-surface border-b border-border/60">
+      {/* Info row */}
+      <div className="flex items-center justify-between px-6 pt-3 pb-2">
+        <div className="flex items-center gap-4 text-[12px] text-text-2 font-medium flex-1 min-w-0">
+          {infoPills.map((p, i) => (
+            <span key={i} className="flex items-center gap-4">
+              {i > 0 && <span className="w-1 h-1 rounded-full bg-border-2 -ml-2" />}
+              <span className={p.mono ? "font-mono" : ""}>{p.label}</span>
+            </span>
+          ))}
+          {signals > 0 && (
+            <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2.5 py-0.5 rounded-full text-[11px]">
+              <Zap size={10} /> {signals} signal{signals !== 1 ? "s" : ""}
             </span>
           )}
         </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-3">
+        {/* Right controls */}
+        <div className="flex items-center gap-3 shrink-0 ml-4">
           <button
             className="relative p-2 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
             onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
@@ -95,12 +101,12 @@ export function Topbar() {
       </div>
 
       {/* Action buttons */}
-      <div className="flex items-center gap-0.5 mt-2.5 -ml-2">
+      <div className="flex items-center justify-center gap-1 px-6 pb-2.5">
         {actions.map((a) => (
           <Link
             key={a.label}
             href={a.href}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-text/80 rounded-md hover:bg-surface-2 hover:text-text transition-colors"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-text/70 rounded-md hover:bg-surface-2 hover:text-text transition-colors"
           >
             <a.icon size={14} />
             {a.label}
