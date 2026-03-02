@@ -3,15 +3,14 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import type { Entry, SensitivityLevel } from "@/types";
 import { CLEARANCE_LABELS } from "@/types";
 import {
-  Users, Building2, Link2, Globe, Shield, Zap, Eye, Target,
-  ChevronRight, AlertTriangle, Crosshair, Radio, FileWarning,
-  FileText, Brain, Plus, Search, Share2, Bell, Clock,
-  ArrowRight, CheckCircle2, XCircle
+  Users, Building2, Link2, Globe, Zap,
+  ChevronRight, Radio, FileWarning,
+  FileText, Brain, Plus, Search, Share2, Bell,
+  CheckCircle2
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
@@ -19,10 +18,9 @@ import {
 
 /* ─── Palette ─── */
 const C = {
-  navy: "#1e3a5f", blue: "#3b82f6",
-  purple: "#7c3aed", emerald: "#059669",
-  amber: "#d97706", red: "#dc2626",
-  cyan: "#0891b2", slate: "#64748b",
+  blue: "#3b82f6", purple: "#7c3aed",
+  emerald: "#059669", amber: "#d97706",
+  red: "#dc2626", cyan: "#0891b2",
 };
 
 const tooltipStyle = {
@@ -31,6 +29,14 @@ const tooltipStyle = {
   fontSize: 11, padding: "8px 14px",
   boxShadow: "0 8px 32px rgba(0,0,0,0.08)",
 };
+
+const PIE_COLORS = [
+  "hsl(217, 92%, 60%)",
+  "hsl(265, 78%, 60%)",
+  "hsl(152, 72%, 46%)",
+  "hsl(174, 72%, 44%)",
+  "hsl(24, 100%, 58%)",
+];
 
 /* ─── Animated Counter ─── */
 function Num({ value, duration = 700 }: { value: number; duration?: number }) {
@@ -48,39 +54,39 @@ function Num({ value, duration = 700 }: { value: number; duration?: number }) {
   return <>{d}</>;
 }
 
-/* ─── Sparkline ─── */
-function Spark({ data, color, h = 32 }: { data: number[]; color: string; h?: number }) {
-  const max = Math.max(...data, 1), min = Math.min(...data), range = max - min || 1, w = 80;
-  const pts = data.map((v, i) => `${(i / (data.length - 1)) * w},${h - ((v - min) / range) * (h - 4) - 2}`).join(" ");
-  const id = `sp-${color.replace("#", "")}`;
+/* ─── Sparkline (Lovable-style) ─── */
+function Spark({ data, color, label }: { data: number[]; color: string; label: string }) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data, 1);
+  const points = data
+    .map((v, i) => `${(i / (data.length - 1)) * 100},${100 - (v / max) * 80}`)
+    .join(" ");
+  const id = `spark-${label.replace(/\s/g, "")}`;
   return (
-    <svg width={w} height={h} className="overflow-visible">
-      <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.25} /><stop offset="100%" stopColor={color} stopOpacity={0} /></linearGradient></defs>
-      <polygon fill={`url(#${id})`} points={`0,${h} ${pts} ${w},${h}`} />
-      <polyline fill="none" stroke={color} strokeWidth={1.5} points={pts} strokeLinejoin="round" strokeLinecap="round" />
+    <svg viewBox="0 0 100 100" className="w-28 h-16 opacity-50 group-hover:opacity-80 transition-opacity" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+          <stop offset="100%" stopColor={color} stopOpacity={1} />
+        </linearGradient>
+      </defs>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={`url(#${id})`}
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-/* ─── Card Shell ─── */
-function B({ children, className, dark, glow }: { children: React.ReactNode; className?: string; dark?: boolean; glow?: string }) {
-  return (
-    <div className={cn(
-      "relative rounded-2xl border overflow-hidden transition-all duration-300",
-      dark ? "bg-gradient-to-br from-[#0f1b2d] to-[#1e3a5f] border-white/10 text-white"
-        : "bg-white/80 backdrop-blur-sm border-border/40 hover:border-border/60 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]",
-      className
-    )}>
-      {glow && <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none", glow)} />}
-      <div className="relative z-10 p-7 h-full">{children}</div>
-    </div>
-  );
-}
-
+/* ─── Section Header ─── */
 function SH({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-5">
-      <h3 className="text-[11px] font-semibold text-text-3 uppercase tracking-[0.1em]">{children}</h3>
+      <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest">{children}</h3>
       {action}
     </div>
   );
@@ -161,7 +167,7 @@ export default function DashboardPage() {
   const unreadNotifs = db.notifications.filter((n) => n.forUser === currentUser?.username && !n.read).length;
   const totalActionItems = pendingValidations + newInferences + unreadNotifs;
 
-  /* ── Unified intelligence feed (reports + inferences, sorted by date) ── */
+  /* ── Intelligence feed ── */
   const intelligenceFeed = useMemo(() => {
     const items: { type: "report" | "inference"; date: string; data: unknown }[] = [];
     db.reports.filter(r => canView(r.overallSensitivity)).forEach(r => {
@@ -177,160 +183,142 @@ export default function DashboardPage() {
     standard: "text-emerald", sensitive: "text-amber", confidential: "text-red", "top-secret": "text-purple",
   };
 
-  return (
-    <div className="animate-fade-in space-y-10">
+  const domainGradients = ["gradient-blue", "gradient-purple", "gradient-teal", "gradient-orange", "gradient-green"];
 
-      {/* ═══ SECTION 1: Info Bar + Quick Actions ═══ */}
-      <div>
-        <div className="flex items-center gap-3 text-[13px] text-text-3 mb-4">
+  return (
+    <div className="animate-fade-in">
+
+      {/* ═══ INFO BAR ═══ */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 text-xs text-text-3 font-medium mb-3">
           <span>{today}</span>
-          <span className="text-border">&middot;</span>
-          <span className="flex items-center gap-1.5"><Shield size={12} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
-          <span className="text-border">&middot;</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
+          <span>{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
           <span>{entries.length} entities</span>
-          <span className="text-border">&middot;</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
           <span>{coverage.length} regions</span>
-          <span className="text-border">&middot;</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
           <span>{totalLinks} links</span>
           {db.signals.length > 0 && (
-            <>
-              <span className="text-border">&middot;</span>
-              <span className="text-amber flex items-center gap-1.5 font-semibold"><Radio size={11} className="animate-pulse" />{db.signals.length} signal{db.signals.length !== 1 && "s"}</span>
-            </>
+            <span className="ml-2 flex items-center gap-1 text-amber font-bold bg-amber/10 px-2.5 py-1 rounded-full">
+              <Zap size={12} /> {db.signals.length} signal{db.signals.length !== 1 && "s"}
+            </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <button onClick={() => router.push("/new-entry")}
-            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
-            <Plus size={15} /> New Entry
-          </button>
-          <button onClick={() => router.push("/search")}
-            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
-            <Search size={15} /> Search
-          </button>
-          <button onClick={() => router.push("/reports/new")}
-            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
-            <FileText size={15} /> New Report
-          </button>
-          <button onClick={() => router.push("/network")}
-            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
-            <Share2 size={15} /> Network
-          </button>
+        <div className="flex items-center gap-1">
+          {[
+            { icon: Plus, label: "New Entry", href: "/new-entry" },
+            { icon: Search, label: "Search", href: "/search" },
+            { icon: FileText, label: "New Report", href: "/reports/new" },
+            { icon: Share2, label: "Network", href: "/network" },
+          ].map((a) => (
+            <button key={a.label} onClick={() => router.push(a.href)}
+              className="flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-text rounded-lg hover:bg-surface-3 transition-colors cursor-pointer">
+              <a.icon size={15} /> {a.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* ═══ SECTION 2: Command Strip — 4 KPIs ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <B className="bg-gradient-to-br from-accent/[0.04] to-transparent">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
-              <Users size={24} className="text-accent" />
+      {/* ═══ STATS ROW ═══ */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {[
+          { icon: Users, value: persons.length, label: "Key Actors", gradient: "gradient-blue", glow: "shadow-glow-blue", color: C.blue, sparkData: sparkEntities.slice(0, -2).concat([persons.length]) },
+          { icon: Building2, value: orgs.length, label: "Organizations", gradient: "gradient-purple", glow: "shadow-glow-purple", color: C.purple, sparkData: sparkEntities.slice(0, -2).concat([orgs.length]) },
+          { icon: Link2, value: totalLinks, label: "Network Links", gradient: "gradient-teal", glow: "shadow-glow-green", color: C.cyan, sparkData: sparkLinks },
+          { icon: Globe, value: coverage.length, label: "Regions Covered", gradient: "gradient-green", glow: "shadow-glow-green", color: C.emerald, sparkData: [5, 7, 8, 9, 10, 12, coverage.length] },
+        ].map((stat) => (
+          <div key={stat.label} className="bg-surface rounded-xl border border-border/60 p-5 flex items-start justify-between shadow-card hover:shadow-card-hover transition-all duration-300 group animate-fade-in">
+            <div className="flex flex-col gap-2.5">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-shadow duration-300`}>
+                <stat.icon size={20} />
+              </div>
+              <span className="text-3xl font-extrabold text-text font-mono tracking-tight"><Num value={stat.value} /></span>
+              <span className="text-[11px] text-text-3 uppercase tracking-widest font-semibold">{stat.label}</span>
             </div>
-            <Spark data={sparkEntities.slice(0, -2).concat([persons.length])} color={C.navy} h={36} />
+            <Spark data={stat.sparkData} color={stat.color} label={stat.label} />
           </div>
-          <div className="text-3xl font-bold tracking-tight"><Num value={persons.length} /></div>
-          <div className="text-[13px] text-text-3 font-medium mt-1">Key Actors</div>
-        </B>
-        <B className="bg-gradient-to-br from-purple/[0.04] to-transparent">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-14 h-14 rounded-2xl bg-purple/10 flex items-center justify-center">
-              <Building2 size={24} className="text-purple" />
-            </div>
-            <Spark data={sparkEntities.slice(0, -2).concat([orgs.length])} color={C.purple} h={36} />
-          </div>
-          <div className="text-3xl font-bold tracking-tight"><Num value={orgs.length} /></div>
-          <div className="text-[13px] text-text-3 font-medium mt-1">Organizations</div>
-        </B>
-        <B className="bg-gradient-to-br from-cyan/[0.04] to-transparent">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center">
-              <Link2 size={24} className="text-cyan" />
-            </div>
-            <Spark data={sparkLinks} color={C.cyan} h={36} />
-          </div>
-          <div className="text-3xl font-bold tracking-tight"><Num value={totalLinks} /></div>
-          <div className="text-[13px] text-text-3 font-medium mt-1">Network Links</div>
-        </B>
-        <B className="bg-gradient-to-br from-emerald/[0.04] to-transparent">
-          <div className="flex items-start justify-between mb-5">
-            <div className="w-14 h-14 rounded-2xl bg-emerald/10 flex items-center justify-center">
-              <Globe size={24} className="text-emerald" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold tracking-tight"><Num value={coverage.length} /></div>
-          <div className="text-[13px] text-text-3 font-medium mt-1">Regions Covered</div>
-        </B>
+        ))}
       </div>
 
-      {/* ═══ SECTION 3: Priority Zone — Action Center + Watch Targets ═══ */}
-      <div className="grid grid-cols-12 gap-6">
+      {/* ═══ MIDDLE ROW: Attention + Watch Targets ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
 
-        {/* Action Center */}
-        <B className="col-span-12 md:col-span-5">
-          <SH action={
-            totalActionItems > 0 ? <span className="text-[10px] font-bold text-amber bg-amber/8 px-2 py-0.5 rounded-full">{totalActionItems} pending</span> : undefined
-          }>Requires Your Attention</SH>
+        {/* Attention Panel */}
+        <div className="bg-surface rounded-xl border border-border/60 shadow-card animate-fade-in">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest">Requires Your Attention</h3>
+            {totalActionItems > 0 && (
+              <span className="text-xs font-bold text-accent px-2.5 py-1 rounded-full bg-accent/10">{totalActionItems} pending</span>
+            )}
+          </div>
           {totalActionItems === 0 ? (
-            <div className="flex flex-col items-center py-10 text-center">
+            <div className="flex flex-col items-center py-10 text-center px-5 pb-5">
               <CheckCircle2 size={28} className="text-emerald/50 mb-3" />
-              <p className="text-[13px] text-text-3">All caught up. No pending actions.</p>
+              <p className="text-xs text-text-3">All caught up. No pending actions.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-border/60">
               {pendingValidations > 0 && (
                 <button onClick={() => router.push("/admin/validations")}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-red/10 bg-red/[0.02] hover:bg-red/[0.05] hover:border-red/20 transition-all cursor-pointer text-left group">
-                  <div className="w-11 h-11 rounded-xl bg-red/8 flex items-center justify-center shrink-0">
-                    <FileWarning size={18} className="text-red" />
+                  className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-surface-3/40 transition-all duration-200 group cursor-pointer">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-orange">
+                    <FileWarning size={16} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-text group-hover:text-red transition-colors">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</div>
-                    <div className="text-[11px] text-text-3 mt-0.5">Awaiting admin review</div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-text">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</p>
+                    <p className="text-xs text-text-3 mt-0.5">Awaiting admin review</p>
                   </div>
-                  <ChevronRight size={16} className="text-text-3 group-hover:text-red shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3/40 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
                 </button>
               )}
               {newInferences > 0 && (
                 <button onClick={() => router.push("/intelligence")}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-purple/10 bg-purple/[0.02] hover:bg-purple/[0.05] hover:border-purple/20 transition-all cursor-pointer text-left group">
-                  <div className="w-11 h-11 rounded-xl bg-purple/8 flex items-center justify-center shrink-0">
-                    <Brain size={18} className="text-purple" />
+                  className={cn("w-full flex items-center gap-4 px-5 py-3.5 hover:bg-surface-3/40 transition-all duration-200 group cursor-pointer",
+                    newInferences > 5 && "bg-emerald/[0.04]")}>
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-green">
+                    <Brain size={16} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-text group-hover:text-purple transition-colors">{newInferences} AI inference{newInferences !== 1 && "s"} to review</div>
-                    <div className="text-[11px] text-text-3 mt-0.5">New connections detected</div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className={cn("text-sm font-semibold", newInferences > 5 ? "text-emerald" : "text-text")}>{newInferences} AI inference{newInferences !== 1 && "s"} to review</p>
+                    <p className="text-xs text-text-3 mt-0.5">New connections detected</p>
                   </div>
-                  <ChevronRight size={16} className="text-text-3 group-hover:text-purple shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3/40 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
                 </button>
               )}
               {unreadNotifs > 0 && (
                 <button onClick={() => {}}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-amber/10 bg-amber/[0.02] hover:bg-amber/[0.05] hover:border-amber/20 transition-all cursor-pointer text-left group">
-                  <div className="w-11 h-11 rounded-xl bg-amber/8 flex items-center justify-center shrink-0">
-                    <Bell size={18} className="text-amber" />
+                  className="w-full flex items-center gap-4 px-5 py-3.5 hover:bg-surface-3/40 transition-all duration-200 group cursor-pointer">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-purple">
+                    <Bell size={16} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-text group-hover:text-amber transition-colors">{unreadNotifs} unread notification{unreadNotifs !== 1 && "s"}</div>
-                    <div className="text-[11px] text-text-3 mt-0.5">Signal alerts and updates</div>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-text">{unreadNotifs} unread notification{unreadNotifs !== 1 && "s"}</p>
+                    <p className="text-xs text-text-3 mt-0.5">Signal alerts and updates</p>
                   </div>
-                  <ChevronRight size={16} className="text-text-3 group-hover:text-amber shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3/40 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
                 </button>
               )}
             </div>
           )}
-        </B>
+        </div>
 
         {/* Watch Targets */}
-        <B className="col-span-12 md:col-span-7 border-amber/15 bg-gradient-to-br from-amber/[0.02] to-transparent">
-          <SH action={
-            <span className="flex items-center gap-1 text-[10px] text-amber font-semibold">
-              <Radio size={10} className="animate-pulse-glow" /> {db.signals.length} Active
+        <div className="bg-surface rounded-xl border border-border/60 p-5 shadow-card animate-fade-in">
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full gradient-orange flex items-center justify-center animate-pulse-glow">
+                <Radio size={10} className="text-white" />
+              </div>
+              <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest">Watch Targets</h3>
+            </div>
+            <span className="text-xs font-bold text-emerald px-2.5 py-1 rounded-full bg-emerald/10">
+              {db.signals.length} Active
             </span>
-          }>
-            <span className="flex items-center gap-2"><Crosshair size={12} className="text-amber" /> Watch Targets</span>
-          </SH>
+          </div>
           {db.signals.length === 0 ? (
-            <p className="text-[13px] text-text-3 py-10 text-center">No active watch targets</p>
+            <p className="text-xs text-text-3 py-10 text-center">No active watch targets</p>
           ) : (
             <div className="space-y-3">
               {db.signals.map((sig) => {
@@ -343,194 +331,171 @@ export default function DashboardPage() {
                 }), 1);
                 return (
                   <div key={sig.entityId} onClick={() => go(sig.entityId)}
-                    className="flex items-center gap-4 p-4 rounded-xl bg-amber/[0.03] border border-amber/10 hover:border-amber/25 transition-all cursor-pointer group">
-                    <div className="w-11 h-11 rounded-xl bg-amber/10 flex items-center justify-center shrink-0">
-                      <Radio size={18} className="text-amber animate-pulse-glow" />
+                    className="flex items-center gap-4 bg-surface-3/30 rounded-xl p-4 border border-border/40 cursor-pointer hover:border-border/60 transition-all group">
+                    <div className="w-10 h-10 rounded-xl gradient-orange flex items-center justify-center shrink-0 shadow-glow-orange">
+                      <Radio size={16} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[13px] font-semibold group-hover:text-amber transition-colors truncate">{entity.name}</span>
-                        <Badge variant={entity.category as never} className="text-[9px]">{entity.category}</Badge>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-bold text-text group-hover:text-accent transition-colors">{entity.name}</span>
+                        <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full uppercase">{entity.category}</span>
                       </div>
-                      <div className="w-full h-2 bg-amber/10 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-amber/60 to-amber transition-all duration-700"
-                          style={{ width: `${(score / maxScore) * 100}%` }} />
+                      <div className="w-full bg-border rounded-full h-2 overflow-hidden">
+                        <div className="gradient-green rounded-full h-2 transition-all duration-1000"
+                          style={{ width: `${Math.min((score / maxScore) * 100, 100)}%` }} />
                       </div>
                     </div>
-                    <div className="text-right shrink-0 ml-3">
-                      <div className="text-[18px] font-bold text-amber tabular-nums">{score}</div>
-                      <div className="text-[9px] text-text-3 font-medium uppercase">Influence</div>
+                    <div className="text-right shrink-0 pl-3">
+                      <span className="text-3xl font-extrabold text-text font-mono">{score}</span>
+                      <p className="text-[10px] text-text-3 uppercase tracking-widest font-semibold">Influence</p>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </B>
+        </div>
       </div>
 
-      {/* ═══ SECTION 4: Intelligence Overview — Key Actors + Coverage + Composition ═══ */}
-      <div className="grid grid-cols-12 gap-6">
+      {/* ═══ ANALYTICS ROW ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
         {/* Key Actors */}
-        <B className="col-span-12 md:col-span-5">
+        <div className="bg-surface rounded-xl border border-border/60 p-5 shadow-card animate-fade-in">
           <SH action={
-            <button onClick={() => router.push("/persons")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">View all ({persons.length})</button>
+            <button onClick={() => router.push("/persons")} className="text-xs text-accent hover:underline font-semibold cursor-pointer">View all ({persons.length})</button>
           }>Key Actors &mdash; Top 3</SH>
-          <div className="space-y-2.5">
+          <div className="space-y-4">
             {keyActors.map((e, i) => {
               const score = influence(e);
-              const hasSig = db.signals.some((s) => s.entityId === e.id);
               const maxScore = influence(keyActors[0]);
               return (
-                <div key={e.id} onClick={() => go(e.id)}
-                  className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
-                  <span className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-bold shrink-0",
-                    i === 0 ? "bg-gradient-to-br from-amber to-amber/60 text-white shadow-sm shadow-amber/20" :
-                    i === 1 ? "bg-gradient-to-br from-slate to-slate/60 text-white" :
-                    i === 2 ? "bg-gradient-to-br from-amber/70 to-amber/40 text-white" :
+                <div key={e.id} onClick={() => go(e.id)} className="flex items-center gap-3 group cursor-pointer">
+                  <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shrink-0",
+                    i === 0 ? "gradient-blue shadow-glow-blue text-white" :
+                    i === 1 ? "gradient-purple text-white" :
                     "bg-surface-3 text-text-3"
                   )}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold group-hover:text-accent transition-colors truncate">{e.name}</span>
-                      {hasSig && <span className="px-1.5 py-0.5 rounded bg-amber/10 text-amber text-[9px] font-bold leading-none animate-pulse-glow">SIGNAL</span>}
-                    </div>
-                    <div className="text-[11px] text-text-3 mt-1">{e.country}</div>
+                    <p className="text-sm font-semibold text-text truncate group-hover:text-accent transition-colors">{e.name}</p>
+                    <p className="text-xs text-text-3">{e.country}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="w-20">
-                      <div className="w-full h-2.5 bg-surface-3 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-[#1e3a5f] to-[#3b82f6] transition-all duration-700"
-                          style={{ width: `${(score / maxScore) * 100}%` }} />
-                      </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-20 bg-border rounded-full h-2.5 overflow-hidden">
+                      <div className={cn("rounded-full h-2.5 transition-all duration-500",
+                        i === 0 ? "gradient-blue" : i === 1 ? "gradient-purple" : "gradient-teal"
+                      )} style={{ width: `${(score / maxScore) * 100}%` }} />
                     </div>
-                    <span className={cn("text-[15px] font-bold w-9 text-right tabular-nums",
-                      score >= 120 ? "text-red" : score >= 80 ? "text-amber" : "text-text-2"
-                    )}>{score}</span>
+                    <span className="text-sm font-extrabold text-accent font-mono w-8 text-right">{score}</span>
                   </div>
                 </div>
               );
             })}
           </div>
-        </B>
+        </div>
 
-        {/* Regional Coverage */}
-        <B className="col-span-12 md:col-span-4">
+        {/* Top Regions */}
+        <div className="bg-surface rounded-xl border border-border/60 p-5 shadow-card animate-fade-in">
           <SH action={
-            <button onClick={() => router.push("/geo")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">All {coverage.length} regions</button>
+            <button onClick={() => router.push("/geo")} className="text-xs text-accent hover:underline font-semibold cursor-pointer">All {coverage.length} regions</button>
           }>Top Regions</SH>
           <div className="space-y-4">
-            {coverage.slice(0, 3).map(([country, data]) => {
-              const confRate = data.total > 0 ? Math.round((data.confirmed / data.total) * 100) : 0;
+            {coverage.slice(0, 3).map(([country, data], i) => {
               const shortName = country === "International" ? "Int'l" : country === "Czech Republic" ? "Czech Rep." : country === "North Macedonia" ? "N. Macedonia" : country;
+              const maxTotal = coverage[0][1].total;
               return (
                 <div key={country} className="flex items-center gap-3">
-                  <div className="w-24 truncate text-[13px] font-medium text-text-2">{shortName}</div>
-                  <div className="flex-1">
-                    <div className="h-3.5 bg-surface-3 rounded-full overflow-hidden flex">
-                      <div className="h-full bg-accent rounded-l-full" style={{ width: `${(data.persons / data.total) * 100}%` }} />
-                      <div className="h-full bg-purple" style={{ width: `${(data.orgs / data.total) * 100}%` }} />
-                      <div className="h-full bg-amber/50" style={{ width: `${((data.total - data.persons - data.orgs) / data.total) * 100}%` }} />
-                    </div>
+                  <span className="text-sm text-text w-20 font-semibold truncate">{shortName}</span>
+                  <div className="flex-1 bg-border/60 rounded-full h-3 overflow-hidden">
+                    <div className={cn("rounded-full h-3 transition-all duration-700",
+                      i === 0 ? "gradient-blue" : i === 1 ? "gradient-purple" : "gradient-teal"
+                    )} style={{ width: `${(data.total / maxTotal) * 100}%` }} />
                   </div>
-                  <span className="text-[13px] font-bold text-text w-7 text-right tabular-nums">{data.total}</span>
-                  <span className={cn("text-[12px] font-semibold w-10 text-right tabular-nums",
-                    confRate >= 80 ? "text-emerald" : confRate >= 50 ? "text-amber" : "text-red"
-                  )}>{confRate}%</span>
+                  <span className="text-xs font-extrabold text-text font-mono w-8 text-right">{data.total}</span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center gap-4 mt-5 pt-3.5 border-t border-border/30">
-            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-accent" />Persons</span>
-            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-purple" />Orgs</span>
-            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-amber/50" />Other</span>
-            <span className="ml-auto text-[10px] text-text-3">% = verified</span>
-          </div>
-        </B>
+        </div>
 
         {/* Entity Composition */}
-        <B className="col-span-12 md:col-span-3">
-          <SH>Entity Composition</SH>
-          <div className="relative">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <defs>
-                  {Object.entries(CAT_GRADIENTS).map(([k, [c1, c2]], i) => (
-                    <linearGradient key={k} id={`cg${i}`} x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor={c1} /><stop offset="100%" stopColor={c2} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <Pie
-                  data={[
-                    { name: "Persons", value: persons.length },
-                    { name: "Organizations", value: orgs.length },
-                    { name: "Addresses", value: entries.filter((e) => e.category === "address").length },
-                    { name: "Contacts", value: entries.filter((e) => e.category === "mobile").length },
-                    { name: "Vehicles", value: entries.filter((e) => e.category === "vehicle").length },
-                  ]}
-                  cx="50%" cy="50%" innerRadius={55} outerRadius={85}
-                  paddingAngle={3} dataKey="value" strokeWidth={0} cornerRadius={4}
-                >
-                  {Object.keys(CAT_GRADIENTS).map((_, i) => <Cell key={i} fill={`url(#cg${i})`} />)}
-                </Pie>
-                <Tooltip contentStyle={tooltipStyle} />
-              </PieChart>
-            </ResponsiveContainer>
-            {/* Center label */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <div className="text-[24px] font-bold text-text">{entries.length}</div>
-                <div className="text-[9px] text-text-3 uppercase font-semibold tracking-wider">Total</div>
+        <div className="bg-surface rounded-xl border border-border/60 p-5 shadow-card animate-fade-in">
+          <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest mb-4">Entity Composition</h3>
+          <div className="flex items-center justify-center">
+            <div className="relative w-48 h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: "Persons", value: persons.length },
+                      { name: "Organizations", value: orgs.length },
+                      { name: "Addresses", value: entries.filter((e) => e.category === "address").length },
+                      { name: "Contacts", value: entries.filter((e) => e.category === "mobile").length },
+                      { name: "Vehicles", value: entries.filter((e) => e.category === "vehicle").length },
+                    ]}
+                    cx="50%" cy="50%" innerRadius={52} outerRadius={80}
+                    paddingAngle={3} dataKey="value" stroke="none" cornerRadius={4}
+                  >
+                    {PIE_COLORS.map((color, i) => <Cell key={i} fill={color} />)}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-extrabold text-text font-mono"><Num value={entries.length} /></span>
+                <span className="text-[10px] text-text-3 uppercase tracking-widest font-semibold">Total</span>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center mt-3">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 justify-center">
             {[
-              { label: "Persons", color: C.navy, val: persons.length },
-              { label: "Orgs", color: C.purple, val: orgs.length },
-              { label: "Addr", color: C.amber, val: entries.filter((e) => e.category === "address").length },
-              { label: "Mobile", color: C.emerald, val: entries.filter((e) => e.category === "mobile").length },
-              { label: "Vehicle", color: C.red, val: entries.filter((e) => e.category === "vehicle").length },
+              { label: "Persons", color: PIE_COLORS[0], val: persons.length },
+              { label: "Orgs", color: PIE_COLORS[1], val: orgs.length },
+              { label: "Addr", color: PIE_COLORS[2], val: entries.filter((e) => e.category === "address").length },
+              { label: "Mobile", color: PIE_COLORS[3], val: entries.filter((e) => e.category === "mobile").length },
+              { label: "Vehicle", color: PIE_COLORS[4], val: entries.filter((e) => e.category === "vehicle").length },
             ].map((c) => (
-              <span key={c.label} className="flex items-center gap-1.5 text-[11px] text-text-3">
-                <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />{c.label} <b className="text-text-2">{c.val}</b>
-              </span>
+              <div key={c.label} className="flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded-sm" style={{ backgroundColor: c.color }} />
+                <span className="text-[11px] text-text-3 font-medium">
+                  {c.label} <span className="font-bold text-text">{c.val}</span>
+                </span>
+              </div>
             ))}
           </div>
-        </B>
+        </div>
       </div>
 
-      {/* ═══ SECTION 5: Intelligence Feed + Domain Profile ═══ */}
-      <div className="grid grid-cols-12 gap-6">
+      {/* ═══ BOTTOM ROW ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
 
-        {/* Unified Intelligence Feed */}
-        <B className="col-span-12 md:col-span-7">
-          <SH action={
-            <div className="flex items-center gap-3">
-              <button onClick={() => router.push("/reports")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">Reports</button>
-              <span className="text-text-3 text-[10px]">/</span>
-              <button onClick={() => router.push("/intelligence")} className="text-[10px] text-purple font-medium hover:underline cursor-pointer">Inferences</button>
+        {/* Latest Intelligence */}
+        <div className="bg-surface rounded-xl border border-border/60 shadow-card animate-fade-in">
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest">Latest Intelligence</h3>
+            <div className="flex gap-1 bg-surface-3/60 rounded-lg p-0.5">
+              <button onClick={() => router.push("/reports")} className="text-xs font-semibold text-white bg-accent px-3 py-1 rounded-md cursor-pointer">Reports</button>
+              <button onClick={() => router.push("/intelligence")} className="text-xs font-medium text-text-3 px-3 py-1 rounded-md hover:text-text transition-colors cursor-pointer">Inferences</button>
             </div>
-          }>Latest Intelligence</SH>
+          </div>
           {intelligenceFeed.length === 0 ? (
-            <p className="text-[12px] text-text-3 py-6 text-center">No recent intelligence</p>
+            <p className="text-xs text-text-3 py-6 text-center px-5 pb-5">No recent intelligence</p>
           ) : (
-            <div className="space-y-2.5">
-              {intelligenceFeed.map((item, idx) => {
+            <div className="divide-y divide-border/50">
+              {intelligenceFeed.map((item) => {
                 if (item.type === "report") {
                   const report = item.data as typeof db.reports[0];
                   return (
                     <div key={`r-${report.id}`} onClick={() => router.push("/reports")}
-                      className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
-                      <div className="w-10 h-10 rounded-xl bg-accent/8 flex items-center justify-center shrink-0">
-                        <FileText size={17} className="text-accent" />
+                      className="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-3/30 transition-colors group cursor-pointer">
+                      <div className="w-9 h-9 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
+                        <FileText size={15} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold group-hover:text-accent transition-colors truncate">{report.title}</div>
-                        <div className="text-[11px] text-text-3 mt-1">{report.createdBy} &middot; {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &middot; {report.sections.length} sections</div>
+                        <p className="text-sm font-semibold text-text group-hover:text-accent transition-colors truncate">{report.title}</p>
+                        <p className="text-xs text-text-3 mt-0.5">
+                          {report.createdBy} · {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        </p>
                       </div>
                       <span className={cn("text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg", sensColors[report.overallSensitivity],
                         report.overallSensitivity === "standard" ? "bg-emerald/8" :
@@ -546,79 +511,56 @@ export default function DashboardPage() {
                   const entityA = entries.find(e => e.id === ic.entityA);
                   const entityB = entries.find(e => e.id === ic.entityB);
                   if (!entityA || !entityB) return null;
-                  const confPctVal = Math.round(ic.confidence);
                   return (
                     <div key={`i-${ic.id}`} onClick={() => router.push("/intelligence")}
-                      className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-purple/[0.03] transition-all cursor-pointer group">
-                      <div className="w-10 h-10 rounded-xl bg-purple/8 flex items-center justify-center shrink-0">
-                        <Brain size={17} className="text-purple" />
+                      className="flex items-center gap-4 px-5 py-3.5 hover:bg-surface-3/30 transition-colors group cursor-pointer">
+                      <div className="w-9 h-9 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
+                        <Globe size={15} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold truncate">
-                          <span className="group-hover:text-accent transition-colors">{entityA.name}</span>
-                          <span className="text-text-3 mx-1.5">&harr;</span>
-                          <span className="group-hover:text-purple transition-colors">{entityB.name}</span>
-                        </div>
-                        <div className="text-[11px] text-text-3 mt-1 capitalize">{ic.category.replace(/-/g, " ")} &middot; {ic.evidence.length} evidence</div>
+                        <p className="text-sm font-semibold text-text group-hover:text-accent transition-colors">
+                          {entityA.name} <span className="text-text-3 mx-1">&harr;</span> {entityB.name}
+                        </p>
+                        <p className="text-xs text-text-3 mt-0.5">
+                          {ic.category.replace(/-/g, " ")} · {ic.evidence.length} Evidence
+                        </p>
                       </div>
-                      <div className={cn("text-[14px] font-bold tabular-nums shrink-0",
-                        confPctVal >= 80 ? "text-emerald" : confPctVal >= 60 ? "text-amber" : "text-red"
-                      )}>{confPctVal}%</div>
+                      <span className="text-sm font-extrabold text-amber font-mono">{Math.round(ic.confidence)}%</span>
                     </div>
                   );
                 }
               })}
             </div>
           )}
-          {/* Feed stats */}
-          <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border/30">
-            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
-              <FileText size={12} className="text-accent" /> {db.reports.filter(r => canView(r.overallSensitivity)).length} Reports
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
-              <Brain size={12} className="text-purple" /> {newInferences} New Inferences
-            </span>
-            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
-              <CheckCircle2 size={12} className="text-emerald" /> {db.inferredConnections.filter(ic => ic.status === "confirmed").length} Confirmed
-            </span>
-          </div>
-        </B>
+        </div>
 
         {/* Domain Profile */}
-        <B className="col-span-12 md:col-span-5">
-          <SH>Domain Capability Profile</SH>
+        <div className="bg-surface rounded-xl border border-border/60 p-5 shadow-card animate-fade-in">
+          <h3 className="text-[11px] font-bold text-text-3 uppercase tracking-widest mb-5">Domain Capability Profile</h3>
           {(() => {
             const maxDim = Math.max(...radarDims.map(d => d.value), 1);
             const sorted = [...radarDims].sort((a, b) => b.value - a.value).slice(0, 5);
             return (
-              <div className="space-y-5">
-                {sorted.map((d) => {
+              <div className="space-y-4">
+                {sorted.map((d, i) => {
                   const pct = Math.round((d.value / maxDim) * 100);
                   return (
-                    <div key={d.dim} className="flex items-center gap-4">
-                      <div className="w-24 text-[13px] font-medium text-text-2 shrink-0">{d.dim}</div>
-                      <div className="flex-1 h-3.5 bg-surface-3 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-[#1e3a5f] to-[#3b82f6] transition-all duration-700"
+                    <div key={d.dim} className="flex items-center gap-3">
+                      <span className="text-sm text-text w-20 font-semibold">{d.dim}</span>
+                      <div className="flex-1 bg-border/60 rounded-full h-3 overflow-hidden">
+                        <div className={`${domainGradients[i % domainGradients.length]} rounded-full h-3 transition-all duration-700`}
                           style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-[13px] font-bold text-text tabular-nums w-10 text-right">{pct}%</span>
+                      <span className="text-xs font-extrabold text-text font-mono w-10 text-right">{pct}%</span>
                     </div>
                   );
                 })}
               </div>
             );
           })()}
-        </B>
+        </div>
       </div>
 
     </div>
   );
 }
-
-const CAT_GRADIENTS: Record<string, [string, string]> = {
-  person: ["#1e3a5f", "#3b82f6"],
-  company: ["#7c3aed", "#a78bfa"],
-  address: ["#d97706", "#fbbf24"],
-  mobile: ["#059669", "#34d399"],
-  vehicle: ["#dc2626", "#f87171"],
-};
