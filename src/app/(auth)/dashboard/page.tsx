@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
 
 /* ─── Palette ─── */
@@ -59,19 +58,6 @@ function Spark({ data, color, h = 32 }: { data: number[]; color: string; h?: num
       <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={color} stopOpacity={0.25} /><stop offset="100%" stopColor={color} stopOpacity={0} /></linearGradient></defs>
       <polygon fill={`url(#${id})`} points={`0,${h} ${pts} ${w},${h}`} />
       <polyline fill="none" stroke={color} strokeWidth={1.5} points={pts} strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/* ─── Progress Ring ─── */
-function Ring({ pct, size = 48, sw = 4, color }: { pct: number; size?: number; sw?: number; color: string }) {
-  const r = (size - sw) / 2, c = 2 * Math.PI * r;
-  return (
-    <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e2e8f0" strokeWidth={sw} />
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={sw}
-        strokeDasharray={c} strokeDashoffset={c * (1 - pct / 100)} strokeLinecap="round"
-        className="transition-all duration-1000 ease-out" />
     </svg>
   );
 }
@@ -154,10 +140,6 @@ export default function DashboardPage() {
     return Object.entries(m).sort((a, b) => b[1].total - a[1].total);
   }, [entries]);
 
-  /* ── Reliability ── */
-  const confirmed = entries.filter((e) => e.context === "confirmed").length;
-  const confPct = entries.length > 0 ? Math.round((confirmed / entries.length) * 100) : 0;
-
   /* ── Domain capabilities ── */
   const radarDims = useMemo(() => {
     const dims = ["policy", "education", "advocacy", "legal", "leadership", "culture", "funding", "research"];
@@ -171,10 +153,6 @@ export default function DashboardPage() {
   const sparkEntities = [18, 32, 48, 60, 72, 88, entries.length];
   const sparkLinks = [40, 65, 90, 120, 150, 180, totalLinks];
 
-  /* ── Time-aware greeting ── */
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const firstName = currentUser?.fullName?.split(" ")[0] || currentUser?.username || "Analyst";
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
   /* ── Action items ── */
@@ -202,64 +180,42 @@ export default function DashboardPage() {
   return (
     <div className="animate-fade-in space-y-10">
 
-      {/* ═══ SECTION 1: Welcome Banner ═══ */}
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#0f1b2d] via-[#1e3a5f] to-[#274b7a] border border-white/5">
-        <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-blue-400/10 blur-[120px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-emerald/5 blur-[80px] translate-y-1/3 -translate-x-1/4" />
-        <div className="relative z-10 px-10 py-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-[36px] font-bold text-white tracking-tight mb-2">
-                {greeting}, {firstName}
-              </h1>
-              <p className="text-[16px] text-white/50 mb-6">{today}</p>
-              <div className="flex items-center gap-5 text-[13px] text-white/40">
-                <span className="flex items-center gap-2"><Shield size={14} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
-                <span className="w-px h-4 bg-white/15" />
-                <span className="font-medium">{entries.length} entities</span>
-                <span className="w-px h-4 bg-white/15" />
-                <span className="font-medium">{coverage.length} regions</span>
-                <span className="w-px h-4 bg-white/15" />
-                <span className="font-medium">{totalLinks} links</span>
-                {db.signals.length > 0 && (
-                  <>
-                    <span className="w-px h-4 bg-white/15" />
-                    <span className="text-amber flex items-center gap-1.5 font-medium"><Radio size={12} className="animate-pulse" />{db.signals.length} signal{db.signals.length !== 1 && "s"}</span>
-                  </>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-6">
-              {/* Reliability ring */}
-              <div className="relative">
-                <Ring pct={confPct} size={88} sw={6} color="#34d399" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[22px] font-bold text-emerald">{confPct}%</span>
-                  <span className="text-[9px] text-white/30 uppercase font-semibold tracking-wide">Verified</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Quick Actions */}
-          <div className="flex items-center gap-3.5 mt-8">
-            <button onClick={() => router.push("/new-entry")}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Plus size={16} /> New Entry
-            </button>
-            <button onClick={() => router.push("/search")}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Search size={16} /> Search
-            </button>
-            <button onClick={() => router.push("/reports/new")}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <FileText size={16} /> New Report
-            </button>
-            <button onClick={() => router.push("/network")}
-              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Share2 size={16} /> Network
-            </button>
-          </div>
+      {/* ═══ SECTION 1: Info Bar + Quick Actions ═══ */}
+      <div>
+        <div className="flex items-center gap-3 text-[13px] text-text-3 mb-4">
+          <span>{today}</span>
+          <span className="text-border">&middot;</span>
+          <span className="flex items-center gap-1.5"><Shield size={12} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
+          <span className="text-border">&middot;</span>
+          <span>{entries.length} entities</span>
+          <span className="text-border">&middot;</span>
+          <span>{coverage.length} regions</span>
+          <span className="text-border">&middot;</span>
+          <span>{totalLinks} links</span>
+          {db.signals.length > 0 && (
+            <>
+              <span className="text-border">&middot;</span>
+              <span className="text-amber flex items-center gap-1.5 font-semibold"><Radio size={11} className="animate-pulse" />{db.signals.length} signal{db.signals.length !== 1 && "s"}</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.push("/new-entry")}
+            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
+            <Plus size={15} /> New Entry
+          </button>
+          <button onClick={() => router.push("/search")}
+            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
+            <Search size={15} /> Search
+          </button>
+          <button onClick={() => router.push("/reports/new")}
+            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
+            <FileText size={15} /> New Report
+          </button>
+          <button onClick={() => router.push("/network")}
+            className="flex items-center gap-2 text-[14px] font-semibold text-text hover:text-accent transition-colors cursor-pointer">
+            <Share2 size={15} /> Network
+          </button>
         </div>
       </div>
 
@@ -590,7 +546,7 @@ export default function DashboardPage() {
                   const entityA = entries.find(e => e.id === ic.entityA);
                   const entityB = entries.find(e => e.id === ic.entityB);
                   if (!entityA || !entityB) return null;
-                  const confPctVal = Math.round(ic.confidence * 100);
+                  const confPctVal = Math.round(ic.confidence);
                   return (
                     <div key={`i-${ic.id}`} onClick={() => router.push("/intelligence")}
                       className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-purple/[0.03] transition-all cursor-pointer group">
@@ -631,18 +587,27 @@ export default function DashboardPage() {
         {/* Domain Profile */}
         <B className="col-span-12 md:col-span-5">
           <SH>Domain Capability Profile</SH>
-          <ResponsiveContainer width="100%" height={280}>
-            <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarDims}>
-              <PolarGrid stroke="#e2e8f0" strokeDasharray="3 3" />
-              <PolarAngleAxis dataKey="dim" tick={{ fill: "#3e5068", fontSize: 10, fontWeight: 500 }} />
-              <PolarRadiusAxis tick={false} axisLine={false} />
-              <Radar dataKey="value" stroke={C.navy} fill={C.navy} fillOpacity={0.12} strokeWidth={2}
-                dot={{ r: 3.5, fill: C.navy, strokeWidth: 0 }} />
-            </RadarChart>
-          </ResponsiveContainer>
-          <div className="flex items-center gap-2 justify-center mt-1">
-            <span className="text-[10px] text-text-3">Coverage across {radarDims.filter(d => d.value > 0).length} of {radarDims.length} domains</span>
-          </div>
+          {(() => {
+            const maxDim = Math.max(...radarDims.map(d => d.value), 1);
+            const sorted = [...radarDims].sort((a, b) => b.value - a.value).slice(0, 5);
+            return (
+              <div className="space-y-5">
+                {sorted.map((d) => {
+                  const pct = Math.round((d.value / maxDim) * 100);
+                  return (
+                    <div key={d.dim} className="flex items-center gap-4">
+                      <div className="w-24 text-[13px] font-medium text-text-2 shrink-0">{d.dim}</div>
+                      <div className="flex-1 h-3.5 bg-surface-3 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-[#1e3a5f] to-[#3b82f6] transition-all duration-700"
+                          style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-[13px] font-bold text-text tabular-nums w-10 text-right">{pct}%</span>
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
         </B>
       </div>
 

@@ -169,7 +169,7 @@ export default function NetworkPage() {
         ctx.font = "bold 9px Inter, sans-serif";
         ctx.fillStyle = INFER_COLORS[e.inferCategory || ""] || "#0891b2";
         ctx.textAlign = "center";
-        ctx.fillText(`${Math.round(e.confidence * 100)}%`, mx, my - 4);
+        ctx.fillText(`${Math.round(e.confidence)}%`, mx, my - 4);
       }
     });
 
