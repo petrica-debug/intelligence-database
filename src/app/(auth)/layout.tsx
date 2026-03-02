@@ -17,7 +17,6 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     if (!currentUser) router.replace("/");
   }, [currentUser, router]);
 
-  // Close mobile sidebar on navigation
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
@@ -34,7 +33,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <NotificationPanel />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-7 py-6 scrollbar-thin">
           <div className="animate-fade-in">{children}</div>
         </main>
       </div>

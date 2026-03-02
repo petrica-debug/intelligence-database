@@ -4,16 +4,17 @@ import Link from "next/link";
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/cn";
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   LayoutDashboard, Search, PenSquare, Users, Building2, Phone, MapPin, Car,
   Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog, Globe, BarChart3,
-  ChevronLeft, ChevronRight, FileText, Brain, X
+  ChevronLeft, ChevronRight, FileText, Brain, X, Shield
 } from "lucide-react";
 import { CLEARANCE_LABELS } from "@/types";
 import type { ClearanceLevel } from "@/types";
 import type { ReactNode } from "react";
 
-interface NavItem { href: string; label: string; icon: ReactNode; badge?: number }
+interface NavItem { href: string; label: string; icon: ReactNode; badge?: number; count?: number }
 
 interface SidebarProps {
   pathname: string;
@@ -55,11 +56,11 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
   ];
 
   const CATS: NavItem[] = [
-    { href: "/persons", label: "Persons", icon: <Users size={16} />, badge: db.entries.filter(e => e.category === "person").length },
-    { href: "/companies", label: "Organizations", icon: <Building2 size={16} />, badge: db.entries.filter(e => e.category === "company").length },
-    { href: "/mobile", label: "Contacts", icon: <Phone size={16} />, badge: db.entries.filter(e => e.category === "mobile").length },
-    { href: "/addresses", label: "Addresses", icon: <MapPin size={16} />, badge: db.entries.filter(e => e.category === "address").length },
-    { href: "/vehicles", label: "Vehicles", icon: <Car size={16} />, badge: db.entries.filter(e => e.category === "vehicle").length },
+    { href: "/persons", label: "Persons", icon: <Users size={16} />, count: db.entries.filter(e => e.category === "person").length },
+    { href: "/companies", label: "Organizations", icon: <Building2 size={16} />, count: db.entries.filter(e => e.category === "company").length },
+    { href: "/mobile", label: "Contacts", icon: <Phone size={16} />, count: db.entries.filter(e => e.category === "mobile").length },
+    { href: "/addresses", label: "Addresses", icon: <MapPin size={16} />, count: db.entries.filter(e => e.category === "address").length },
+    { href: "/vehicles", label: "Vehicles", icon: <Car size={16} />, count: db.entries.filter(e => e.category === "vehicle").length },
   ];
 
   const ADMIN: NavItem[] = [
@@ -70,6 +71,15 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
     { href: "/admin/users", label: "Users", icon: <UserCog size={16} /> },
   ];
 
+  const sections = [
+    { label: "NAVIGATION", items: NAV },
+    { label: "ENTITIES", items: CATS },
+    ...(currentUser?.role === "admin" ? [{ label: "SYSTEM", items: ADMIN }] : []),
+  ];
+
+  const totalLinks = db.entries.reduce((s, e) => s + e.linkedTo.length, 0);
+  const regions = new Set(db.entries.map((e) => e.country).filter(Boolean)).size;
+
   const NavLink = ({ item, mobile }: { item: NavItem; mobile?: boolean }) => {
     const a = isActive(item.href);
     return (
@@ -78,18 +88,21 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
         title={collapsed && !mobile ? item.label : undefined}
         onClick={onMobileClose}
         className={cn(
-          "w-full flex items-center gap-3 rounded-lg font-medium transition-all duration-150",
+          "w-full flex items-center gap-3 rounded-xl font-medium transition-all duration-200 relative group",
           mobile
             ? "px-3 py-3 text-[15px]"
             : collapsed
               ? "justify-center w-10 h-10 mx-auto text-[13px]"
-              : "px-2.5 py-2 text-[13px]",
+              : "px-3 py-2.5 text-[13px]",
           a
-            ? "bg-sb-2 text-sb-bright font-semibold"
-            : "text-sb-fg hover:bg-sb-2/50 hover:text-sb-bright"
+            ? "bg-sb-active/[0.12] text-sb-bright font-semibold"
+            : "text-sb-fg hover:bg-sb-2/40 hover:text-sb-bright"
         )}
       >
-        <span className={cn("shrink-0", a ? "text-sb-active" : "")}>
+        {a && !collapsed && !mobile && (
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-sb-active" />
+        )}
+        <span className={cn("shrink-0", a ? "text-sb-active" : "group-hover:text-sb-bright")}>
           {item.icon}
         </span>
         {(mobile || !collapsed) && (
@@ -97,11 +110,16 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
             <span className="flex-1 text-left truncate">{item.label}</span>
             {item.badge != null && item.badge > 0 && (
               <span className={cn(
-                "font-bold min-w-[24px] text-center rounded-md px-1.5 py-0.5",
-                mobile ? "text-[12px]" : "text-[10px]",
-                a ? "text-sb-bright" : "bg-sb-active/20 text-sb-active"
+                "font-bold min-w-[24px] text-center rounded-md px-2 py-0.5",
+                mobile ? "text-[12px]" : "text-[9px]",
+                a ? "text-sb-bright" : "bg-sb-active/15 text-sb-active"
               )}>
                 {item.badge}
+              </span>
+            )}
+            {item.count != null && item.count > 0 && !item.badge && (
+              <span className="text-[11px] font-mono font-semibold text-sb-fg/45 tabular-nums">
+                {item.count}
               </span>
             )}
           </>
@@ -113,20 +131,6 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
     );
   };
 
-  const SectionLabel = ({ children, mobile }: { children: ReactNode; mobile?: boolean }) => {
-    if (!mobile && collapsed) return <div className="my-2 mx-3 border-t border-sb-border" />;
-    return (
-      <p className={cn(
-        "font-semibold text-sb-fg/50 uppercase px-2.5",
-        mobile ? "text-[11px] tracking-widest mt-5 mb-1.5" : "text-[10px] tracking-[0.2em] mb-2"
-      )}>
-        {children}
-      </p>
-    );
-  };
-
-  const totalLinks = db.entries.reduce((s, e) => s + e.linkedTo.length, 0);
-
   /* ── Mobile Drawer ── */
   const mobileDrawer = (
     <>
@@ -135,19 +139,21 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[80vw] max-w-[320px] bg-sb flex flex-col border-r border-sb-border transition-transform duration-300 ease-in-out md:hidden",
+          "fixed inset-y-0 left-0 z-50 w-[80vw] max-w-[320px] gradient-sidebar flex flex-col border-r border-sb-border transition-transform duration-300 ease-in-out md:hidden noise-texture",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        {/* Brand + close */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-sb-border">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
-              <Globe size={16} className="text-white" />
+        <div className="absolute -top-20 -left-20 w-60 h-60 rounded-full bg-sb-active/5 blur-3xl pointer-events-none" />
+
+        <div className="flex items-center justify-between px-5 py-5 border-b border-sb-border/60 relative">
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue relative">
+              <Shield size={18} className="text-white" />
+              <div className="absolute inset-0 rounded-xl gradient-blue opacity-50 blur-md -z-10" />
             </div>
             <div>
-              <h1 className="text-[15px] font-bold text-sb-bright leading-tight">RFE Database</h1>
-              <p className="text-[11px] text-sb-fg uppercase tracking-wider">Roma Foundations for Europe</p>
+              <h1 className="text-[15px] font-bold text-sb-bright leading-tight tracking-tight font-display">RFE Database</h1>
+              <p className="text-[9px] text-sb-fg/60 uppercase tracking-[0.2em] mt-1 font-medium">Roma Foundations for Europe</p>
             </div>
           </div>
           <button
@@ -158,47 +164,41 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
           </button>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-2 px-3 scrollbar-thin">
-          <SectionLabel mobile>Navigation</SectionLabel>
-          <div className="space-y-0.5">
-            {NAV.map((i) => <NavLink key={i.href} item={i} mobile />)}
-          </div>
-
-          <SectionLabel mobile>Entities</SectionLabel>
-          <div className="space-y-0.5">
-            {CATS.map((i) => <NavLink key={i.href} item={i} mobile />)}
-          </div>
-
-          {currentUser?.role === "admin" && (
-            <>
-              <SectionLabel mobile>Admin</SectionLabel>
+        <nav className="flex-1 overflow-y-auto py-5 px-3 scrollbar-thin space-y-7">
+          {sections.map((section) => (
+            <div key={section.label}>
+              <p className="text-[9px] font-bold text-sb-fg/35 uppercase tracking-[0.25em] px-3 mb-2.5">
+                {section.label}
+              </p>
               <div className="space-y-0.5">
-                {ADMIN.map((i) => <NavLink key={i.href} item={i} mobile />)}
+                {section.items.map((i) => <NavLink key={i.href} item={i} mobile />)}
               </div>
-            </>
-          )}
+            </div>
+          ))}
         </nav>
 
-        {/* Footer */}
-        <div className="px-4 py-3 border-t border-sb-border">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald animate-pulse-glow" />
-            <span className="text-[12px] font-medium text-sb-fg">System Active</span>
+        <div className="px-5 py-5 border-t border-sb-border/60 relative">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stat-green opacity-50" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-stat-green" />
+            </span>
+            <span className="text-[11px] font-medium text-sb-fg">System Online</span>
           </div>
-          {currentUser && (
-            <p className="text-[11px] text-sb-fg/60 font-medium mb-2">
-              {CLEARANCE_LABELS[(currentUser.clearance ?? 1) as ClearanceLevel]} (L{currentUser.clearance ?? 1})
-            </p>
-          )}
           <div className="flex items-center gap-6">
             <div>
-              <span className="text-xl font-extrabold text-sb-bright font-mono">{db.entries.length}</span>
-              <p className="text-[10px] text-sb-fg/60 uppercase tracking-widest">Entities</p>
+              <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{db.entries.length}</span>
+              <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Entities</p>
             </div>
+            <div className="w-px h-8 bg-sb-border/60" />
             <div>
-              <span className="text-xl font-extrabold text-sb-bright font-mono">{totalLinks}</span>
-              <p className="text-[10px] text-sb-fg/60 uppercase tracking-widest">Links</p>
+              <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{totalLinks}</span>
+              <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Links</p>
+            </div>
+            <div className="w-px h-8 bg-sb-border/60" />
+            <div>
+              <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{regions}</span>
+              <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Regions</p>
             </div>
           </div>
         </div>
@@ -210,24 +210,28 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
   const desktopSidebar = (
     <aside
       className={cn(
-        "relative bg-sb flex-col shrink-0 border-r border-sb-border transition-all duration-300 ease-in-out hidden md:flex",
-        collapsed ? "w-[68px]" : "w-60"
+        "relative gradient-sidebar flex-col shrink-0 border-r border-sb-border transition-all duration-300 ease-in-out hidden md:flex overflow-hidden noise-texture",
+        collapsed ? "w-[68px]" : "w-[260px]"
       )}
     >
+      <div className="absolute -top-20 -left-20 w-60 h-60 rounded-full bg-sb-active/5 blur-3xl pointer-events-none" />
+
       {/* Brand */}
-      <div className={cn("border-b border-sb-border", collapsed ? "px-2 py-4" : "px-5 py-5")}>
+      <div className={cn("border-b border-sb-border/60 relative", collapsed ? "px-2 py-4" : "px-5 py-6")}>
         {collapsed ? (
-          <div className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue mx-auto">
-            <Globe size={16} className="text-white" />
+          <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue mx-auto relative">
+            <Shield size={18} className="text-white" />
+            <div className="absolute inset-0 rounded-xl gradient-blue opacity-50 blur-md -z-10" />
           </div>
         ) : (
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
-              <Globe size={16} className="text-white" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue shrink-0 relative">
+              <Shield size={18} className="text-white" />
+              <div className="absolute inset-0 rounded-xl gradient-blue opacity-50 blur-md -z-10" />
             </div>
             <div>
-              <h1 className="text-[14px] font-bold text-sb-bright leading-tight">RFE Database</h1>
-              <p className="text-[10px] text-sb-fg uppercase tracking-[0.15em] mt-0.5">Roma Foundations for Europe</p>
+              <h1 className="text-[15px] font-bold text-sb-bright leading-tight tracking-tight font-display">RFE Database</h1>
+              <p className="text-[9px] text-sb-fg/60 uppercase tracking-[0.2em] mt-1 font-medium">Roma Foundations for Europe</p>
             </div>
           </div>
         )}
@@ -236,62 +240,71 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
       {/* Toggle */}
       <button
         onClick={toggle}
-        className="absolute -right-3 top-[72px] z-10 w-6 h-6 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-text-3 hover:text-accent hover:border-accent/30 transition-all cursor-pointer"
+        className="absolute -right-3 top-[76px] z-10 w-6 h-6 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-text-3 hover:text-accent hover:border-accent/30 transition-all cursor-pointer"
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin space-y-6">
-        <div>
-          <SectionLabel>Navigation</SectionLabel>
-          <div className="space-y-1">
-            {NAV.map((i) => <NavLink key={i.href} item={i} />)}
-          </div>
-        </div>
-
-        <div>
-          <SectionLabel>Entities</SectionLabel>
-          <div className="space-y-1">
-            {CATS.map((i) => <NavLink key={i.href} item={i} />)}
-          </div>
-        </div>
-
-        {currentUser?.role === "admin" && (
-          <div>
-            <SectionLabel>Admin</SectionLabel>
-            <div className="space-y-1">
-              {ADMIN.map((i) => <NavLink key={i.href} item={i} />)}
+      <nav className="flex-1 overflow-y-auto py-5 px-3 scrollbar-thin space-y-7 relative">
+        {sections.map((section, si) => (
+          <motion.div
+            key={section.label}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: si * 0.08, duration: 0.4 }}
+          >
+            {collapsed ? (
+              <div className="my-2 mx-3 border-t border-sb-border" />
+            ) : (
+              <p className="text-[9px] font-bold text-sb-fg/35 uppercase tracking-[0.25em] px-3 mb-2.5">
+                {section.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {section.items.map((i) => <NavLink key={i.href} item={i} />)}
             </div>
-          </div>
-        )}
+          </motion.div>
+        ))}
       </nav>
 
       {/* Footer */}
-      <div className={cn("border-t border-sb-border", collapsed ? "p-2" : "px-5 py-4")}>
+      <div className={cn("border-t border-sb-border/60 relative", collapsed ? "p-2" : "px-5 py-5")}>
         {collapsed ? (
           <div className="flex flex-col items-center gap-1.5">
-            <div className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stat-green opacity-50" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-stat-green" />
+            </span>
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 mb-2.5">
-              <span className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
-              <span className="text-[11px] font-medium text-sb-fg">System Active</span>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stat-green opacity-50" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-stat-green" />
+              </span>
+              <span className="text-[11px] font-medium text-sb-fg">System Online</span>
             </div>
             {currentUser && (
-              <p className="text-[10px] text-sb-fg/50 font-medium mb-2">
+              <p className="text-[9px] text-sb-fg/50 font-medium mb-2.5 uppercase tracking-[0.15em]">
                 {CLEARANCE_LABELS[(currentUser.clearance ?? 1) as ClearanceLevel]} (L{currentUser.clearance ?? 1})
               </p>
             )}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-6">
               <div>
-                <span className="text-lg font-extrabold text-sb-bright font-mono">{db.entries.length}</span>
-                <p className="text-[9px] text-sb-fg/50 uppercase tracking-[0.15em]">Entities</p>
+                <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{db.entries.length}</span>
+                <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Entities</p>
               </div>
+              <div className="w-px h-8 bg-sb-border/60" />
               <div>
-                <span className="text-lg font-extrabold text-sb-bright font-mono">{totalLinks}</span>
-                <p className="text-[9px] text-sb-fg/50 uppercase tracking-[0.15em]">Links</p>
+                <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{totalLinks}</span>
+                <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Links</p>
+              </div>
+              <div className="w-px h-8 bg-sb-border/60" />
+              <div>
+                <span className="text-xl font-extrabold text-sb-bright font-mono tabular-nums">{regions}</span>
+                <p className="text-[8px] text-sb-fg/40 uppercase tracking-[0.2em] font-bold mt-0.5">Regions</p>
               </div>
             </div>
           </>

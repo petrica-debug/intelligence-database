@@ -4,18 +4,18 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { motion } from "framer-motion";
 import type { Entry, SensitivityLevel } from "@/types";
 import {
   Users, Building2, Link2, Globe,
   ChevronRight, Radio, FileWarning,
-  FileText, Brain, Bell,
-  CheckCircle2
+  FileText, Brain, Bell, AlertCircle,
+  CheckCircle2, TrendingUp, MapPin, Sparkles, ArrowUpRight
 } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
 } from "recharts";
 
-/* ─── Palette ─── */
 const C = {
   blue: "#3b82f6", purple: "#7c3aed",
   emerald: "#059669", amber: "#d97706",
@@ -30,14 +30,13 @@ const tooltipStyle = {
 };
 
 const PIE_COLORS = [
-  "hsl(217, 92%, 60%)",
-  "hsl(265, 78%, 60%)",
-  "hsl(152, 72%, 46%)",
-  "hsl(174, 72%, 44%)",
-  "hsl(24, 100%, 58%)",
+  "hsl(220, 95%, 58%)",
+  "hsl(268, 82%, 58%)",
+  "hsl(155, 75%, 42%)",
+  "hsl(178, 75%, 40%)",
+  "hsl(22, 100%, 56%)",
 ];
 
-/* ─── Animated Counter ─── */
 function Num({ value, duration = 700 }: { value: number; duration?: number }) {
   const [d, setD] = useState(0);
   const prev = useRef(0);
@@ -53,38 +52,44 @@ function Num({ value, duration = 700 }: { value: number; duration?: number }) {
   return <>{d}</>;
 }
 
-/* ─── Sparkline ─── */
 function Spark({ data, color, label }: { data: number[]; color: string; label: string }) {
   if (data.length < 2) return null;
   const max = Math.max(...data, 1);
   const points = data
     .map((v, i) => `${(i / (data.length - 1)) * 100},${100 - (v / max) * 80}`)
     .join(" ");
+  const fillPoints = `0,100 ${points} 100,100`;
   const id = `spark-${label.replace(/\s/g, "")}`;
+  const fillId = `fill-${label.replace(/\s/g, "")}`;
   return (
-    <svg viewBox="0 0 100 100" className="absolute bottom-0 left-0 right-0 w-full h-10 opacity-20 group-hover:opacity-40 transition-opacity z-0" preserveAspectRatio="none">
+    <svg viewBox="0 0 100 100" className="absolute bottom-0 left-0 right-0 w-full h-14 z-0" preserveAspectRatio="none">
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor={color} stopOpacity={0.1} />
+          <stop offset="0%" stopColor={color} stopOpacity={0} />
+          <stop offset="30%" stopColor={color} stopOpacity={0.6} />
           <stop offset="100%" stopColor={color} stopOpacity={1} />
         </linearGradient>
+        <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity={0.1} />
+          <stop offset="100%" stopColor={color} stopOpacity={0} />
+        </linearGradient>
       </defs>
+      <polygon
+        points={fillPoints}
+        fill={`url(#${fillId})`}
+        className="opacity-20 group-hover:opacity-40 transition-opacity"
+      />
       <polyline
         points={points}
         fill="none"
         stroke={`url(#${id})`}
-        strokeWidth="3"
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
   );
 }
-
-
-/* ═══════════════════════════════════════════════════ */
-/*  MAIN                                              */
-/* ═══════════════════════════════════════════════════ */
 
 export default function DashboardPage() {
   const { db, currentUser, canView } = useApp();
@@ -95,7 +100,6 @@ export default function DashboardPage() {
   const persons = useMemo(() => entries.filter((e) => e.category === "person"), [entries]);
   const orgs = useMemo(() => entries.filter((e) => e.category === "company"), [entries]);
 
-  /* ── Connectivity index ── */
   const connMap = useMemo(() => {
     const m = new Map<number, number>();
     entries.forEach((e) => {
@@ -108,7 +112,6 @@ export default function DashboardPage() {
   const conn = (e: Entry) => connMap.get(e.id) || 0;
   const totalLinks = useMemo(() => entries.reduce((s, e) => s + e.linkedTo.length, 0), [entries]);
 
-  /* ── Influence Score ── */
   const influence = (e: Entry) => {
     const c = conn(e);
     const t = (e.tags || []).length;
@@ -116,13 +119,11 @@ export default function DashboardPage() {
     return c * 10 + t * 5 + sig;
   };
 
-  /* ── Key Actors ── */
   const keyActors = useMemo(() =>
     [...persons].sort((a, b) => influence(b) - influence(a)).slice(0, 3),
     [persons, connMap] // eslint-disable-line
   );
 
-  /* ── Coverage ── */
   const coverage = useMemo(() => {
     const m: Record<string, { total: number; persons: number; orgs: number; confirmed: number }> = {};
     entries.forEach((e) => {
@@ -136,7 +137,6 @@ export default function DashboardPage() {
     return Object.entries(m).sort((a, b) => b[1].total - a[1].total);
   }, [entries]);
 
-  /* ── Domain capabilities ── */
   const radarDims = useMemo(() => {
     const dims = ["policy", "education", "advocacy", "legal", "leadership", "culture", "funding", "research"];
     return dims.map((d) => ({
@@ -145,17 +145,14 @@ export default function DashboardPage() {
     }));
   }, [entries]);
 
-  /* ── Sparkline data ── */
   const sparkEntities = [18, 32, 48, 60, 72, 88, entries.length];
   const sparkLinks = [40, 65, 90, 120, 150, 180, totalLinks];
 
-  /* ── Action items ── */
   const pendingValidations = db.pendingValidations.filter((v) => !v.resolved).length;
   const newInferences = db.inferredConnections.filter((ic) => ic.status === "new").length;
   const unreadNotifs = db.notifications.filter((n) => n.forUser === currentUser?.username && !n.read).length;
   const totalActionItems = pendingValidations + newInferences + unreadNotifs;
 
-  /* ── Intelligence feed ── */
   const intelligenceFeed = useMemo(() => {
     const items: { type: "report" | "inference"; date: string; data: unknown }[] = [];
     db.reports.filter(r => canView(r.overallSensitivity)).forEach(r => {
@@ -172,42 +169,76 @@ export default function DashboardPage() {
   };
 
   const domainGradients = ["gradient-blue", "gradient-purple", "gradient-orange", "gradient-teal", "gradient-green"];
+  const rankStyles = [
+    { bg: "gradient-blue", shadow: "shadow-glow-blue", bar: "gradient-blue" },
+    { bg: "gradient-purple", shadow: "", bar: "gradient-purple" },
+    { bg: "bg-surface-3", shadow: "", bar: "gradient-teal", textColor: "text-text-3" },
+  ];
 
   return (
     <div className="animate-fade-in">
 
-      {/* ═══ STATS ROW ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-7">
         {[
-          { icon: Users, value: persons.length, label: "Key Actors", gradient: "gradient-blue", glow: "shadow-glow-blue", color: C.blue, sparkData: sparkEntities.slice(0, -2).concat([persons.length]) },
-          { icon: Building2, value: orgs.length, label: "Organizations", gradient: "gradient-purple", glow: "shadow-glow-purple", color: C.purple, sparkData: sparkEntities.slice(0, -2).concat([orgs.length]) },
-          { icon: Link2, value: totalLinks, label: "Network Links", gradient: "gradient-teal", glow: "shadow-glow-green", color: C.cyan, sparkData: sparkLinks },
-          { icon: Globe, value: coverage.length, label: "Regions Covered", gradient: "gradient-green", glow: "shadow-glow-green", color: C.emerald, sparkData: [5, 7, 8, 9, 10, 12, coverage.length] },
-        ].map((stat) => (
-          <div key={stat.label} className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 flex flex-col items-center text-center hover:shadow-card-hover transition-all duration-300 group animate-fade-in relative overflow-hidden">
-            <div className={`absolute inset-0 opacity-[0.04] ${stat.gradient}`} />
-            <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-shadow duration-300`}>
-                <stat.icon size={18} className="sm:hidden" />
-                <stat.icon size={20} className="hidden sm:block" />
+          { icon: Users, value: persons.length, label: "Key Actors", gradient: "gradient-blue", glow: "shadow-glow-blue", color: C.blue, sparkData: sparkEntities.slice(0, -2).concat([persons.length]), trend: `+${Math.round(persons.length * 0.12)}%` },
+          { icon: Building2, value: orgs.length, label: "Organizations", gradient: "gradient-purple", glow: "shadow-glow-purple", color: C.purple, sparkData: sparkEntities.slice(0, -2).concat([orgs.length]), trend: `+${Math.round(orgs.length * 0.04)}%` },
+          { icon: Link2, value: totalLinks, label: "Network Links", gradient: "gradient-teal", glow: "shadow-glow-green", color: C.cyan, sparkData: sparkLinks, trend: `+${Math.round(totalLinks * 0.18)}%` },
+          { icon: Globe, value: coverage.length, label: "Regions Covered", gradient: "gradient-green", glow: "shadow-glow-green", color: C.emerald, sparkData: [5, 7, 8, 9, 10, 12, coverage.length], trend: `+${coverage.length > 10 ? 2 : 1}` },
+        ].map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="card-premium p-5 sm:p-6 flex flex-col items-center text-center relative overflow-hidden group cursor-pointer"
+          >
+            <div className={`absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity duration-500 ${stat.gradient}`} />
+            <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full opacity-[0.06] group-hover:opacity-[0.1] transition-opacity duration-500 blur-xl ${stat.gradient}`} />
+
+            <div className="relative z-10 flex flex-col items-center gap-3">
+              <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-all duration-300 group-hover:scale-105 relative`}>
+                <stat.icon size={22} strokeWidth={1.8} />
+                <div className={`absolute inset-0 rounded-2xl ${stat.gradient} opacity-40 blur-lg -z-10 group-hover:blur-xl transition-all`} />
               </div>
-              <span className="text-[28px] sm:text-[32px] font-extrabold text-text font-mono tracking-tight leading-none mt-1"><Num value={stat.value} /></span>
-              <span className="text-[9px] sm:text-[10px] text-text-3 uppercase tracking-[0.15em] sm:tracking-[0.2em] font-bold">{stat.label}</span>
+              <div>
+                <span className="text-[32px] sm:text-[36px] font-extrabold text-text font-mono tracking-tight leading-none tabular-nums">
+                  <Num value={stat.value} />
+                </span>
+                {stat.trend && (
+                  <span className="ml-2 text-[11px] font-bold text-stat-green">
+                    {stat.trend}
+                  </span>
+                )}
+              </div>
+              <span className="text-[9px] text-text-3 uppercase tracking-[0.25em] font-bold">{stat.label}</span>
             </div>
             <Spark data={stat.sparkData} color={stat.color} label={stat.label} />
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* ═══ MIDDLE ROW: Attention + Watch Targets ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      {/* Middle Row: Attention + Watch Targets */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-7">
 
         {/* Attention Panel */}
-        <div className="bg-surface rounded-xl border border-border/50 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3">
-            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Requires Your Attention</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium overflow-hidden"
+        >
+          <div className="flex items-center justify-between px-6 pt-6 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full gradient-orange" />
+              <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+                Requires Attention
+              </h3>
+            </div>
             {totalActionItems > 0 && (
-              <span className="text-[12px] sm:text-[11px] font-bold text-accent px-2.5 py-1 sm:py-0.5 rounded-full bg-accent/10">{totalActionItems} pending</span>
+              <span className="text-[10px] font-bold text-accent px-3 py-1 rounded-lg bg-accent-muted border border-accent/12">
+                {totalActionItems} pending
+              </span>
             )}
           </div>
           {totalActionItems === 0 ? (
@@ -216,68 +247,74 @@ export default function DashboardPage() {
               <p className="text-[11px] text-text-3">All caught up. No pending actions.</p>
             </div>
           ) : (
-            <div className="divide-y divide-border/40">
+            <div>
               {pendingValidations > 0 && (
                 <button onClick={() => router.push("/admin/validations")}
-                  className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-4 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer active:bg-surface-3/60">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-orange">
-                    <FileWarning size={15} />
+                  className="w-full flex items-center gap-4 px-6 py-4 hover:bg-surface-3/30 transition-all duration-200 group border-t border-border/30 cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white gradient-orange relative">
+                    <AlertCircle size={16} strokeWidth={1.8} />
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red border-2 border-surface" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-[14px] sm:text-[13px] font-semibold text-text leading-tight">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</p>
-                    <p className="text-[11px] text-text-3 mt-1">Awaiting admin review</p>
+                    <p className="text-[13px] font-semibold text-text leading-tight">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</p>
+                    <p className="text-[11px] text-text-3 mt-1.5">Awaiting admin review</p>
                   </div>
-                  <ChevronRight size={14} className="text-text-3/30 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowUpRight size={14} className="text-text-3/0 group-hover:text-text-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
                 </button>
               )}
               {newInferences > 0 && (
                 <button onClick={() => router.push("/intelligence")}
-                  className={cn("w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-4 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer",
-                    newInferences > 5 && "bg-emerald/[0.03]")}>
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-green">
-                    <Brain size={15} />
+                  className={cn("w-full flex items-center gap-4 px-6 py-4 hover:bg-surface-3/30 transition-all duration-200 group border-t border-border/30 cursor-pointer",
+                    newInferences > 5 && "bg-stat-green/[0.02]")}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white gradient-green">
+                    <Globe size={16} strokeWidth={1.8} />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className={cn("text-[13px] font-semibold leading-tight", newInferences > 5 ? "text-emerald" : "text-text")}>{newInferences} AI inference{newInferences !== 1 && "s"} to review</p>
-                    <p className="text-[11px] text-text-3 mt-1">New connections detected</p>
+                    <p className={cn("text-[13px] font-semibold leading-tight", newInferences > 5 ? "text-stat-green" : "text-text")}>{newInferences} AI inference{newInferences !== 1 && "s"} to review</p>
+                    <p className="text-[11px] text-text-3 mt-1.5">New connections detected</p>
                   </div>
-                  <ChevronRight size={14} className="text-text-3/30 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowUpRight size={14} className="text-text-3/0 group-hover:text-text-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
                 </button>
               )}
               {unreadNotifs > 0 && (
                 <button onClick={() => {}}
-                  className="w-full flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-4 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer active:bg-surface-3/60">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0 text-white gradient-purple">
-                    <Bell size={15} />
+                  className="w-full flex items-center gap-4 px-6 py-4 hover:bg-surface-3/30 transition-all duration-200 group border-t border-border/30 cursor-pointer">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white gradient-purple">
+                    <Bell size={16} strokeWidth={1.8} />
                   </div>
                   <div className="text-left flex-1 min-w-0">
                     <p className="text-[13px] font-semibold text-text leading-tight">{unreadNotifs} unread notification{unreadNotifs !== 1 && "s"}</p>
-                    <p className="text-[11px] text-text-3 mt-1">Signal alerts and updates</p>
+                    <p className="text-[11px] text-text-3 mt-1.5">Signal alerts and updates</p>
                   </div>
-                  <ChevronRight size={14} className="text-text-3/30 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
+                  <ArrowUpRight size={14} className="text-text-3/0 group-hover:text-text-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all duration-200" />
                 </button>
               )}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Watch Targets */}
-        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-6 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between mb-4 sm:mb-5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-5 h-5 rounded-full gradient-orange flex items-center justify-center animate-pulse-glow">
-                <Radio size={9} className="text-white" />
-              </div>
-              <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Watch Targets</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full gradient-teal" />
+              <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+                Watch Targets
+              </h3>
             </div>
-            <span className="text-[11px] font-bold text-emerald px-2 py-0.5 rounded-full bg-emerald/10">
+            <span className="text-[10px] font-bold text-stat-green px-3 py-1 rounded-lg bg-stat-green/8 border border-stat-green/12">
               {db.signals.length} Active
             </span>
           </div>
           {db.signals.length === 0 ? (
             <p className="text-[11px] text-text-3 py-8 text-center">No active watch targets</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {db.signals.map((sig) => {
                 const entity = entries.find((e) => e.id === sig.entityId);
                 if (!entity) return null;
@@ -288,115 +325,181 @@ export default function DashboardPage() {
                 }), 1);
                 return (
                   <div key={sig.entityId} onClick={() => go(sig.entityId)}
-                    className="flex items-center gap-3 sm:gap-4 bg-surface-3/20 rounded-xl p-3.5 sm:p-4 border border-border/30 cursor-pointer hover:border-border/50 transition-all group active:bg-surface-3/40">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl gradient-orange flex items-center justify-center shrink-0 shadow-glow-orange">
-                      <Radio size={16} className="text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[14px] font-bold text-text group-hover:text-accent transition-colors truncate">{entity.name}</span>
-                        <span className="text-[9px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded uppercase">{entity.category}</span>
+                    className="rounded-xl bg-surface-3/20 border border-border/30 p-5 group hover:border-stat-blue/20 transition-all duration-300 cursor-pointer relative overflow-hidden">
+                    <div className="absolute inset-0 gradient-teal opacity-[0.02] group-hover:opacity-[0.04] transition-opacity" />
+                    <div className="flex items-center gap-5 relative">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-xl gradient-teal flex items-center justify-center shrink-0 shadow-glow-green relative">
+                          <Radio size={18} className="text-white" strokeWidth={1.8} />
+                        </div>
+                        <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-stat-green opacity-40" />
+                          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-stat-green border-2 border-surface" />
+                        </span>
                       </div>
-                      <div className="w-full bg-border/60 rounded-full h-2 overflow-hidden">
-                        <div className="gradient-green rounded-full h-2 transition-all duration-1000"
-                          style={{ width: `${Math.min((score / maxScore) * 100, 100)}%` }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="text-[15px] font-bold text-text font-display group-hover:text-accent transition-colors">{entity.name}</span>
+                          <span className="text-[8px] font-bold text-stat-blue bg-stat-blue/8 border border-stat-blue/12 px-2 py-0.5 rounded-md uppercase tracking-widest">{entity.category}</span>
+                        </div>
+                        <div className="w-full bg-border/40 rounded-full h-2 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((score / maxScore) * 100, 100)}%` }}
+                            transition={{ delay: 0.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                            className="gradient-green rounded-full h-2"
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-right shrink-0 pl-2">
-                      <span className="text-[28px] font-extrabold text-text font-mono leading-none">{score}</span>
-                      <p className="text-[9px] text-text-3 uppercase tracking-[0.2em] font-bold mt-1">Influence</p>
+                      <div className="text-right shrink-0 pl-4">
+                        <span className="text-[32px] font-extrabold text-text font-mono leading-none tabular-nums">{score}</span>
+                        <p className="text-[8px] text-text-3 uppercase tracking-[0.25em] font-bold mt-1.5">Influence Score</p>
+                      </div>
                     </div>
                   </div>
                 );
               })}
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
 
-      {/* ═══ ANALYTICS ROW ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      {/* Analytics Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
 
         {/* Key Actors */}
-        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-6 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between mb-4 sm:mb-5">
-            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Key Actors &mdash; Top 3</h3>
-            <button onClick={() => router.push("/persons")} className="text-[11px] text-accent hover:underline font-semibold cursor-pointer">View all ({persons.length})</button>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full gradient-blue" />
+              <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+                Key Actors — Top 3
+              </h3>
+            </div>
+            <button onClick={() => router.push("/persons")} className="text-[11px] text-stat-blue hover:text-stat-blue/80 font-semibold transition-colors flex items-center gap-1 cursor-pointer">
+              View all ({persons.length}) <TrendingUp size={11} />
+            </button>
           </div>
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-5">
             {keyActors.map((e, i) => {
               const score = influence(e);
               const maxScore = influence(keyActors[0]);
+              const style = rankStyles[i];
               return (
-                <div key={e.id} onClick={() => go(e.id)} className="flex items-center gap-3 group cursor-pointer active:opacity-80">
-                  <span className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold shrink-0",
-                    i === 0 ? "gradient-blue shadow-glow-blue text-white" :
-                    i === 1 ? "gradient-purple text-white" :
-                    "bg-surface-3 text-text-3"
+                <div key={e.id} onClick={() => go(e.id)} className="flex items-center gap-4 group cursor-pointer">
+                  <span className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold shrink-0",
+                    style.bg, style.shadow, style.textColor || "text-white"
                   )}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-text truncate group-hover:text-accent transition-colors leading-tight">{e.name}</p>
-                    <p className="text-[11px] text-text-3 mt-0.5">{e.country}</p>
+                    <p className="text-[13px] font-semibold text-text truncate group-hover:text-stat-blue transition-colors leading-tight">{e.name}</p>
+                    <p className="text-[10px] text-text-3 mt-1">{e.country}</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-20 bg-border/50 rounded-full h-2.5 overflow-hidden">
-                      <div className={cn("rounded-full h-2.5 transition-all duration-500",
-                        i === 0 ? "gradient-blue" : i === 1 ? "gradient-purple" : "gradient-teal"
-                      )} style={{ width: `${(score / maxScore) * 100}%` }} />
+                    <div className="w-24 bg-border/30 rounded-full h-2 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${(score / maxScore) * 100}%` }}
+                        transition={{ delay: 0.6 + i * 0.15, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        className={`rounded-full h-2 ${style.bar}`}
+                      />
                     </div>
-                    <span className="text-[14px] font-extrabold text-accent font-mono w-9 text-right">{score}</span>
+                    <div className="text-right">
+                      <span className="text-[15px] font-extrabold text-text font-mono tabular-nums">{score}</span>
+                    </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </motion.div>
 
         {/* Top Regions */}
-        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-6 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between mb-4 sm:mb-5">
-            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Top Regions</h3>
-            <span className="text-[11px] text-text-3 font-medium">All {coverage.length} regions</span>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full gradient-green" />
+              <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+                Top Regions
+              </h3>
+            </div>
+            <span className="text-[10px] text-text-3 font-medium flex items-center gap-1.5">
+              <MapPin size={10} /> All {coverage.length} regions
+            </span>
           </div>
-          <div className="space-y-3 sm:space-y-4">
-            {coverage.slice(0, 3).map(([country, data]) => {
+          <div className="space-y-5">
+            {coverage.slice(0, 3).map(([country, data], i) => {
               const shortName = country === "International" ? "Int'l" : country === "Czech Republic" ? "Czech Rep." : country === "North Macedonia" ? "N. Macedonia" : country;
               const total = data.total;
               const pPersons = total > 0 ? (data.persons / total) * 100 : 0;
               const pOrgs = total > 0 ? (data.orgs / total) * 100 : 0;
               const pOther = total > 0 ? ((total - data.persons - data.orgs) / total) * 100 : 0;
               return (
-                <div key={country} className="flex items-center gap-3">
-                  <span className="text-[13px] font-semibold text-text w-18 truncate">{shortName}</span>
-                  <div className="flex-1 h-5 flex rounded-md overflow-hidden gap-0.5">
-                    <div className="gradient-blue h-full rounded-l-md" style={{ width: `${pPersons}%` }} />
-                    <div className="gradient-purple h-full" style={{ width: `${pOrgs}%` }} />
-                    <div className="gradient-orange h-full rounded-r-md" style={{ width: `${pOther}%` }} />
+                <div key={country} className="flex items-center gap-4">
+                  <span className="text-[13px] font-semibold text-text w-20 truncate">{shortName}</span>
+                  <div className="flex-1 h-4 flex rounded-lg overflow-hidden gap-[2px]">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pPersons}%` }}
+                      transition={{ delay: 0.6 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className="gradient-blue h-full rounded-l-lg"
+                    />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pOrgs}%` }}
+                      transition={{ delay: 0.7 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className="gradient-purple h-full"
+                    />
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pOther}%` }}
+                      transition={{ delay: 0.8 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className="gradient-orange h-full rounded-r-lg"
+                    />
                   </div>
-                  <span className="text-[14px] font-extrabold text-text font-mono w-8 text-right">{data.total}</span>
+                  <span className="text-[15px] font-extrabold text-text font-mono w-8 text-right tabular-nums">{data.total}</span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border/30">
+          <div className="flex items-center gap-6 mt-6 pt-5 border-t border-border/30">
             {[
               { label: "Persons", cls: "gradient-blue" },
-              { label: "Orgs", cls: "gradient-purple" },
+              { label: "Organizations", cls: "gradient-purple" },
               { label: "Other", cls: "gradient-orange" },
             ].map((l) => (
-              <div key={l.label} className="flex items-center gap-1.5">
-                <span className={`w-3 h-3 rounded-sm ${l.cls}`} />
-                <span className="text-[11px] font-medium text-text-3">{l.label}</span>
+              <div key={l.label} className="flex items-center gap-2">
+                <span className={`w-3 h-2.5 rounded-[3px] ${l.cls}`} />
+                <span className="text-[10px] font-medium text-text-3">{l.label}</span>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Entity Composition */}
-        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-6 shadow-card animate-fade-in">
-          <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-4">Entity Composition</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium p-6"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1.5 h-5 rounded-full gradient-purple" />
+            <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+              Entity Composition
+            </h3>
+          </div>
           <div className="flex items-center justify-center">
-            <div className="relative w-44 h-44">
+            <div className="relative w-48 h-48">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -407,8 +510,8 @@ export default function DashboardPage() {
                       { name: "Contacts", value: entries.filter((e) => e.category === "mobile").length },
                       { name: "Vehicles", value: entries.filter((e) => e.category === "vehicle").length },
                     ]}
-                    cx="50%" cy="50%" innerRadius={48} outerRadius={72}
-                    paddingAngle={3} dataKey="value" stroke="none" cornerRadius={3}
+                    cx="50%" cy="50%" innerRadius={52} outerRadius={76}
+                    paddingAngle={4} dataKey="value" stroke="none" cornerRadius={4}
                   >
                     {PIE_COLORS.map((color, i) => <Cell key={i} fill={color} />)}
                   </Pie>
@@ -416,59 +519,70 @@ export default function DashboardPage() {
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-[28px] font-extrabold text-text font-mono leading-none"><Num value={entries.length} /></span>
-                <span className="text-[9px] text-text-3 uppercase tracking-[0.2em] font-bold mt-1">Total</span>
+                <span className="text-[32px] font-extrabold text-text font-mono leading-none tabular-nums"><Num value={entries.length} /></span>
+                <span className="text-[8px] text-text-3 uppercase tracking-[0.25em] font-bold mt-1.5">Total Entities</span>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 justify-center">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 mt-5">
             {[
               { label: "Persons", color: PIE_COLORS[0], val: persons.length },
-              { label: "Orgs", color: PIE_COLORS[1], val: orgs.length },
-              { label: "Addr", color: PIE_COLORS[2], val: entries.filter((e) => e.category === "address").length },
-              { label: "Mobile", color: PIE_COLORS[3], val: entries.filter((e) => e.category === "mobile").length },
-              { label: "Vehicle", color: PIE_COLORS[4], val: entries.filter((e) => e.category === "vehicle").length },
+              { label: "Organizations", color: PIE_COLORS[1], val: orgs.length },
+              { label: "Addresses", color: PIE_COLORS[2], val: entries.filter((e) => e.category === "address").length },
+              { label: "Contacts", color: PIE_COLORS[3], val: entries.filter((e) => e.category === "mobile").length },
+              { label: "Vehicles", color: PIE_COLORS[4], val: entries.filter((e) => e.category === "vehicle").length },
             ].map((c) => (
-              <div key={c.label} className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: c.color }} />
-                <span className="text-[11px] text-text-3 font-medium">
-                  {c.label} <span className="font-bold text-text font-mono">{c.val}</span>
-                </span>
+              <div key={c.label} className="flex items-center gap-2.5 py-1">
+                <span className="w-3 h-3 rounded-[4px] shrink-0" style={{ backgroundColor: c.color }} />
+                <span className="text-[11px] text-text-3 font-medium flex-1">{c.label}</span>
+                <span className="text-[12px] font-bold text-text font-mono tabular-nums">{c.val}</span>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      {/* ═══ BOTTOM ROW ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 pb-3 sm:pb-4">
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pb-6">
 
         {/* Latest Intelligence */}
-        <div className="bg-surface rounded-xl border border-border/50 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-5 pb-3">
-            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Latest Intelligence</h3>
-            <div className="flex gap-0.5 bg-surface-3/50 rounded-lg p-0.5">
-              <button onClick={() => router.push("/reports")} className="text-[11px] font-semibold text-white bg-accent px-3 py-1.5 rounded-md cursor-pointer">Reports</button>
-              <button onClick={() => router.push("/intelligence")} className="text-[11px] font-medium text-text-3 px-3 py-1.5 rounded-md hover:text-text transition-colors cursor-pointer">Inferences</button>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium overflow-hidden"
+        >
+          <div className="flex items-center justify-between px-6 pt-6 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1.5 h-5 rounded-full gradient-blue" />
+              <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+                Latest Intelligence
+              </h3>
+            </div>
+            <div className="flex gap-1 bg-surface-3/40 rounded-xl p-1 border border-border/30">
+              <button onClick={() => router.push("/reports")} className="text-[10px] font-semibold text-white bg-accent px-3.5 py-1.5 rounded-lg shadow-sm cursor-pointer">Reports</button>
+              <button onClick={() => router.push("/intelligence")} className="text-[10px] font-medium text-text-3 px-3.5 py-1.5 rounded-lg hover:text-text transition-colors cursor-pointer">Inferences</button>
             </div>
           </div>
           {intelligenceFeed.length === 0 ? (
             <p className="text-[11px] text-text-3 py-6 text-center px-5 pb-5">No recent intelligence</p>
           ) : (
-            <div className="divide-y divide-border/30">
+            <div>
               {intelligenceFeed.map((item) => {
                 if (item.type === "report") {
                   const report = item.data as typeof db.reports[0];
                   return (
                     <div key={`r-${report.id}`} onClick={() => router.push("/reports")}
-                      className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-4 hover:bg-surface-3/20 transition-colors group cursor-pointer active:bg-surface-3/40">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
-                        <FileText size={14} />
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-surface-3/20 transition-all duration-200 group cursor-pointer border-t border-border/20">
+                      <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center shrink-0 text-white">
+                        <FileText size={15} strokeWidth={1.8} />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-text group-hover:text-accent transition-colors truncate leading-tight">{report.title}</p>
-                        <p className="text-[11px] text-text-3 mt-0.5">
-                          {report.createdBy} · {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                        <p className="text-[13px] font-semibold text-text group-hover:text-stat-blue transition-colors truncate leading-tight">{report.title}</p>
+                        <p className="text-[10px] text-text-3 mt-1.5 flex items-center gap-2">
+                          <span>{report.createdBy}</span>
+                          <span className="w-1 h-1 rounded-full bg-border" />
+                          <span>{new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                         </p>
                       </div>
                       <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded", sensColors[report.overallSensitivity],
@@ -487,52 +601,72 @@ export default function DashboardPage() {
                   if (!entityA || !entityB) return null;
                   return (
                     <div key={`i-${ic.id}`} onClick={() => router.push("/intelligence")}
-                      className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-4 hover:bg-surface-3/20 transition-colors group cursor-pointer active:bg-surface-3/40">
-                      <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
-                        <Globe size={14} />
+                      className="flex items-center gap-4 px-6 py-4 hover:bg-surface-3/20 transition-all duration-200 group cursor-pointer border-t border-border/20">
+                      <div className="w-10 h-10 rounded-xl gradient-blue flex items-center justify-center shrink-0 text-white relative">
+                        <Globe size={15} strokeWidth={1.8} />
+                        <Sparkles size={8} className="absolute -top-0.5 -right-0.5 text-stat-amber fill-stat-amber" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-text group-hover:text-accent transition-colors leading-tight">
-                          {entityA.name} <span className="text-text-3 mx-0.5 font-normal">&harr;</span> {entityB.name}
+                        <p className="text-[13px] font-semibold text-text group-hover:text-stat-blue transition-colors leading-tight">
+                          {entityA.name} <span className="text-text-3/50 mx-1.5 font-normal text-[11px]">&harr;</span> {entityB.name}
                         </p>
-                        <p className="text-[11px] text-text-3 mt-0.5">
-                          {ic.category.replace(/-/g, " ")} · {ic.evidence.length} Evidence
+                        <p className="text-[10px] text-text-3 mt-1.5 flex items-center gap-2">
+                          <span className="capitalize">{ic.category.replace(/-/g, " ")}</span>
+                          <span className="w-1 h-1 rounded-full bg-border" />
+                          <span>{ic.evidence.length} Evidence</span>
                         </p>
                       </div>
-                      <span className="text-[14px] font-extrabold text-accent font-mono">{Math.round(ic.confidence)}%</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[15px] font-extrabold text-accent font-mono tabular-nums">{Math.round(ic.confidence)}%</span>
+                        <ArrowUpRight size={12} className="text-text-3/0 group-hover:text-text-3 transition-all" />
+                      </div>
                     </div>
                   );
                 }
               })}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Domain Profile */}
-        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-6 shadow-card animate-fade-in">
-          <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-4 sm:mb-5">Domain Capability Profile</h3>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="card-premium p-6"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1.5 h-5 rounded-full gradient-orange" />
+            <h3 className="text-[11px] font-bold text-text uppercase tracking-[0.12em] font-display">
+              Domain Capability Profile
+            </h3>
+          </div>
           {(() => {
             const maxDim = Math.max(...radarDims.map(d => d.value), 1);
             const sorted = [...radarDims].sort((a, b) => b.value - a.value).slice(0, 5);
             return (
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-5">
                 {sorted.map((d, i) => {
                   const pct = Math.round((d.value / maxDim) * 100);
                   return (
                     <div key={d.dim} className="flex items-center gap-4">
-                      <span className="text-[13px] text-text w-22 font-semibold">{d.dim}</span>
-                      <div className="flex-1 bg-border/40 rounded-full h-3 overflow-hidden">
-                        <div className={`${domainGradients[i % domainGradients.length]} rounded-full h-3 transition-all duration-700`}
-                          style={{ width: `${pct}%` }} />
+                      <span className="text-[12px] text-text w-[72px] font-semibold truncate">{d.dim}</span>
+                      <div className="flex-1 bg-border/25 rounded-full h-2.5 overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ delay: 0.8 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                          className={`${domainGradients[i % domainGradients.length]} rounded-full h-2.5`}
+                        />
                       </div>
-                      <span className="text-[13px] font-extrabold text-text font-mono w-12 text-right">{pct}%</span>
+                      <span className="text-[13px] font-extrabold text-text font-mono w-12 text-right tabular-nums">{pct}%</span>
                     </div>
                   );
                 })}
               </div>
             );
           })()}
-        </div>
+        </motion.div>
       </div>
 
     </div>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import { Bell, LogOut, Plus, Search, FileText, Share2, Zap, Menu } from "lucide-react";
+import { Bell, LogOut, Plus, Search, FileText, Share2, Zap, Menu, Command } from "lucide-react";
 import { CLEARANCE_LABELS } from "@/types";
 import type { ClearanceLevel } from "@/types";
 import Link from "next/link";
@@ -40,15 +40,15 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const monthDay = now.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
   const actions = [
-    { href: "/new-entry", icon: Plus, label: "New Entry" },
+    { href: "/new-entry", icon: Plus, label: "New Entry", primary: true },
     { href: "/search", icon: Search, label: "Search" },
     { href: "/reports", icon: FileText, label: "New Report" },
-    { href: "/network", icon: Share2, label: "Network" },
+    { href: "/network", icon: Share2, label: "Network Map" },
   ];
 
   return (
-    <header className="bg-surface border-b border-border/60">
-      {/* ── Mobile header: hamburger + brand + controls ── */}
+    <header className="glass-card border-b border-border/40">
+      {/* ── Mobile header ── */}
       <div className="flex md:hidden items-center justify-between px-3 py-2.5">
         <div className="flex items-center gap-3">
           <button
@@ -71,12 +71,12 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           >
             <Bell size={18} className="text-text-3" />
             {unread > 0 && (
-              <span className="absolute top-1 right-1 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute top-1 right-1 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-glow-orange">
                 {unread}
               </span>
             )}
           </button>
-          <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[12px] font-bold text-white ring-2 ring-accent/20">
+          <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[12px] font-bold text-white ring-2 ring-stat-blue/20 ring-offset-2 ring-offset-surface">
             {currentUser.username[0].toUpperCase()}
           </div>
           <button
@@ -89,39 +89,56 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       </div>
 
-      {/* ── Desktop header: full info bar + controls ── */}
-      <div className="hidden md:block px-6 py-3.5">
+      {/* ── Desktop header ── */}
+      <div className="hidden md:block px-7 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3.5 text-[12px] text-text-2 font-medium flex-1 min-w-0">
-            <span>{dayName}, {monthDay}</span>
-            <span className="w-1 h-1 rounded-full bg-border-2" />
-            <span className="hidden lg:inline">{CLEARANCE_LABELS[clearance]} (L{clearance})</span>
-            <span className="hidden lg:inline w-1 h-1 rounded-full bg-border-2" />
-            <span className="font-mono font-semibold text-text">{db.entries.length} entities</span>
-            <span className="w-1 h-1 rounded-full bg-border-2" />
-            <span className="font-mono font-semibold text-text">{regions} regions</span>
-            <span className="hidden xl:inline w-1 h-1 rounded-full bg-border-2" />
-            <span className="hidden xl:inline font-mono font-semibold text-text">{totalLinks} links</span>
-            {signals > 0 && (
-              <span className="ml-2 inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2.5 py-1 rounded-full text-[11px]">
-                <Zap size={10} /> {signals} signal{signals !== 1 ? "s" : ""}
+          <div className="flex items-center gap-2">
+            <h2 className="text-[22px] font-bold text-text tracking-tight font-display">Dashboard</h2>
+            <div className="flex items-center gap-2 ml-4">
+              <span className="text-[11px] text-text-3 font-medium bg-surface-3 px-2.5 py-1 rounded-lg">
+                {dayName}, {monthDay}
               </span>
-            )}
+              <span className="text-[11px] font-semibold text-text bg-surface-3 px-2.5 py-1 rounded-lg font-mono tabular-nums">
+                {db.entries.length} entities
+              </span>
+              <span className="text-[11px] font-semibold text-text bg-surface-3 px-2.5 py-1 rounded-lg font-mono tabular-nums">
+                {totalLinks} links
+              </span>
+              {signals > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-accent font-bold bg-accent-muted border border-accent/15 px-2.5 py-1 rounded-lg text-[11px]">
+                  <Zap size={10} className="fill-current" /> {signals} signal{signals !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-4 shrink-0 ml-4">
+          <div className="flex items-center gap-3">
             <button
-              className="relative p-2.5 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
+              onClick={() => router.push("/search")}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-3/60 border border-border/50 hover:bg-surface-3 transition-all text-text-3 text-[12px]"
+            >
+              <Search size={13} />
+              <span>Search...</span>
+              <kbd className="ml-4 flex items-center gap-0.5 text-[10px] font-mono text-text-3/60 bg-surface/80 px-1.5 py-0.5 rounded border border-border/50">
+                <Command size={9} />K
+              </kbd>
+            </button>
+
+            <button
+              className="relative p-2.5 rounded-xl hover:bg-surface-3 transition-all group"
               onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
             >
-              <Bell size={18} className="text-text-3" />
+              <Bell size={18} className="text-text-3 group-hover:text-text transition-colors" />
               {unread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-glow-orange">
                   {unread}
                 </span>
               )}
             </button>
-            <div className="flex items-center gap-3 pl-4 border-l border-border/60">
-              <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[12px] font-bold text-white ring-2 ring-accent/20">
+
+            <div className="w-px h-8 bg-border/50" />
+
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[11px] font-bold text-white ring-2 ring-stat-blue/15 ring-offset-2 ring-offset-surface">
                 {currentUser.username[0].toUpperCase()}
               </div>
               <div>
@@ -139,13 +156,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-1 mt-3 -ml-2.5">
+        {/* Quick actions */}
+        <div className="flex items-center gap-1.5 mt-4">
           {actions.map((a) => (
             <Link
               key={a.label}
               href={a.href}
-              className="flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium text-text/70 rounded-lg hover:bg-surface-2 hover:text-text transition-colors"
+              className={`flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl transition-all duration-200
+                ${a.primary
+                  ? "gradient-blue text-white shadow-glow-blue hover:shadow-lg"
+                  : "text-text-3 hover:bg-surface-3 hover:text-text border border-transparent hover:border-border/50"
+                }`}
             >
               <a.icon size={14} />
               {a.label}
