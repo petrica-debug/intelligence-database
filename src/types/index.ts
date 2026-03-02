@@ -58,6 +58,17 @@ export interface ReportSection {
   sensitivity: SensitivityLevel;
 }
 
+export type ReportItemType = "person" | "company" | "phone" | "vehicle" | "location" | "document" | "financial" | "other";
+
+export interface ReportItem {
+  type: ReportItemType;
+  label: string;
+  value: string;
+  notes: string;
+  sensitivity: SensitivityLevel;
+  linkedEntityId?: number;
+}
+
 export interface Report {
   id: number;
   title: string;
@@ -67,6 +78,7 @@ export interface Report {
   attendees: number[];
   externalAttendees: string[];
   sections: ReportSection[];
+  items?: ReportItem[];
   tags: string[];
   linkedEntities: number[];
   createdBy: string;

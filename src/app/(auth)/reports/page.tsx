@@ -6,11 +6,22 @@ import Link from "next/link";
 import {
   FileText, Plus, Shield, Eye, EyeOff, Calendar, MapPin, Users,
   Filter, Lock, ChevronDown, ChevronRight, Tag, AlertTriangle, CheckCircle2,
-  Clock, Archive, Search
+  Clock, Archive, Search, Phone, Car, Building2, User, FileArchive, DollarSign, MoreHorizontal
 } from "lucide-react";
 import { cn } from "@/lib/cn";
-import type { Report, SensitivityLevel } from "@/types";
+import type { Report, SensitivityLevel, ReportItemType } from "@/types";
 import { SENSITIVITY_MIN_CLEARANCE, CLEARANCE_LABELS } from "@/types";
+
+const ITEM_TYPE_CONFIG: Record<ReportItemType, { label: string; icon: typeof User; gradient: string }> = {
+  person: { label: "Person", icon: User, gradient: "gradient-blue" },
+  company: { label: "Organization", icon: Building2, gradient: "gradient-purple" },
+  phone: { label: "Phone", icon: Phone, gradient: "gradient-teal" },
+  vehicle: { label: "Vehicle", icon: Car, gradient: "gradient-orange" },
+  location: { label: "Location", icon: MapPin, gradient: "gradient-green" },
+  document: { label: "Document", icon: FileArchive, gradient: "bg-text-3" },
+  financial: { label: "Financial", icon: DollarSign, gradient: "bg-text-3" },
+  other: { label: "Other", icon: MoreHorizontal, gradient: "bg-text-3" },
+};
 
 const SENS_STYLE: Record<SensitivityLevel, { bg: string; text: string; border: string; icon: typeof Shield }> = {
   standard: { bg: "bg-emerald/8", text: "text-emerald", border: "border-emerald/15", icon: Eye },
@@ -178,8 +189,14 @@ export default function ReportsPage() {
                     {report.location && <span className="flex items-center gap-1"><MapPin size={12} />{report.location.split(",")[0]}</span>}
                     <span className="flex items-center gap-1">
                       <Eye size={12} />
-                      {visible.length}/{report.sections.length} sections visible
+                      {visible.length}/{report.sections.length} sections
                     </span>
+                    {report.items && report.items.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Shield size={12} />
+                        {report.items.filter(i => canView(i.sensitivity)).length}/{report.items.length} items
+                      </span>
+                    )}
                     {hidden.length > 0 && (
                       <span className="flex items-center gap-1 text-red">
                         <EyeOff size={12} />
@@ -243,6 +260,52 @@ export default function ReportsPage() {
                       {report.tags.map((t) => (
                         <span key={t} className="text-[10px] font-medium bg-surface-3 text-text-2 px-2 py-0.5 rounded-md">{t}</span>
                       ))}
+                    </div>
+                  )}
+
+                  {/* Intelligence Items */}
+                  {report.items && report.items.length > 0 && (
+                    <div>
+                      <h4 className="text-[11px] font-semibold text-text-3 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                        <Shield size={12} /> Intelligence Items ({report.items.filter(i => canView(i.sensitivity)).length}/{report.items.length})
+                      </h4>
+                      <div className="space-y-1.5">
+                        {report.items.map((item, idx) => {
+                          const canSee = canView(item.sensitivity);
+                          const cfg = ITEM_TYPE_CONFIG[item.type] ?? ITEM_TYPE_CONFIG.other;
+                          const ItemIcon = cfg.icon;
+                          const iSens = SENS_STYLE[item.sensitivity];
+                          return (
+                            <div key={idx} className={cn(
+                              "flex items-center gap-3 rounded-lg border px-3 py-2 text-[12px]",
+                              canSee ? "bg-white border-border/60" : "bg-surface-2/50 border-border/30"
+                            )}>
+                              <div className={cn("w-6 h-6 rounded flex items-center justify-center text-white shrink-0", cfg.gradient)}>
+                                <ItemIcon size={12} />
+                              </div>
+                              {canSee ? (
+                                <>
+                                  <div className="flex-1 min-w-0">
+                                    <span className="font-semibold text-text">{item.value}</span>
+                                    {item.label && <span className="text-text-3 ml-1.5">({item.label})</span>}
+                                    {item.notes && <span className="text-text-3 ml-1.5 text-[11px]">— {item.notes}</span>}
+                                  </div>
+                                  <span className={cn("text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border shrink-0", iSens.bg, iSens.text, iSens.border)}>
+                                    {item.sensitivity}
+                                  </span>
+                                </>
+                              ) : (
+                                <div className="flex items-center gap-1.5 text-text-3 flex-1">
+                                  <Lock size={12} />
+                                  <span className="text-[11px] italic">
+                                    {cfg.label} — restricted (requires L{SENSITIVITY_MIN_CLEARANCE[item.sensitivity]})
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
 
