@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
   /* ── Key Actors ── */
   const keyActors = useMemo(() =>
-    [...persons].sort((a, b) => influence(b) - influence(a)).slice(0, 6),
+    [...persons].sort((a, b) => influence(b) - influence(a)).slice(0, 3),
     [persons, connMap] // eslint-disable-line
   );
 
@@ -189,10 +189,10 @@ export default function DashboardPage() {
     db.reports.filter(r => canView(r.overallSensitivity)).forEach(r => {
       items.push({ type: "report", date: r.createdAt, data: r });
     });
-    db.inferredConnections.filter(ic => ic.status === "new").sort((a, b) => b.confidence - a.confidence).slice(0, 5).forEach(ic => {
+    db.inferredConnections.filter(ic => ic.status === "new").sort((a, b) => b.confidence - a.confidence).slice(0, 3).forEach(ic => {
       items.push({ type: "inference", date: ic.createdAt, data: ic });
     });
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 6);
+    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 3);
   }, [db.reports, db.inferredConnections, canView]);
 
   const sensColors: Record<SensitivityLevel, string> = {
@@ -200,70 +200,71 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="animate-fade-in space-y-8">
+    <div className="animate-fade-in space-y-10">
 
       {/* ═══ SECTION 1: Welcome Banner ═══ */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#0f1b2d] via-[#1e3a5f] to-[#274b7a] border border-white/5">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
-        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-400/10 blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="relative z-10 px-8 py-8">
-          <div className="flex items-start justify-between">
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-blue-400/10 blur-[120px] -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-emerald/5 blur-[80px] translate-y-1/3 -translate-x-1/4" />
+        <div className="relative z-10 px-10 py-10">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[28px] font-bold text-white tracking-tight mb-1.5">
+              <h1 className="text-[36px] font-bold text-white tracking-tight mb-2">
                 {greeting}, {firstName}
               </h1>
-              <p className="text-[14px] text-white/50 mb-5">{today}</p>
-              <div className="flex items-center gap-4 text-[12px] text-white/40">
-                <span className="flex items-center gap-1.5"><Shield size={12} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
-                <span className="w-px h-3 bg-white/15" />
-                <span>{entries.length} entities</span>
-                <span className="w-px h-3 bg-white/15" />
-                <span>{coverage.length} regions</span>
-                <span className="w-px h-3 bg-white/15" />
-                <span>{totalLinks} links</span>
+              <p className="text-[16px] text-white/50 mb-6">{today}</p>
+              <div className="flex items-center gap-5 text-[13px] text-white/40">
+                <span className="flex items-center gap-2"><Shield size={14} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
+                <span className="w-px h-4 bg-white/15" />
+                <span className="font-medium">{entries.length} entities</span>
+                <span className="w-px h-4 bg-white/15" />
+                <span className="font-medium">{coverage.length} regions</span>
+                <span className="w-px h-4 bg-white/15" />
+                <span className="font-medium">{totalLinks} links</span>
                 {db.signals.length > 0 && (
                   <>
-                    <span className="w-px h-3 bg-white/15" />
-                    <span className="text-amber flex items-center gap-1"><Radio size={10} className="animate-pulse" />{db.signals.length} signal{db.signals.length !== 1 && "s"}</span>
+                    <span className="w-px h-4 bg-white/15" />
+                    <span className="text-amber flex items-center gap-1.5 font-medium"><Radio size={12} className="animate-pulse" />{db.signals.length} signal{db.signals.length !== 1 && "s"}</span>
                   </>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               {/* Reliability ring */}
               <div className="relative">
-                <Ring pct={confPct} size={64} sw={5} color="#34d399" />
+                <Ring pct={confPct} size={88} sw={6} color="#34d399" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-[15px] font-bold text-emerald">{confPct}%</span>
-                  <span className="text-[7px] text-white/30 uppercase font-semibold">Verified</span>
+                  <span className="text-[22px] font-bold text-emerald">{confPct}%</span>
+                  <span className="text-[9px] text-white/30 uppercase font-semibold tracking-wide">Verified</span>
                 </div>
               </div>
             </div>
           </div>
           {/* Quick Actions */}
-          <div className="flex items-center gap-3 mt-6">
+          <div className="flex items-center gap-3.5 mt-8">
             <button onClick={() => router.push("/new-entry")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Plus size={14} /> New Entry
+              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Plus size={16} /> New Entry
             </button>
             <button onClick={() => router.push("/search")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Search size={14} /> Search
+              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Search size={16} /> Search
             </button>
             <button onClick={() => router.push("/reports/new")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <FileText size={14} /> New Report
+              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <FileText size={16} /> New Report
             </button>
             <button onClick={() => router.push("/network")}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Share2 size={14} /> Network
+              className="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[14px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Share2 size={16} /> Network
             </button>
           </div>
         </div>
       </div>
 
       {/* ═══ SECTION 2: Command Strip — 4 KPIs ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
         <B className="bg-gradient-to-br from-accent/[0.04] to-transparent">
           <div className="flex items-start justify-between mb-5">
             <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
@@ -306,7 +307,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ SECTION 3: Priority Zone — Action Center + Watch Targets ═══ */}
-      <div className="grid grid-cols-12 gap-5">
+      <div className="grid grid-cols-12 gap-6">
 
         {/* Action Center */}
         <B className="col-span-12 md:col-span-5">
@@ -413,22 +414,22 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ SECTION 4: Intelligence Overview — Key Actors + Coverage + Composition ═══ */}
-      <div className="grid grid-cols-12 gap-5">
+      <div className="grid grid-cols-12 gap-6">
 
         {/* Key Actors */}
         <B className="col-span-12 md:col-span-5">
           <SH action={
-            <button onClick={() => router.push("/persons")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">View all</button>
-          }>Key Actors &mdash; Influence Ranking</SH>
-          <div className="space-y-2">
+            <button onClick={() => router.push("/persons")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">View all ({persons.length})</button>
+          }>Key Actors &mdash; Top 3</SH>
+          <div className="space-y-2.5">
             {keyActors.map((e, i) => {
               const score = influence(e);
               const hasSig = db.signals.some((s) => s.entityId === e.id);
               const maxScore = influence(keyActors[0]);
               return (
                 <div key={e.id} onClick={() => go(e.id)}
-                  className="flex items-center gap-3.5 py-3 px-3 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
-                  <span className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold shrink-0",
+                  className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
+                  <span className={cn("w-10 h-10 rounded-xl flex items-center justify-center text-[13px] font-bold shrink-0",
                     i === 0 ? "bg-gradient-to-br from-amber to-amber/60 text-white shadow-sm shadow-amber/20" :
                     i === 1 ? "bg-gradient-to-br from-slate to-slate/60 text-white" :
                     i === 2 ? "bg-gradient-to-br from-amber/70 to-amber/40 text-white" :
@@ -436,7 +437,7 @@ export default function DashboardPage() {
                   )}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-semibold group-hover:text-accent transition-colors truncate">{e.name}</span>
+                      <span className="text-[14px] font-semibold group-hover:text-accent transition-colors truncate">{e.name}</span>
                       {hasSig && <span className="px-1.5 py-0.5 rounded bg-amber/10 text-amber text-[9px] font-bold leading-none animate-pulse-glow">SIGNAL</span>}
                     </div>
                     <div className="text-[11px] text-text-3 mt-1">{e.country}</div>
@@ -448,7 +449,7 @@ export default function DashboardPage() {
                           style={{ width: `${(score / maxScore) * 100}%` }} />
                       </div>
                     </div>
-                    <span className={cn("text-[14px] font-bold w-8 text-right tabular-nums",
+                    <span className={cn("text-[15px] font-bold w-9 text-right tabular-nums",
                       score >= 120 ? "text-red" : score >= 80 ? "text-amber" : "text-text-2"
                     )}>{score}</span>
                   </div>
@@ -461,35 +462,35 @@ export default function DashboardPage() {
         {/* Regional Coverage */}
         <B className="col-span-12 md:col-span-4">
           <SH action={
-            <button onClick={() => router.push("/geo")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">Map view</button>
-          }>Regional Coverage</SH>
-          <div className="space-y-3">
-            {coverage.slice(0, 8).map(([country, data]) => {
+            <button onClick={() => router.push("/geo")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">All {coverage.length} regions</button>
+          }>Top Regions</SH>
+          <div className="space-y-4">
+            {coverage.slice(0, 3).map(([country, data]) => {
               const confRate = data.total > 0 ? Math.round((data.confirmed / data.total) * 100) : 0;
               const shortName = country === "International" ? "Int'l" : country === "Czech Republic" ? "Czech Rep." : country === "North Macedonia" ? "N. Macedonia" : country;
               return (
                 <div key={country} className="flex items-center gap-3">
-                  <div className="w-20 truncate text-[12px] font-medium text-text-2">{shortName}</div>
+                  <div className="w-24 truncate text-[13px] font-medium text-text-2">{shortName}</div>
                   <div className="flex-1">
-                    <div className="h-3 bg-surface-3 rounded-full overflow-hidden flex">
+                    <div className="h-3.5 bg-surface-3 rounded-full overflow-hidden flex">
                       <div className="h-full bg-accent rounded-l-full" style={{ width: `${(data.persons / data.total) * 100}%` }} />
                       <div className="h-full bg-purple" style={{ width: `${(data.orgs / data.total) * 100}%` }} />
                       <div className="h-full bg-amber/50" style={{ width: `${((data.total - data.persons - data.orgs) / data.total) * 100}%` }} />
                     </div>
                   </div>
-                  <span className="text-[12px] font-bold text-text w-6 text-right tabular-nums">{data.total}</span>
-                  <span className={cn("text-[11px] font-semibold w-9 text-right tabular-nums",
+                  <span className="text-[13px] font-bold text-text w-7 text-right tabular-nums">{data.total}</span>
+                  <span className={cn("text-[12px] font-semibold w-10 text-right tabular-nums",
                     confRate >= 80 ? "text-emerald" : confRate >= 50 ? "text-amber" : "text-red"
                   )}>{confRate}%</span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/30">
-            <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-accent" />Persons</span>
-            <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-purple" />Orgs</span>
-            <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-amber/50" />Other</span>
-            <span className="ml-auto text-[9px] text-text-3">% = verified</span>
+          <div className="flex items-center gap-4 mt-5 pt-3.5 border-t border-border/30">
+            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-accent" />Persons</span>
+            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-purple" />Orgs</span>
+            <span className="flex items-center gap-1.5 text-[10px] text-text-3"><span className="w-2.5 h-2.5 rounded-sm bg-amber/50" />Other</span>
+            <span className="ml-auto text-[10px] text-text-3">% = verified</span>
           </div>
         </B>
 
@@ -547,17 +548,17 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ SECTION 5: Intelligence Feed + Domain Profile ═══ */}
-      <div className="grid grid-cols-12 gap-5">
+      <div className="grid grid-cols-12 gap-6">
 
         {/* Unified Intelligence Feed */}
         <B className="col-span-12 md:col-span-7">
           <SH action={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button onClick={() => router.push("/reports")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">Reports</button>
               <span className="text-text-3 text-[10px]">/</span>
               <button onClick={() => router.push("/intelligence")} className="text-[10px] text-purple font-medium hover:underline cursor-pointer">Inferences</button>
             </div>
-          }>Recent Intelligence</SH>
+          }>Latest Intelligence</SH>
           {intelligenceFeed.length === 0 ? (
             <p className="text-[12px] text-text-3 py-6 text-center">No recent intelligence</p>
           ) : (
