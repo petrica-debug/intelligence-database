@@ -1,5 +1,6 @@
--- Enable UUID extension
+-- Enable extensions
 create extension if not exists "uuid-ossp";
+create extension if not exists "pg_trgm";
 
 -- ─── Users (app-level profile linked to Supabase Auth) ───
 create table public.profiles (
