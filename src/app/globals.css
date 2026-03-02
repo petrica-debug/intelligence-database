@@ -27,6 +27,13 @@
   --color-text-2: #3e5068;
   --color-text-3: #7b8da4;
 
+  --color-sb: #1c2333;
+  --color-sb-2: #272f3e;
+  --color-sb-fg: #8d96a5;
+  --color-sb-bright: #e8ebf0;
+  --color-sb-border: #282f3c;
+  --color-sb-active: #3b8af5;
+
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }

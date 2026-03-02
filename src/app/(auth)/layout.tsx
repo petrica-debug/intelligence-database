@@ -23,15 +23,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <>
-      <Topbar />
-      <NotificationPanel />
-      <div className="flex min-h-[calc(100vh-56px)]">
-        <Sidebar pathname={pathname} />
-        <main className="flex-1 p-7 overflow-y-auto max-h-[calc(100vh-56px)]">
+    <div className="flex h-screen bg-bg overflow-hidden">
+      <Sidebar pathname={pathname} />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <Topbar />
+        <NotificationPanel />
+        <main className="flex-1 overflow-y-auto p-5 scrollbar-thin">
           <div className="animate-fade-in">{children}</div>
         </main>
       </div>
-    </>
+    </div>
   );
 }
