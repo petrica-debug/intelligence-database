@@ -86,15 +86,15 @@ function B({ children, className, dark, glow }: { children: React.ReactNode; cla
       className
     )}>
       {glow && <div className={cn("absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none", glow)} />}
-      <div className="relative z-10 p-5 h-full">{children}</div>
+      <div className="relative z-10 p-7 h-full">{children}</div>
     </div>
   );
 }
 
 function SH({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between mb-3">
-      <h3 className="text-[10px] font-semibold text-text-3 uppercase tracking-[0.08em]">{children}</h3>
+    <div className="flex items-center justify-between mb-5">
+      <h3 className="text-[11px] font-semibold text-text-3 uppercase tracking-[0.1em]">{children}</h3>
       {action}
     </div>
   );
@@ -200,20 +200,20 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="animate-fade-in space-y-5">
+    <div className="animate-fade-in space-y-8">
 
       {/* ═══ SECTION 1: Welcome Banner ═══ */}
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#0f1b2d] via-[#1e3a5f] to-[#274b7a] border border-white/5">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-blue-400/10 blur-[100px] -translate-y-1/2 translate-x-1/3" />
-        <div className="relative z-10 px-7 py-6">
+        <div className="relative z-10 px-8 py-8">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-[24px] font-bold text-white tracking-tight mb-1">
+              <h1 className="text-[28px] font-bold text-white tracking-tight mb-1.5">
                 {greeting}, {firstName}
               </h1>
-              <p className="text-[13px] text-white/50 mb-4">{today}</p>
-              <div className="flex items-center gap-3 text-[12px] text-white/40">
+              <p className="text-[14px] text-white/50 mb-5">{today}</p>
+              <div className="flex items-center gap-4 text-[12px] text-white/40">
                 <span className="flex items-center gap-1.5"><Shield size={12} />{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
                 <span className="w-px h-3 bg-white/15" />
                 <span>{entries.length} entities</span>
@@ -241,72 +241,72 @@ export default function DashboardPage() {
             </div>
           </div>
           {/* Quick Actions */}
-          <div className="flex items-center gap-2.5 mt-5">
+          <div className="flex items-center gap-3 mt-6">
             <button onClick={() => router.push("/new-entry")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[12px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Plus size={13} /> New Entry
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Plus size={14} /> New Entry
             </button>
             <button onClick={() => router.push("/search")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[12px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Search size={13} /> Search
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Search size={14} /> Search
             </button>
             <button onClick={() => router.push("/reports/new")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[12px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <FileText size={13} /> New Report
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <FileText size={14} /> New Report
             </button>
             <button onClick={() => router.push("/network")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[12px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
-              <Share2 size={13} /> Network
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[13px] font-semibold transition-all cursor-pointer backdrop-blur-sm">
+              <Share2 size={14} /> Network
             </button>
           </div>
         </div>
       </div>
 
       {/* ═══ SECTION 2: Command Strip — 4 KPIs ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <B>
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-accent/8 flex items-center justify-center">
-              <Users size={18} className="text-accent" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <B className="bg-gradient-to-br from-accent/[0.04] to-transparent">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center">
+              <Users size={24} className="text-accent" />
             </div>
-            <Spark data={sparkEntities.slice(0, -2).concat([persons.length])} color={C.navy} />
+            <Spark data={sparkEntities.slice(0, -2).concat([persons.length])} color={C.navy} h={36} />
           </div>
-          <div className="text-2xl font-bold tracking-tight"><Num value={persons.length} /></div>
-          <div className="text-[11px] text-text-3 font-medium mt-0.5">Key Actors</div>
+          <div className="text-3xl font-bold tracking-tight"><Num value={persons.length} /></div>
+          <div className="text-[13px] text-text-3 font-medium mt-1">Key Actors</div>
         </B>
-        <B>
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-purple/8 flex items-center justify-center">
-              <Building2 size={18} className="text-purple" />
+        <B className="bg-gradient-to-br from-purple/[0.04] to-transparent">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-14 h-14 rounded-2xl bg-purple/10 flex items-center justify-center">
+              <Building2 size={24} className="text-purple" />
             </div>
-            <Spark data={sparkEntities.slice(0, -2).concat([orgs.length])} color={C.purple} />
+            <Spark data={sparkEntities.slice(0, -2).concat([orgs.length])} color={C.purple} h={36} />
           </div>
-          <div className="text-2xl font-bold tracking-tight"><Num value={orgs.length} /></div>
-          <div className="text-[11px] text-text-3 font-medium mt-0.5">Organizations</div>
+          <div className="text-3xl font-bold tracking-tight"><Num value={orgs.length} /></div>
+          <div className="text-[13px] text-text-3 font-medium mt-1">Organizations</div>
         </B>
-        <B>
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan/8 flex items-center justify-center">
-              <Link2 size={18} className="text-cyan" />
+        <B className="bg-gradient-to-br from-cyan/[0.04] to-transparent">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-14 h-14 rounded-2xl bg-cyan/10 flex items-center justify-center">
+              <Link2 size={24} className="text-cyan" />
             </div>
-            <Spark data={sparkLinks} color={C.cyan} />
+            <Spark data={sparkLinks} color={C.cyan} h={36} />
           </div>
-          <div className="text-2xl font-bold tracking-tight"><Num value={totalLinks} /></div>
-          <div className="text-[11px] text-text-3 font-medium mt-0.5">Network Links</div>
+          <div className="text-3xl font-bold tracking-tight"><Num value={totalLinks} /></div>
+          <div className="text-[13px] text-text-3 font-medium mt-1">Network Links</div>
         </B>
-        <B>
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald/8 flex items-center justify-center">
-              <Globe size={18} className="text-emerald" />
+        <B className="bg-gradient-to-br from-emerald/[0.04] to-transparent">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-14 h-14 rounded-2xl bg-emerald/10 flex items-center justify-center">
+              <Globe size={24} className="text-emerald" />
             </div>
           </div>
-          <div className="text-2xl font-bold tracking-tight"><Num value={coverage.length} /></div>
-          <div className="text-[11px] text-text-3 font-medium mt-0.5">Regions Covered</div>
+          <div className="text-3xl font-bold tracking-tight"><Num value={coverage.length} /></div>
+          <div className="text-[13px] text-text-3 font-medium mt-1">Regions Covered</div>
         </B>
       </div>
 
       {/* ═══ SECTION 3: Priority Zone — Action Center + Watch Targets ═══ */}
-      <div className="grid grid-cols-12 gap-3">
+      <div className="grid grid-cols-12 gap-5">
 
         {/* Action Center */}
         <B className="col-span-12 md:col-span-5">
@@ -314,49 +314,49 @@ export default function DashboardPage() {
             totalActionItems > 0 ? <span className="text-[10px] font-bold text-amber bg-amber/8 px-2 py-0.5 rounded-full">{totalActionItems} pending</span> : undefined
           }>Requires Your Attention</SH>
           {totalActionItems === 0 ? (
-            <div className="flex flex-col items-center py-6 text-center">
-              <CheckCircle2 size={24} className="text-emerald/50 mb-2" />
-              <p className="text-[12px] text-text-3">All caught up. No pending actions.</p>
+            <div className="flex flex-col items-center py-10 text-center">
+              <CheckCircle2 size={28} className="text-emerald/50 mb-3" />
+              <p className="text-[13px] text-text-3">All caught up. No pending actions.</p>
             </div>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               {pendingValidations > 0 && (
                 <button onClick={() => router.push("/admin/validations")}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-red/10 bg-red/[0.02] hover:bg-red/[0.05] hover:border-red/20 transition-all cursor-pointer text-left group">
-                  <div className="w-8 h-8 rounded-lg bg-red/8 flex items-center justify-center shrink-0">
-                    <FileWarning size={14} className="text-red" />
+                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-red/10 bg-red/[0.02] hover:bg-red/[0.05] hover:border-red/20 transition-all cursor-pointer text-left group">
+                  <div className="w-11 h-11 rounded-xl bg-red/8 flex items-center justify-center shrink-0">
+                    <FileWarning size={18} className="text-red" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-semibold text-text group-hover:text-red transition-colors">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</div>
-                    <div className="text-[10px] text-text-3">Awaiting admin review</div>
+                    <div className="text-[13px] font-semibold text-text group-hover:text-red transition-colors">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">Awaiting admin review</div>
                   </div>
-                  <ChevronRight size={14} className="text-text-3 group-hover:text-red shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3 group-hover:text-red shrink-0 transition-colors" />
                 </button>
               )}
               {newInferences > 0 && (
                 <button onClick={() => router.push("/intelligence")}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-purple/10 bg-purple/[0.02] hover:bg-purple/[0.05] hover:border-purple/20 transition-all cursor-pointer text-left group">
-                  <div className="w-8 h-8 rounded-lg bg-purple/8 flex items-center justify-center shrink-0">
-                    <Brain size={14} className="text-purple" />
+                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-purple/10 bg-purple/[0.02] hover:bg-purple/[0.05] hover:border-purple/20 transition-all cursor-pointer text-left group">
+                  <div className="w-11 h-11 rounded-xl bg-purple/8 flex items-center justify-center shrink-0">
+                    <Brain size={18} className="text-purple" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-semibold text-text group-hover:text-purple transition-colors">{newInferences} AI inference{newInferences !== 1 && "s"} to review</div>
-                    <div className="text-[10px] text-text-3">New connections detected</div>
+                    <div className="text-[13px] font-semibold text-text group-hover:text-purple transition-colors">{newInferences} AI inference{newInferences !== 1 && "s"} to review</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">New connections detected</div>
                   </div>
-                  <ChevronRight size={14} className="text-text-3 group-hover:text-purple shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3 group-hover:text-purple shrink-0 transition-colors" />
                 </button>
               )}
               {unreadNotifs > 0 && (
                 <button onClick={() => {}}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border border-amber/10 bg-amber/[0.02] hover:bg-amber/[0.05] hover:border-amber/20 transition-all cursor-pointer text-left group">
-                  <div className="w-8 h-8 rounded-lg bg-amber/8 flex items-center justify-center shrink-0">
-                    <Bell size={14} className="text-amber" />
+                  className="w-full flex items-center gap-4 p-4 rounded-xl border border-amber/10 bg-amber/[0.02] hover:bg-amber/[0.05] hover:border-amber/20 transition-all cursor-pointer text-left group">
+                  <div className="w-11 h-11 rounded-xl bg-amber/8 flex items-center justify-center shrink-0">
+                    <Bell size={18} className="text-amber" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-semibold text-text group-hover:text-amber transition-colors">{unreadNotifs} unread notification{unreadNotifs !== 1 && "s"}</div>
-                    <div className="text-[10px] text-text-3">Signal alerts and updates</div>
+                    <div className="text-[13px] font-semibold text-text group-hover:text-amber transition-colors">{unreadNotifs} unread notification{unreadNotifs !== 1 && "s"}</div>
+                    <div className="text-[11px] text-text-3 mt-0.5">Signal alerts and updates</div>
                   </div>
-                  <ChevronRight size={14} className="text-text-3 group-hover:text-amber shrink-0 transition-colors" />
+                  <ChevronRight size={16} className="text-text-3 group-hover:text-amber shrink-0 transition-colors" />
                 </button>
               )}
             </div>
@@ -373,9 +373,9 @@ export default function DashboardPage() {
             <span className="flex items-center gap-2"><Crosshair size={12} className="text-amber" /> Watch Targets</span>
           </SH>
           {db.signals.length === 0 ? (
-            <p className="text-[12px] text-text-3 py-6 text-center">No active watch targets</p>
+            <p className="text-[13px] text-text-3 py-10 text-center">No active watch targets</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {db.signals.map((sig) => {
                 const entity = entries.find((e) => e.id === sig.entityId);
                 if (!entity) return null;
@@ -386,23 +386,23 @@ export default function DashboardPage() {
                 }), 1);
                 return (
                   <div key={sig.entityId} onClick={() => go(sig.entityId)}
-                    className="flex items-center gap-3 p-3 rounded-xl bg-amber/[0.03] border border-amber/10 hover:border-amber/25 transition-all cursor-pointer group">
-                    <div className="w-9 h-9 rounded-xl bg-amber/10 flex items-center justify-center shrink-0">
-                      <Radio size={14} className="text-amber animate-pulse-glow" />
+                    className="flex items-center gap-4 p-4 rounded-xl bg-amber/[0.03] border border-amber/10 hover:border-amber/25 transition-all cursor-pointer group">
+                    <div className="w-11 h-11 rounded-xl bg-amber/10 flex items-center justify-center shrink-0">
+                      <Radio size={18} className="text-amber animate-pulse-glow" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-[13px] font-semibold group-hover:text-amber transition-colors truncate">{entity.name}</span>
-                        <Badge variant={entity.category as never} className="text-[8px]">{entity.category}</Badge>
+                        <Badge variant={entity.category as never} className="text-[9px]">{entity.category}</Badge>
                       </div>
-                      <div className="w-full h-1.5 bg-amber/10 rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-amber/10 rounded-full overflow-hidden">
                         <div className="h-full rounded-full bg-gradient-to-r from-amber/60 to-amber transition-all duration-700"
                           style={{ width: `${(score / maxScore) * 100}%` }} />
                       </div>
                     </div>
-                    <div className="text-right shrink-0 ml-2">
-                      <div className="text-[15px] font-bold text-amber tabular-nums">{score}</div>
-                      <div className="text-[8px] text-text-3 font-medium uppercase">Influence</div>
+                    <div className="text-right shrink-0 ml-3">
+                      <div className="text-[18px] font-bold text-amber tabular-nums">{score}</div>
+                      <div className="text-[9px] text-text-3 font-medium uppercase">Influence</div>
                     </div>
                   </div>
                 );
@@ -413,22 +413,22 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ SECTION 4: Intelligence Overview — Key Actors + Coverage + Composition ═══ */}
-      <div className="grid grid-cols-12 gap-3">
+      <div className="grid grid-cols-12 gap-5">
 
         {/* Key Actors */}
         <B className="col-span-12 md:col-span-5">
           <SH action={
             <button onClick={() => router.push("/persons")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">View all</button>
           }>Key Actors &mdash; Influence Ranking</SH>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {keyActors.map((e, i) => {
               const score = influence(e);
               const hasSig = db.signals.some((s) => s.entityId === e.id);
               const maxScore = influence(keyActors[0]);
               return (
                 <div key={e.id} onClick={() => go(e.id)}
-                  className="flex items-center gap-3 py-2.5 px-2.5 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
-                  <span className={cn("w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-bold shrink-0",
+                  className="flex items-center gap-3.5 py-3 px-3 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
+                  <span className={cn("w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold shrink-0",
                     i === 0 ? "bg-gradient-to-br from-amber to-amber/60 text-white shadow-sm shadow-amber/20" :
                     i === 1 ? "bg-gradient-to-br from-slate to-slate/60 text-white" :
                     i === 2 ? "bg-gradient-to-br from-amber/70 to-amber/40 text-white" :
@@ -437,18 +437,18 @@ export default function DashboardPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-[13px] font-semibold group-hover:text-accent transition-colors truncate">{e.name}</span>
-                      {hasSig && <span className="px-1.5 py-0.5 rounded bg-amber/10 text-amber text-[8px] font-bold leading-none animate-pulse-glow">SIGNAL</span>}
+                      {hasSig && <span className="px-1.5 py-0.5 rounded bg-amber/10 text-amber text-[9px] font-bold leading-none animate-pulse-glow">SIGNAL</span>}
                     </div>
-                    <div className="text-[10px] text-text-3 mt-0.5">{e.country}</div>
+                    <div className="text-[11px] text-text-3 mt-1">{e.country}</div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-3 shrink-0">
                     <div className="w-20">
-                      <div className="w-full h-2 bg-surface-3 rounded-full overflow-hidden">
+                      <div className="w-full h-2.5 bg-surface-3 rounded-full overflow-hidden">
                         <div className="h-full rounded-full bg-gradient-to-r from-[#1e3a5f] to-[#3b82f6] transition-all duration-700"
                           style={{ width: `${(score / maxScore) * 100}%` }} />
                       </div>
                     </div>
-                    <span className={cn("text-[13px] font-bold w-8 text-right tabular-nums",
+                    <span className={cn("text-[14px] font-bold w-8 text-right tabular-nums",
                       score >= 120 ? "text-red" : score >= 80 ? "text-amber" : "text-text-2"
                     )}>{score}</span>
                   </div>
@@ -463,29 +463,29 @@ export default function DashboardPage() {
           <SH action={
             <button onClick={() => router.push("/geo")} className="text-[10px] text-accent font-medium hover:underline cursor-pointer">Map view</button>
           }>Regional Coverage</SH>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {coverage.slice(0, 8).map(([country, data]) => {
               const confRate = data.total > 0 ? Math.round((data.confirmed / data.total) * 100) : 0;
               const shortName = country === "International" ? "Int'l" : country === "Czech Republic" ? "Czech Rep." : country === "North Macedonia" ? "N. Macedonia" : country;
               return (
-                <div key={country} className="flex items-center gap-2.5">
-                  <div className="w-20 truncate text-[11px] font-medium text-text-2">{shortName}</div>
+                <div key={country} className="flex items-center gap-3">
+                  <div className="w-20 truncate text-[12px] font-medium text-text-2">{shortName}</div>
                   <div className="flex-1">
-                    <div className="h-2.5 bg-surface-3 rounded-full overflow-hidden flex">
+                    <div className="h-3 bg-surface-3 rounded-full overflow-hidden flex">
                       <div className="h-full bg-accent rounded-l-full" style={{ width: `${(data.persons / data.total) * 100}%` }} />
                       <div className="h-full bg-purple" style={{ width: `${(data.orgs / data.total) * 100}%` }} />
                       <div className="h-full bg-amber/50" style={{ width: `${((data.total - data.persons - data.orgs) / data.total) * 100}%` }} />
                     </div>
                   </div>
-                  <span className="text-[11px] font-bold text-text w-6 text-right tabular-nums">{data.total}</span>
-                  <span className={cn("text-[10px] font-semibold w-9 text-right tabular-nums",
+                  <span className="text-[12px] font-bold text-text w-6 text-right tabular-nums">{data.total}</span>
+                  <span className={cn("text-[11px] font-semibold w-9 text-right tabular-nums",
                     confRate >= 80 ? "text-emerald" : confRate >= 50 ? "text-amber" : "text-red"
                   )}>{confRate}%</span>
                 </div>
               );
             })}
           </div>
-          <div className="flex items-center gap-3 mt-3 pt-2.5 border-t border-border/30">
+          <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border/30">
             <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-accent" />Persons</span>
             <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-purple" />Orgs</span>
             <span className="flex items-center gap-1 text-[9px] text-text-3"><span className="w-2 h-2 rounded-sm bg-amber/50" />Other</span>
@@ -497,7 +497,7 @@ export default function DashboardPage() {
         <B className="col-span-12 md:col-span-3">
           <SH>Entity Composition</SH>
           <div className="relative">
-            <ResponsiveContainer width="100%" height={190}>
+            <ResponsiveContainer width="100%" height={220}>
               <PieChart>
                 <defs>
                   {Object.entries(CAT_GRADIENTS).map(([k, [c1, c2]], i) => (
@@ -514,7 +514,7 @@ export default function DashboardPage() {
                     { name: "Contacts", value: entries.filter((e) => e.category === "mobile").length },
                     { name: "Vehicles", value: entries.filter((e) => e.category === "vehicle").length },
                   ]}
-                  cx="50%" cy="50%" innerRadius={50} outerRadius={75}
+                  cx="50%" cy="50%" innerRadius={55} outerRadius={85}
                   paddingAngle={3} dataKey="value" strokeWidth={0} cornerRadius={4}
                 >
                   {Object.keys(CAT_GRADIENTS).map((_, i) => <Cell key={i} fill={`url(#cg${i})`} />)}
@@ -525,12 +525,12 @@ export default function DashboardPage() {
             {/* Center label */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center">
-                <div className="text-[20px] font-bold text-text">{entries.length}</div>
-                <div className="text-[8px] text-text-3 uppercase font-semibold tracking-wider">Total</div>
+                <div className="text-[24px] font-bold text-text">{entries.length}</div>
+                <div className="text-[9px] text-text-3 uppercase font-semibold tracking-wider">Total</div>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center mt-1">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center mt-3">
             {[
               { label: "Persons", color: C.navy, val: persons.length },
               { label: "Orgs", color: C.purple, val: orgs.length },
@@ -538,8 +538,8 @@ export default function DashboardPage() {
               { label: "Mobile", color: C.emerald, val: entries.filter((e) => e.category === "mobile").length },
               { label: "Vehicle", color: C.red, val: entries.filter((e) => e.category === "vehicle").length },
             ].map((c) => (
-              <span key={c.label} className="flex items-center gap-1 text-[10px] text-text-3">
-                <span className="w-2 h-2 rounded-sm" style={{ background: c.color }} />{c.label} <b className="text-text-2">{c.val}</b>
+              <span key={c.label} className="flex items-center gap-1.5 text-[11px] text-text-3">
+                <span className="w-2.5 h-2.5 rounded-sm" style={{ background: c.color }} />{c.label} <b className="text-text-2">{c.val}</b>
               </span>
             ))}
           </div>
@@ -547,7 +547,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ SECTION 5: Intelligence Feed + Domain Profile ═══ */}
-      <div className="grid grid-cols-12 gap-3">
+      <div className="grid grid-cols-12 gap-5">
 
         {/* Unified Intelligence Feed */}
         <B className="col-span-12 md:col-span-7">
@@ -561,21 +561,21 @@ export default function DashboardPage() {
           {intelligenceFeed.length === 0 ? (
             <p className="text-[12px] text-text-3 py-6 text-center">No recent intelligence</p>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-2.5">
               {intelligenceFeed.map((item, idx) => {
                 if (item.type === "report") {
                   const report = item.data as typeof db.reports[0];
                   return (
                     <div key={`r-${report.id}`} onClick={() => router.push("/reports")}
-                      className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
-                      <div className="w-8 h-8 rounded-lg bg-accent/8 flex items-center justify-center shrink-0">
-                        <FileText size={14} className="text-accent" />
+                      className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-accent/[0.03] transition-all cursor-pointer group">
+                      <div className="w-10 h-10 rounded-xl bg-accent/8 flex items-center justify-center shrink-0">
+                        <FileText size={17} className="text-accent" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-semibold group-hover:text-accent transition-colors truncate">{report.title}</div>
-                        <div className="text-[10px] text-text-3 mt-0.5">{report.createdBy} &middot; {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &middot; {report.sections.length} sections</div>
+                        <div className="text-[13px] font-semibold group-hover:text-accent transition-colors truncate">{report.title}</div>
+                        <div className="text-[11px] text-text-3 mt-1">{report.createdBy} &middot; {new Date(report.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })} &middot; {report.sections.length} sections</div>
                       </div>
-                      <span className={cn("text-[10px] font-bold uppercase px-2 py-0.5 rounded-md", sensColors[report.overallSensitivity],
+                      <span className={cn("text-[10px] font-bold uppercase px-2.5 py-1 rounded-lg", sensColors[report.overallSensitivity],
                         report.overallSensitivity === "standard" ? "bg-emerald/8" :
                         report.overallSensitivity === "sensitive" ? "bg-amber/8" :
                         report.overallSensitivity === "confidential" ? "bg-red/8" : "bg-purple/8"
@@ -592,19 +592,19 @@ export default function DashboardPage() {
                   const confPctVal = Math.round(ic.confidence * 100);
                   return (
                     <div key={`i-${ic.id}`} onClick={() => router.push("/intelligence")}
-                      className="flex items-center gap-3 py-2.5 px-3 rounded-xl hover:bg-purple/[0.03] transition-all cursor-pointer group">
-                      <div className="w-8 h-8 rounded-lg bg-purple/8 flex items-center justify-center shrink-0">
-                        <Brain size={14} className="text-purple" />
+                      className="flex items-center gap-4 py-3.5 px-3.5 rounded-xl hover:bg-purple/[0.03] transition-all cursor-pointer group">
+                      <div className="w-10 h-10 rounded-xl bg-purple/8 flex items-center justify-center shrink-0">
+                        <Brain size={17} className="text-purple" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[12px] font-semibold truncate">
+                        <div className="text-[13px] font-semibold truncate">
                           <span className="group-hover:text-accent transition-colors">{entityA.name}</span>
                           <span className="text-text-3 mx-1.5">&harr;</span>
                           <span className="group-hover:text-purple transition-colors">{entityB.name}</span>
                         </div>
-                        <div className="text-[10px] text-text-3 mt-0.5 capitalize">{ic.category.replace(/-/g, " ")} &middot; {ic.evidence.length} evidence</div>
+                        <div className="text-[11px] text-text-3 mt-1 capitalize">{ic.category.replace(/-/g, " ")} &middot; {ic.evidence.length} evidence</div>
                       </div>
-                      <div className={cn("text-[13px] font-bold tabular-nums shrink-0",
+                      <div className={cn("text-[14px] font-bold tabular-nums shrink-0",
                         confPctVal >= 80 ? "text-emerald" : confPctVal >= 60 ? "text-amber" : "text-red"
                       )}>{confPctVal}%</div>
                     </div>
@@ -614,15 +614,15 @@ export default function DashboardPage() {
             </div>
           )}
           {/* Feed stats */}
-          <div className="flex items-center gap-4 mt-3 pt-2.5 border-t border-border/30">
-            <span className="flex items-center gap-1 text-[10px] text-text-3">
-              <FileText size={10} className="text-accent" /> {db.reports.filter(r => canView(r.overallSensitivity)).length} Reports
+          <div className="flex items-center gap-5 mt-5 pt-4 border-t border-border/30">
+            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
+              <FileText size={12} className="text-accent" /> {db.reports.filter(r => canView(r.overallSensitivity)).length} Reports
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-text-3">
-              <Brain size={10} className="text-purple" /> {newInferences} New Inferences
+            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
+              <Brain size={12} className="text-purple" /> {newInferences} New Inferences
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-text-3">
-              <CheckCircle2 size={10} className="text-emerald" /> {db.inferredConnections.filter(ic => ic.status === "confirmed").length} Confirmed
+            <span className="flex items-center gap-1.5 text-[11px] text-text-3">
+              <CheckCircle2 size={12} className="text-emerald" /> {db.inferredConnections.filter(ic => ic.status === "confirmed").length} Confirmed
             </span>
           </div>
         </B>
@@ -630,7 +630,7 @@ export default function DashboardPage() {
         {/* Domain Profile */}
         <B className="col-span-12 md:col-span-5">
           <SH>Domain Capability Profile</SH>
-          <ResponsiveContainer width="100%" height={260}>
+          <ResponsiveContainer width="100%" height={280}>
             <RadarChart cx="50%" cy="50%" outerRadius="72%" data={radarDims}>
               <PolarGrid stroke="#e2e8f0" strokeDasharray="3 3" />
               <PolarAngleAxis dataKey="dim" tick={{ fill: "#3e5068", fontSize: 10, fontWeight: 500 }} />
