@@ -90,88 +90,74 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       {/* ── Desktop header ── */}
-      <div className="hidden md:block px-7 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-[22px] font-bold text-text tracking-tight font-display">Dashboard</h2>
-            <div className="flex items-center gap-2 ml-4">
-              <span className="text-[11px] text-text-3 font-medium bg-surface-3 px-2.5 py-1 rounded-lg">
-                {dayName}, {monthDay}
-              </span>
-              <span className="text-[11px] font-semibold text-text bg-surface-3 px-2.5 py-1 rounded-lg font-mono tabular-nums">
-                {db.entries.length} entities
-              </span>
-              <span className="text-[11px] font-semibold text-text bg-surface-3 px-2.5 py-1 rounded-lg font-mono tabular-nums">
-                {totalLinks} links
-              </span>
-              {signals > 0 && (
-                <span className="inline-flex items-center gap-1.5 text-accent font-bold bg-accent-muted border border-accent/15 px-2.5 py-1 rounded-lg text-[11px]">
-                  <Zap size={10} className="fill-current" /> {signals} signal{signals !== 1 ? "s" : ""}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push("/search")}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-3/60 border border-border/50 hover:bg-surface-3 transition-all text-text-3 text-[12px]"
-            >
-              <Search size={13} />
-              <span>Search...</span>
-              <kbd className="ml-4 flex items-center gap-0.5 text-[10px] font-mono text-text-3/60 bg-surface/80 px-1.5 py-0.5 rounded border border-border/50">
-                <Command size={9} />K
-              </kbd>
-            </button>
-
-            <button
-              className="relative p-2.5 rounded-xl hover:bg-surface-3 transition-all group"
-              onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
-            >
-              <Bell size={18} className="text-text-3 group-hover:text-text transition-colors" />
-              {unread > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-glow-orange">
-                  {unread}
-                </span>
-              )}
-            </button>
-
-            <div className="w-px h-8 bg-border/50" />
-
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[11px] font-bold text-white ring-2 ring-stat-blue/15 ring-offset-2 ring-offset-surface">
-                {currentUser.username[0].toUpperCase()}
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold text-text leading-tight">{currentUser.fullName ?? currentUser.username}</p>
-                <p className="text-[10px] text-text-3 font-medium mt-0.5">L{clearance} · {CLEARANCE_LABELS[clearance]}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-lg text-text-3 hover:text-red hover:bg-red-muted transition-all cursor-pointer"
-              title="Logout"
-            >
-              <LogOut size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="flex items-center gap-1.5 mt-4">
+      <div className="hidden md:flex items-center justify-between px-5 py-2">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           {actions.map((a) => (
             <Link
               key={a.label}
               href={a.href}
-              className={`flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl transition-all duration-200
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all duration-200 shrink-0
                 ${a.primary
                   ? "gradient-blue text-white shadow-glow-blue hover:shadow-lg"
-                  : "text-text-3 hover:bg-surface-3 hover:text-text border border-transparent hover:border-border/50"
+                  : "text-text-3 hover:bg-surface-3 hover:text-text"
                 }`}
             >
-              <a.icon size={14} />
+              <a.icon size={13} />
               {a.label}
             </Link>
           ))}
+          <div className="w-px h-5 bg-border/40 mx-1" />
+          <span className="text-[10px] text-text-3 font-medium shrink-0">{dayName}, {monthDay}</span>
+          <span className="text-[10px] font-semibold text-text font-mono tabular-nums shrink-0">{db.entries.length} entities</span>
+          <span className="text-[10px] font-semibold text-text font-mono tabular-nums shrink-0">{totalLinks} links</span>
+          {signals > 0 && (
+            <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2 py-0.5 rounded text-[10px] shrink-0">
+              <Zap size={9} className="fill-current" /> {signals}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 shrink-0 ml-3">
+          <button
+            onClick={() => router.push("/search")}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-3/60 border border-border/50 hover:bg-surface-3 transition-all text-text-3 text-[11px]"
+          >
+            <Search size={12} />
+            <span>Search</span>
+            <kbd className="ml-2 flex items-center gap-0.5 text-[9px] font-mono text-text-3/50 bg-surface/80 px-1 py-px rounded border border-border/40">
+              <Command size={8} />K
+            </kbd>
+          </button>
+
+          <button
+            className="relative p-2 rounded-lg hover:bg-surface-3 transition-all group"
+            onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
+          >
+            <Bell size={16} className="text-text-3 group-hover:text-text transition-colors" />
+            {unread > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 gradient-orange text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+                {unread}
+              </span>
+            )}
+          </button>
+
+          <div className="w-px h-6 bg-border/40" />
+
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full gradient-blue flex items-center justify-center text-[10px] font-bold text-white ring-1 ring-stat-blue/15">
+              {currentUser.username[0].toUpperCase()}
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-text leading-tight">{currentUser.fullName ?? currentUser.username}</p>
+              <p className="text-[9px] text-text-3 font-medium">L{clearance} · {CLEARANCE_LABELS[clearance]}</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-1.5 rounded-lg text-text-3 hover:text-red hover:bg-red-muted transition-all cursor-pointer"
+            title="Logout"
+          >
+            <LogOut size={13} />
+          </button>
         </div>
       </div>
     </header>
