@@ -40,10 +40,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      const initialDb = getInitialDb();
+      setDb(initialDb);
+
       if (supabaseConfigured) {
         try {
           const supabase = createClient();
-          const { data: { user } } = await supabase.auth.getUser();
+          const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+          const authPromise = supabase.auth.getUser().then(r => r.data?.user ?? null).catch(() => null);
+          const user = await Promise.race([authPromise, timeout]);
 
           if (user) {
             const { data: profile } = await supabase
@@ -70,7 +75,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      setDb(getInitialDb());
       setIsReady(true);
     }
     init();
@@ -83,11 +87,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (username: string, password: string) => {
     if (supabaseConfigured) {
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
         const res = await fetch("/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: `${username}@rfe-database.app`, password }),
+          signal: controller.signal,
         });
+        clearTimeout(timeoutId);
 
         if (res.ok) {
           const { profile } = await res.json();
@@ -106,7 +114,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           }
         }
       } catch {
-        // Fall through to localStorage auth
+        // Supabase unavailable or timed out, fall through to localStorage auth
       }
     }
 
