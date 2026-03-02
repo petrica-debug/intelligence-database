@@ -5,11 +5,10 @@ import { useApp } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/cn";
 import type { Entry, SensitivityLevel } from "@/types";
-import { CLEARANCE_LABELS } from "@/types";
 import {
-  Users, Building2, Link2, Globe, Zap,
+  Users, Building2, Link2, Globe,
   ChevronRight, Radio, FileWarning,
-  FileText, Brain, Plus, Search, Share2, Bell,
+  FileText, Brain, Bell,
   CheckCircle2
 } from "lucide-react";
 import {
@@ -97,7 +96,7 @@ function SH({ children, action }: { children: React.ReactNode; action?: React.Re
 /* ═══════════════════════════════════════════════════ */
 
 export default function DashboardPage() {
-  const { db, currentUser, canView, userClearance } = useApp();
+  const { db, currentUser, canView } = useApp();
   const router = useRouter();
   const go = (id: number) => router.push(`/entry/${id}`);
 
@@ -159,8 +158,6 @@ export default function DashboardPage() {
   const sparkEntities = [18, 32, 48, 60, 72, 88, entries.length];
   const sparkLinks = [40, 65, 90, 120, 150, 180, totalLinks];
 
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
-
   /* ── Action items ── */
   const pendingValidations = db.pendingValidations.filter((v) => !v.resolved).length;
   const newInferences = db.inferredConnections.filter((ic) => ic.status === "new").length;
@@ -187,39 +184,6 @@ export default function DashboardPage() {
 
   return (
     <div className="animate-fade-in">
-
-      {/* ═══ INFO BAR ═══ */}
-      <div className="mb-4">
-        <div className="flex items-center gap-3 text-[12px] text-text-3 font-medium mb-2.5">
-          <span>{today}</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span>{CLEARANCE_LABELS[userClearance]} (L{userClearance})</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{entries.length} entities</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{coverage.length} regions</span>
-          <span className="w-1 h-1 rounded-full bg-border" />
-          <span className="font-mono">{totalLinks} links</span>
-          {db.signals.length > 0 && (
-            <span className="ml-1 inline-flex items-center gap-1 text-amber font-bold bg-amber/10 px-2 py-0.5 rounded-full text-[11px]">
-              <Zap size={10} /> {db.signals.length} signal{db.signals.length !== 1 && "s"}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-0.5 -ml-2">
-          {[
-            { icon: Plus, label: "New Entry", href: "/new-entry" },
-            { icon: Search, label: "Search", href: "/search" },
-            { icon: FileText, label: "New Report", href: "/reports/new" },
-            { icon: Share2, label: "Network", href: "/network" },
-          ].map((a) => (
-            <button key={a.label} onClick={() => router.push(a.href)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-text/80 rounded-md hover:bg-surface-3 hover:text-text transition-colors cursor-pointer">
-              <a.icon size={14} /> {a.label}
-            </button>
-          ))}
-        </div>
-      </div>
 
       {/* ═══ STATS ROW ═══ */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
