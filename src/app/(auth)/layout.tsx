@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useApp } from "@/context/AppContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { NotificationPanel } from "@/components/layout/NotificationPanel";
@@ -11,10 +11,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const { currentUser } = useApp();
   const router = useRouter();
   const pathname = usePathname();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (!currentUser) router.replace("/");
   }, [currentUser, router]);
+
+  // Close mobile sidebar on navigation
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   if (!currentUser) {
     return (
@@ -24,11 +30,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex h-screen bg-bg overflow-hidden">
-      <Sidebar pathname={pathname} />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
+      <Sidebar pathname={pathname} mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <NotificationPanel />
-        <main className="flex-1 overflow-y-auto p-5 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5 scrollbar-thin">
           <div className="animate-fade-in">{children}</div>
         </main>
       </div>

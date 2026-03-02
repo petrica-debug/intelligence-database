@@ -62,7 +62,7 @@ function Spark({ data, color, label }: { data: number[]; color: string; label: s
     .join(" ");
   const id = `spark-${label.replace(/\s/g, "")}`;
   return (
-    <svg viewBox="0 0 100 100" className="w-24 h-14 opacity-40 group-hover:opacity-70 transition-opacity relative z-10" preserveAspectRatio="none">
+    <svg viewBox="0 0 100 100" className="w-16 h-10 sm:w-24 sm:h-14 opacity-40 group-hover:opacity-70 transition-opacity relative z-10" preserveAspectRatio="none">
       <defs>
         <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0%" stopColor={color} stopOpacity={0.2} />
@@ -199,7 +199,7 @@ export default function DashboardPage() {
               <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-shadow duration-300`}>
                 <stat.icon size={18} />
               </div>
-              <span className="text-[28px] font-extrabold text-text font-mono tracking-tight leading-none mt-1"><Num value={stat.value} /></span>
+              <span className="text-[22px] sm:text-[28px] font-extrabold text-text font-mono tracking-tight leading-none mt-1"><Num value={stat.value} /></span>
               <span className="text-[10px] text-text-3 uppercase tracking-[0.15em] font-semibold">{stat.label}</span>
             </div>
             <Spark data={stat.sparkData} color={stat.color} label={stat.label} />

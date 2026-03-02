@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Search, PenSquare, Users, Building2, Phone, MapPin, Car,
   Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog, Globe, BarChart3,
-  ChevronLeft, ChevronRight, FileText, Brain, Shield
+  ChevronLeft, ChevronRight, FileText, Brain, X
 } from "lucide-react";
 import { CLEARANCE_LABELS } from "@/types";
 import type { ClearanceLevel } from "@/types";
@@ -15,7 +15,13 @@ import type { ReactNode } from "react";
 
 interface NavItem { href: string; label: string; icon: ReactNode; badge?: number }
 
-export function Sidebar({ pathname }: { pathname: string }) {
+interface SidebarProps {
+  pathname: string;
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: SidebarProps) {
   const { currentUser, db } = useApp();
   const [collapsed, setCollapsed] = useState(false);
   const pending = db.pendingValidations.filter((v) => !v.resolved).length;
@@ -70,9 +76,10 @@ export function Sidebar({ pathname }: { pathname: string }) {
       <Link
         href={item.href}
         title={collapsed ? item.label : undefined}
+        onClick={onMobileClose}
         className={cn(
           "w-full flex items-center gap-2.5 rounded-lg text-[13px] font-medium transition-all duration-150",
-          collapsed ? "justify-center w-10 h-10 mx-auto" : "px-2.5 py-[7px]",
+          collapsed ? "justify-center w-10 h-10 mx-auto md:flex hidden" : "px-2.5 py-[7px]",
           a
             ? "bg-sb-2 text-sb-bright font-semibold"
             : "text-sb-fg hover:bg-sb-2/50 hover:text-sb-bright"
@@ -102,7 +109,7 @@ export function Sidebar({ pathname }: { pathname: string }) {
   };
 
   const SectionLabel = ({ children }: { children: ReactNode }) => {
-    if (collapsed) return <div className="my-2 mx-3 border-t border-sb-border" />;
+    if (collapsed) return <div className="my-2 mx-3 border-t border-sb-border hidden md:block" />;
     return (
       <p className="text-[10px] font-semibold text-sb-fg/60 uppercase tracking-widest px-2 mb-1.5 mt-4">
         {children}
@@ -112,36 +119,42 @@ export function Sidebar({ pathname }: { pathname: string }) {
 
   const totalLinks = db.entries.reduce((s, e) => s + e.linkedTo.length, 0);
 
-  return (
-    <aside
-      className={cn(
-        "relative bg-sb flex flex-col shrink-0 border-r border-sb-border transition-all duration-300 ease-in-out",
-        collapsed ? "w-[68px]" : "w-56"
-      )}
-    >
+  const sidebarContent = (
+    <>
       {/* Brand */}
       <div className={cn("border-b border-sb-border", collapsed ? "px-2 py-4" : "px-4 py-5")}>
-        {collapsed ? (
-          <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue mx-auto">
-            <Globe size={14} className="text-white" />
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
+        <div className="flex items-center justify-between">
+          {collapsed ? (
+            <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue mx-auto">
               <Globe size={14} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-sb-bright leading-tight">RFE Database</h1>
-              <p className="text-[10px] text-sb-fg uppercase tracking-wider">Roma Foundations for Europe</p>
+          ) : (
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
+                <Globe size={14} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-sm font-bold text-sb-bright leading-tight">RFE Database</h1>
+                <p className="text-[10px] text-sb-fg uppercase tracking-wider">Roma Foundations for Europe</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+          {/* Mobile close button */}
+          {!collapsed && (
+            <button
+              onClick={onMobileClose}
+              className="md:hidden p-1.5 rounded-lg text-sb-fg hover:text-sb-bright hover:bg-sb-2/50 transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Toggle */}
+      {/* Desktop toggle */}
       <button
         onClick={toggle}
-        className="absolute -right-3 top-[72px] z-10 w-6 h-6 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-text-3 hover:text-accent hover:border-accent/30 transition-all cursor-pointer"
+        className="absolute -right-3 top-[72px] z-10 w-6 h-6 rounded-full bg-surface border border-border shadow-sm flex items-center justify-center text-text-3 hover:text-accent hover:border-accent/30 transition-all cursor-pointer hidden md:flex"
       >
         {collapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
       </button>
@@ -198,6 +211,34 @@ export function Sidebar({ pathname }: { pathname: string }) {
           </>
         )}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onMobileClose}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "bg-sb flex flex-col shrink-0 border-r border-sb-border transition-all duration-300 ease-in-out",
+          // Desktop: normal flow
+          "hidden md:relative md:flex",
+          collapsed ? "md:w-[68px]" : "md:w-56",
+          // Mobile: fixed overlay
+          mobileOpen
+            ? "fixed inset-y-0 left-0 z-50 flex w-64"
+            : "fixed inset-y-0 -left-64 z-50 md:left-0"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
