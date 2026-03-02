@@ -138,6 +138,12 @@ body {
 .shadow-glow-orange { box-shadow: 0 0 20px -5px rgba(234, 88, 12, 0.25); }
 .shadow-glow-green { box-shadow: 0 0 20px -5px rgba(5, 150, 105, 0.25); }
 
+/* Mobile touch optimizations */
+@media (max-width: 640px) {
+  .scrollbar-thin { -webkit-overflow-scrolling: touch; }
+  .scrollbar-thin::-webkit-scrollbar { display: none; }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
 }

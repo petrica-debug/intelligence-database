@@ -85,7 +85,7 @@ function Spark({ data, color, label }: { data: number[]; color: string; label: s
 function SH({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-4">
-      <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">{children}</h3>
+      <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">{children}</h3>
       {action}
     </div>
   );
@@ -186,21 +186,22 @@ export default function DashboardPage() {
     <div className="animate-fade-in">
 
       {/* ═══ STATS ROW ═══ */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3 mb-4">
         {[
           { icon: Users, value: persons.length, label: "Key Actors", gradient: "gradient-blue", glow: "shadow-glow-blue", color: C.blue, sparkData: sparkEntities.slice(0, -2).concat([persons.length]) },
           { icon: Building2, value: orgs.length, label: "Organizations", gradient: "gradient-purple", glow: "shadow-glow-purple", color: C.purple, sparkData: sparkEntities.slice(0, -2).concat([orgs.length]) },
           { icon: Link2, value: totalLinks, label: "Network Links", gradient: "gradient-teal", glow: "shadow-glow-green", color: C.cyan, sparkData: sparkLinks },
           { icon: Globe, value: coverage.length, label: "Regions Covered", gradient: "gradient-green", glow: "shadow-glow-green", color: C.emerald, sparkData: [5, 7, 8, 9, 10, 12, coverage.length] },
         ].map((stat) => (
-          <div key={stat.label} className="bg-surface rounded-xl border border-border/50 p-4 flex items-start justify-between hover:shadow-card-hover transition-all duration-300 group animate-fade-in relative overflow-hidden">
+          <div key={stat.label} className="bg-surface rounded-xl border border-border/50 p-3.5 sm:p-4 flex items-start justify-between hover:shadow-card-hover transition-all duration-300 group animate-fade-in relative overflow-hidden">
             <div className={`absolute inset-0 opacity-[0.03] ${stat.gradient}`} />
-            <div className="flex flex-col gap-2 relative z-10">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-shadow duration-300`}>
-                <stat.icon size={18} />
+            <div className="flex flex-col gap-1.5 sm:gap-2 relative z-10">
+              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-white ${stat.gradient} ${stat.glow} transition-shadow duration-300`}>
+                <stat.icon size={16} className="sm:hidden" />
+                <stat.icon size={18} className="hidden sm:block" />
               </div>
-              <span className="text-[22px] sm:text-[28px] font-extrabold text-text font-mono tracking-tight leading-none mt-1"><Num value={stat.value} /></span>
-              <span className="text-[10px] text-text-3 uppercase tracking-[0.15em] font-semibold">{stat.label}</span>
+              <span className="text-[24px] sm:text-[28px] font-extrabold text-text font-mono tracking-tight leading-none mt-0.5"><Num value={stat.value} /></span>
+              <span className="text-[9px] sm:text-[10px] text-text-3 uppercase tracking-[0.12em] sm:tracking-[0.15em] font-semibold leading-tight">{stat.label}</span>
             </div>
             <Spark data={stat.sparkData} color={stat.color} label={stat.label} />
           </div>
@@ -212,10 +213,10 @@ export default function DashboardPage() {
 
         {/* Attention Panel */}
         <div className="bg-surface rounded-xl border border-border/50 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Requires Your Attention</h3>
+          <div className="flex items-center justify-between px-4 sm:px-5 pt-4 pb-3">
+            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Requires Your Attention</h3>
             {totalActionItems > 0 && (
-              <span className="text-[11px] font-bold text-amber px-2 py-0.5 rounded-full bg-amber/10">{totalActionItems} pending</span>
+              <span className="text-[12px] sm:text-[11px] font-bold text-amber px-2.5 py-1 sm:py-0.5 rounded-full bg-amber/10">{totalActionItems} pending</span>
             )}
           </div>
           {totalActionItems === 0 ? (
@@ -227,12 +228,12 @@ export default function DashboardPage() {
             <div className="divide-y divide-border/40">
               {pendingValidations > 0 && (
                 <button onClick={() => router.push("/admin/validations")}
-                  className="w-full flex items-center gap-3 px-5 py-3 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer">
+                  className="w-full flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-3 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer active:bg-surface-3/60">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white gradient-orange">
                     <FileWarning size={14} />
                   </div>
                   <div className="text-left flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-text leading-tight">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</p>
+                    <p className="text-[14px] sm:text-[13px] font-semibold text-text leading-tight">{pendingValidations} pending validation{pendingValidations !== 1 && "s"}</p>
                     <p className="text-[11px] text-text-3 mt-0.5">Awaiting admin review</p>
                   </div>
                   <ChevronRight size={14} className="text-text-3/30 group-hover:text-text-3 group-hover:translate-x-0.5 transition-all" />
@@ -254,7 +255,7 @@ export default function DashboardPage() {
               )}
               {unreadNotifs > 0 && (
                 <button onClick={() => {}}
-                  className="w-full flex items-center gap-3 px-5 py-3 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer">
+                  className="w-full flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-3 hover:bg-surface-3/40 transition-all duration-150 group cursor-pointer active:bg-surface-3/60">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white gradient-purple">
                     <Bell size={14} />
                   </div>
@@ -270,13 +271,14 @@ export default function DashboardPage() {
         </div>
 
         {/* Watch Targets */}
-        <div className="bg-surface rounded-xl border border-border/50 p-5 shadow-card animate-fade-in">
+        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 shadow-card animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded-full gradient-orange flex items-center justify-center animate-pulse-glow">
-                <Radio size={8} className="text-white" />
+              <div className="w-5 h-5 sm:w-4 sm:h-4 rounded-full gradient-orange flex items-center justify-center animate-pulse-glow">
+                <Radio size={9} className="text-white sm:hidden" />
+                <Radio size={8} className="text-white hidden sm:block" />
               </div>
-              <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Watch Targets</h3>
+              <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Watch Targets</h3>
             </div>
             <span className="text-[11px] font-bold text-emerald px-2 py-0.5 rounded-full bg-emerald/10">
               {db.signals.length} Active
@@ -296,13 +298,13 @@ export default function DashboardPage() {
                 }), 1);
                 return (
                   <div key={sig.entityId} onClick={() => go(sig.entityId)}
-                    className="flex items-center gap-3.5 bg-surface-3/20 rounded-lg p-3.5 border border-border/30 cursor-pointer hover:border-border/50 transition-all group">
+                    className="flex items-center gap-3 sm:gap-3.5 bg-surface-3/20 rounded-lg p-3 sm:p-3.5 border border-border/30 cursor-pointer hover:border-border/50 transition-all group active:bg-surface-3/40">
                     <div className="w-9 h-9 rounded-lg gradient-orange flex items-center justify-center shrink-0 shadow-glow-orange">
                       <Radio size={14} className="text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[13px] font-bold text-text group-hover:text-accent transition-colors">{entity.name}</span>
+                        <span className="text-[14px] sm:text-[13px] font-bold text-text group-hover:text-accent transition-colors truncate">{entity.name}</span>
                         <span className="text-[9px] font-semibold text-accent bg-accent/10 px-1.5 py-0.5 rounded uppercase">{entity.category}</span>
                       </div>
                       <div className="w-full bg-border/60 rounded-full h-1.5 overflow-hidden">
@@ -323,10 +325,10 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ ANALYTICS ROW ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 sm:gap-3 mb-4">
 
         {/* Key Actors */}
-        <div className="bg-surface rounded-xl border border-border/50 p-5 shadow-card animate-fade-in">
+        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 shadow-card animate-fade-in">
           <SH action={
             <button onClick={() => router.push("/persons")} className="text-[11px] text-accent hover:underline font-semibold cursor-pointer">View all ({persons.length})</button>
           }>Key Actors &mdash; Top 3</SH>
@@ -335,15 +337,15 @@ export default function DashboardPage() {
               const score = influence(e);
               const maxScore = influence(keyActors[0]);
               return (
-                <div key={e.id} onClick={() => go(e.id)} className="flex items-center gap-2.5 group cursor-pointer">
-                  <span className={cn("w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold shrink-0",
+                <div key={e.id} onClick={() => go(e.id)} className="flex items-center gap-2.5 sm:gap-2.5 py-1 sm:py-0 group cursor-pointer active:opacity-80">
+                  <span className={cn("w-8 h-8 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-[12px] sm:text-[11px] font-bold shrink-0",
                     i === 0 ? "gradient-blue shadow-glow-blue text-white" :
                     i === 1 ? "gradient-purple text-white" :
                     "bg-surface-3 text-text-3"
                   )}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-text truncate group-hover:text-accent transition-colors leading-tight">{e.name}</p>
-                    <p className="text-[11px] text-text-3">{e.country}</p>
+                    <p className="text-[14px] sm:text-[13px] font-semibold text-text truncate group-hover:text-accent transition-colors leading-tight">{e.name}</p>
+                    <p className="text-[12px] sm:text-[11px] text-text-3">{e.country}</p>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <div className="w-16 bg-border/50 rounded-full h-2 overflow-hidden">
@@ -360,7 +362,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Top Regions */}
-        <div className="bg-surface rounded-xl border border-border/50 p-5 shadow-card animate-fade-in">
+        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 shadow-card animate-fade-in">
           <SH action={
             <span className="text-[11px] text-text-3 font-medium">All {coverage.length} regions</span>
           }>Top Regions</SH>
@@ -373,8 +375,8 @@ export default function DashboardPage() {
               const pOther = total > 0 ? ((total - data.persons - data.orgs) / total) * 100 : 0;
               return (
                 <div key={country} className="flex items-center gap-2.5">
-                  <span className="text-[13px] font-semibold text-text w-16 truncate">{shortName}</span>
-                  <div className="flex-1 h-4 flex rounded overflow-hidden gap-px">
+                  <span className="text-[14px] sm:text-[13px] font-semibold text-text w-16 truncate">{shortName}</span>
+                  <div className="flex-1 h-5 sm:h-4 flex rounded overflow-hidden gap-px">
                     <div className="gradient-blue h-full" style={{ width: `${pPersons}%` }} />
                     <div className="gradient-purple h-full" style={{ width: `${pOrgs}%` }} />
                     <div className="gradient-orange h-full" style={{ width: `${pOther}%` }} />
@@ -399,10 +401,10 @@ export default function DashboardPage() {
         </div>
 
         {/* Entity Composition */}
-        <div className="bg-surface rounded-xl border border-border/50 p-5 shadow-card animate-fade-in">
-          <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-3">Entity Composition</h3>
+        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 shadow-card animate-fade-in">
+          <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-3">Entity Composition</h3>
           <div className="flex items-center justify-center">
-            <div className="relative w-40 h-40">
+            <div className="relative w-44 h-44 sm:w-40 sm:h-40">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -447,12 +449,12 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ BOTTOM ROW ═══ */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pb-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 pb-3">
 
         {/* Latest Intelligence */}
         <div className="bg-surface rounded-xl border border-border/50 shadow-card animate-fade-in">
-          <div className="flex items-center justify-between px-5 pt-4 pb-3">
-            <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Latest Intelligence</h3>
+          <div className="flex items-center justify-between px-4 sm:px-5 pt-4 pb-3">
+            <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em]">Latest Intelligence</h3>
             <div className="flex gap-0.5 bg-surface-3/50 rounded-md p-0.5">
               <button onClick={() => router.push("/reports")} className="text-[11px] font-semibold text-white bg-accent px-2.5 py-1 rounded cursor-pointer">Reports</button>
               <button onClick={() => router.push("/intelligence")} className="text-[11px] font-medium text-text-3 px-2.5 py-1 rounded hover:text-text transition-colors cursor-pointer">Inferences</button>
@@ -467,7 +469,7 @@ export default function DashboardPage() {
                   const report = item.data as typeof db.reports[0];
                   return (
                     <div key={`r-${report.id}`} onClick={() => router.push("/reports")}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-surface-3/20 transition-colors group cursor-pointer">
+                      className="flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-3 hover:bg-surface-3/20 transition-colors group cursor-pointer active:bg-surface-3/40">
                       <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
                         <FileText size={13} />
                       </div>
@@ -493,7 +495,7 @@ export default function DashboardPage() {
                   if (!entityA || !entityB) return null;
                   return (
                     <div key={`i-${ic.id}`} onClick={() => router.push("/intelligence")}
-                      className="flex items-center gap-3 px-5 py-3 hover:bg-surface-3/20 transition-colors group cursor-pointer">
+                      className="flex items-center gap-3 px-4 sm:px-5 py-3.5 sm:py-3 hover:bg-surface-3/20 transition-colors group cursor-pointer active:bg-surface-3/40">
                       <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shrink-0 text-white">
                         <Globe size={13} />
                       </div>
@@ -515,8 +517,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Domain Profile */}
-        <div className="bg-surface rounded-xl border border-border/50 p-5 shadow-card animate-fade-in">
-          <h3 className="text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-4">Domain Capability Profile</h3>
+        <div className="bg-surface rounded-xl border border-border/50 p-4 sm:p-5 shadow-card animate-fade-in">
+          <h3 className="text-[11px] sm:text-[10px] font-bold text-text-3 uppercase tracking-[0.15em] mb-4">Domain Capability Profile</h3>
           {(() => {
             const maxDim = Math.max(...radarDims.map(d => d.value), 1);
             const sorted = [...radarDims].sort((a, b) => b.value - a.value).slice(0, 5);
@@ -526,12 +528,12 @@ export default function DashboardPage() {
                   const pct = Math.round((d.value / maxDim) * 100);
                   return (
                     <div key={d.dim} className="flex items-center gap-3">
-                      <span className="text-[13px] text-text w-20 font-semibold">{d.dim}</span>
-                      <div className="flex-1 bg-border/40 rounded-full h-2.5 overflow-hidden">
-                        <div className={`${domainGradients[i % domainGradients.length]} rounded-full h-2.5 transition-all duration-700`}
+                      <span className="text-[14px] sm:text-[13px] text-text w-20 font-semibold">{d.dim}</span>
+                      <div className="flex-1 bg-border/40 rounded-full h-3 sm:h-2.5 overflow-hidden">
+                        <div className={`${domainGradients[i % domainGradients.length]} rounded-full h-3 sm:h-2.5 transition-all duration-700`}
                           style={{ width: `${pct}%` }} />
                       </div>
-                      <span className="text-[12px] font-extrabold text-text font-mono w-10 text-right">{pct}%</span>
+                      <span className="text-[13px] sm:text-[12px] font-extrabold text-text font-mono w-10 text-right">{pct}%</span>
                     </div>
                   );
                 })}

@@ -48,48 +48,66 @@ export function Topbar({ onMenuClick }: TopbarProps) {
 
   return (
     <header className="bg-surface border-b border-border/60">
-      {/* Info row */}
-      <div className="flex items-center justify-between px-3 sm:px-6 pt-3 pb-2">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          {/* Hamburger - mobile only */}
+      {/* ── Mobile header: hamburger + brand + controls ── */}
+      <div className="flex md:hidden items-center justify-between px-3 py-2.5">
+        <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
-            className="md:hidden p-1.5 -ml-1 rounded-lg text-text-3 hover:text-text hover:bg-surface-2 transition-colors cursor-pointer"
+            className="p-2 -ml-1 rounded-lg text-text-2 hover:text-text hover:bg-surface-2 transition-colors cursor-pointer active:scale-95"
           >
-            <Menu size={20} />
+            <Menu size={22} />
           </button>
-
-          {/* Info pills - hidden on small screens, show progressively */}
-          <div className="hidden sm:flex items-center gap-4 text-[12px] text-text-2 font-medium flex-1 min-w-0">
-            <span>{dayName}, {monthDay}</span>
-            <span className="w-1 h-1 rounded-full bg-border-2" />
-            <span className="hidden lg:inline">{CLEARANCE_LABELS[clearance]} (L{clearance})</span>
-            <span className="hidden lg:inline w-1 h-1 rounded-full bg-border-2" />
-            <span className="font-mono">{db.entries.length} entities</span>
-            <span className="w-1 h-1 rounded-full bg-border-2" />
-            <span className="font-mono">{regions} regions</span>
-            <span className="hidden xl:inline w-1 h-1 rounded-full bg-border-2" />
-            <span className="hidden xl:inline font-mono">{totalLinks} links</span>
-            {signals > 0 && (
-              <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2.5 py-0.5 rounded-full text-[11px]">
-                <Zap size={10} /> {signals}
-              </span>
-            )}
-          </div>
-
-          {/* Mobile compact info */}
-          <div className="flex sm:hidden items-center gap-2 text-[12px] text-text-2 font-medium flex-1 min-w-0">
-            <span className="font-mono">{db.entries.length} entities</span>
-            {signals > 0 && (
-              <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2 py-0.5 rounded-full text-[10px]">
-                <Zap size={9} /> {signals}
-              </span>
-            )}
+          <div>
+            <h1 className="text-[14px] font-bold text-text leading-tight">RFE Database</h1>
+            <p className="text-[10px] text-text-3 font-medium">
+              {db.entries.length} entities · {signals > 0 ? `${signals} signal${signals !== 1 ? "s" : ""}` : "System active"}
+            </p>
           </div>
         </div>
+        <div className="flex items-center gap-1.5">
+          <button
+            className="relative p-2.5 rounded-xl hover:bg-surface-2 transition-colors cursor-pointer active:scale-95"
+            onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
+          >
+            <Bell size={18} className="text-text-3" />
+            {unread > 0 && (
+              <span className="absolute top-1 right-1 w-[18px] h-[18px] gradient-orange text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                {unread}
+              </span>
+            )}
+          </button>
+          <div className="w-9 h-9 rounded-full gradient-blue flex items-center justify-center text-[12px] font-bold text-white ring-2 ring-accent/20">
+            {currentUser.username[0].toUpperCase()}
+          </div>
+          <button
+            onClick={handleLogout}
+            className="p-2.5 rounded-xl text-text-3 hover:text-red hover:bg-red-muted transition-all cursor-pointer active:scale-95"
+            title="Logout"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
+      </div>
 
-        {/* Right controls */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+      {/* ── Desktop header: full info bar + controls ── */}
+      <div className="hidden md:flex items-center justify-between px-6 pt-3 pb-2">
+        <div className="flex items-center gap-4 text-[12px] text-text-2 font-medium flex-1 min-w-0">
+          <span>{dayName}, {monthDay}</span>
+          <span className="w-1 h-1 rounded-full bg-border-2" />
+          <span className="hidden lg:inline">{CLEARANCE_LABELS[clearance]} (L{clearance})</span>
+          <span className="hidden lg:inline w-1 h-1 rounded-full bg-border-2" />
+          <span className="font-mono">{db.entries.length} entities</span>
+          <span className="w-1 h-1 rounded-full bg-border-2" />
+          <span className="font-mono">{regions} regions</span>
+          <span className="hidden xl:inline w-1 h-1 rounded-full bg-border-2" />
+          <span className="hidden xl:inline font-mono">{totalLinks} links</span>
+          {signals > 0 && (
+            <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2.5 py-0.5 rounded-full text-[11px]">
+              <Zap size={10} /> {signals} signal{signals !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 shrink-0 ml-4">
           <button
             className="relative p-2 rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
             onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
@@ -101,11 +119,11 @@ export function Topbar({ onMenuClick }: TopbarProps) {
               </span>
             )}
           </button>
-          <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-border/60">
+          <div className="flex items-center gap-2.5 pl-3 border-l border-border/60">
             <div className="w-8 h-8 rounded-full gradient-blue flex items-center justify-center text-[11px] font-bold text-white ring-2 ring-accent/20">
               {currentUser.username[0].toUpperCase()}
             </div>
-            <div className="hidden sm:block">
+            <div>
               <p className="text-[13px] font-semibold text-text leading-tight">{currentUser.fullName ?? currentUser.username}</p>
               <p className="text-[10px] text-text-3 font-medium">L{clearance} · {CLEARANCE_LABELS[clearance]}</p>
             </div>
@@ -120,13 +138,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         </div>
       </div>
 
-      {/* Action buttons - scrollable on mobile */}
-      <div className="flex items-center justify-center gap-1 px-3 sm:px-6 pb-2.5 overflow-x-auto scrollbar-thin">
+      {/* Action buttons - desktop only */}
+      <div className="hidden md:flex items-center justify-center gap-1 px-6 pb-2.5">
         {actions.map((a) => (
           <Link
             key={a.label}
             href={a.href}
-            className="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 text-[13px] font-medium text-text/70 rounded-md hover:bg-surface-2 hover:text-text transition-colors whitespace-nowrap shrink-0"
+            className="flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium text-text/70 rounded-md hover:bg-surface-2 hover:text-text transition-colors"
           >
             <a.icon size={14} />
             {a.label}
