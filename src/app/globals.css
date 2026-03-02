@@ -98,6 +98,10 @@ body {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 
 .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-fade-in-up { animation: fadeInUp 0.4s ease-out; }

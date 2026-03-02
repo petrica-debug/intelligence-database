@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AppProvider } from "@/context/AppContext";
 import { ToastProvider } from "@/components/ui";
+import { ErrorBoundary } from "@/components/error/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "RFE - Roma Foundations for Europe Database",
@@ -17,9 +18,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <AppProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </AppProvider>
+        <ErrorBoundary>
+          <AppProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AppProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

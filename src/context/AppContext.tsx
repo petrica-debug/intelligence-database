@@ -12,16 +12,23 @@ import {
 import type { User, Database, SensitivityLevel, ClearanceLevel } from "@/types";
 import { SENSITIVITY_MIN_CLEARANCE } from "@/types";
 import { getInitialDb, persistDb } from "@/lib/store";
+import { createClient } from "@/lib/supabase/client";
+
+const supabaseConfigured =
+  typeof window !== "undefined" &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
+  !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 interface AppContextValue {
   currentUser: User | null;
   db: Database;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
+  login: (username: string, password: string) => Promise<boolean>;
+  logout: () => Promise<void>;
   updateDb: (updater: (db: Database) => void) => void;
   isReady: boolean;
   canView: (sensitivity: SensitivityLevel) => boolean;
   userClearance: ClearanceLevel;
+  isSupabaseMode: boolean;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -32,26 +39,94 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setDb(getInitialDb());
-    setIsReady(true);
+    async function init() {
+      if (supabaseConfigured) {
+        try {
+          const supabase = createClient();
+          const { data: { user } } = await supabase.auth.getUser();
+
+          if (user) {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", user.id)
+              .single();
+
+            if (profile) {
+              setCurrentUser({
+                username: profile.username,
+                password: "",
+                role: profile.role,
+                access: profile.access,
+                clearance: profile.clearance,
+                active: profile.active,
+                fullName: profile.full_name,
+                department: profile.department,
+              });
+            }
+          }
+        } catch {
+          // Supabase unavailable, fall through to localStorage
+        }
+      }
+
+      setDb(getInitialDb());
+      setIsReady(true);
+    }
+    init();
   }, []);
 
   useEffect(() => {
     if (db) persistDb(db);
   }, [db]);
 
-  const login = useCallback((username: string, password: string) => {
+  const login = useCallback(async (username: string, password: string) => {
+    if (supabaseConfigured) {
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: `${username}@rfe-database.app`, password }),
+        });
+
+        if (res.ok) {
+          const { profile } = await res.json();
+          if (profile) {
+            setCurrentUser({
+              username: profile.username,
+              password: "",
+              role: profile.role,
+              access: profile.access,
+              clearance: profile.clearance,
+              active: profile.active,
+              fullName: profile.full_name,
+              department: profile.department,
+            });
+            return true;
+          }
+        }
+      } catch {
+        // Fall through to localStorage auth
+      }
+    }
+
     if (!db) return false;
     const user = db.users.find(
-      (u) =>
-        u.username === username && u.password === password && u.active
+      (u) => u.username === username && u.password === password && u.active
     );
     if (!user) return false;
     setCurrentUser(user);
     return true;
   }, [db]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    if (supabaseConfigured) {
+      try {
+        await fetch("/api/auth/logout", { method: "POST" });
+      } catch {
+        // Ignore
+      }
+    }
     setCurrentUser(null);
   }, []);
 
@@ -80,6 +155,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isReady,
       canView,
       userClearance,
+      isSupabaseMode: supabaseConfigured,
     }),
     [currentUser, db, login, logout, updateDb, isReady, canView, userClearance]
   );
@@ -87,7 +163,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   if (!isReady) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "var(--text2)" }}>
-        Loading...
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 40, height: 40, border: "2px solid #d0d9e6", borderTopColor: "#1e3a5f", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
+          <p style={{ fontSize: 14, color: "#3e5068" }}>Loading...</p>
+        </div>
       </div>
     );
   }
