@@ -83,7 +83,7 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
             ? "px-3 py-3 text-[15px]"
             : collapsed
               ? "justify-center w-10 h-10 mx-auto text-[13px]"
-              : "px-2.5 py-[7px] text-[13px]",
+              : "px-2.5 py-2 text-[13px]",
           a
             ? "bg-sb-2 text-sb-bright font-semibold"
             : "text-sb-fg hover:bg-sb-2/50 hover:text-sb-bright"
@@ -117,8 +117,8 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
     if (!mobile && collapsed) return <div className="my-2 mx-3 border-t border-sb-border" />;
     return (
       <p className={cn(
-        "font-semibold text-sb-fg/60 uppercase tracking-widest px-2 mb-1.5",
-        mobile ? "text-[11px] mt-5" : "text-[10px] mt-4"
+        "font-semibold text-sb-fg/50 uppercase px-2.5",
+        mobile ? "text-[11px] tracking-widest mt-5 mb-1.5" : "text-[10px] tracking-[0.2em] mb-2"
       )}>
         {children}
       </p>
@@ -211,23 +211,23 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
     <aside
       className={cn(
         "relative bg-sb flex-col shrink-0 border-r border-sb-border transition-all duration-300 ease-in-out hidden md:flex",
-        collapsed ? "w-[68px]" : "w-56"
+        collapsed ? "w-[68px]" : "w-60"
       )}
     >
       {/* Brand */}
-      <div className={cn("border-b border-sb-border", collapsed ? "px-2 py-4" : "px-4 py-5")}>
+      <div className={cn("border-b border-sb-border", collapsed ? "px-2 py-4" : "px-5 py-5")}>
         {collapsed ? (
-          <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue mx-auto">
-            <Globe size={14} className="text-white" />
+          <div className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue mx-auto">
+            <Globe size={16} className="text-white" />
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
-              <Globe size={14} className="text-white" />
+            <div className="w-9 h-9 rounded-xl gradient-blue flex items-center justify-center shadow-glow-blue shrink-0">
+              <Globe size={16} className="text-white" />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-sb-bright leading-tight">RFE Database</h1>
-              <p className="text-[10px] text-sb-fg uppercase tracking-wider">Roma Foundations for Europe</p>
+              <h1 className="text-[14px] font-bold text-sb-bright leading-tight">RFE Database</h1>
+              <p className="text-[10px] text-sb-fg uppercase tracking-[0.15em] mt-0.5">Roma Foundations for Europe</p>
             </div>
           </div>
         )}
@@ -242,52 +242,56 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-3 px-3 scrollbar-thin space-y-1">
-        <SectionLabel>Navigation</SectionLabel>
-        <div className="space-y-0.5">
-          {NAV.map((i) => <NavLink key={i.href} item={i} />)}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 scrollbar-thin space-y-6">
+        <div>
+          <SectionLabel>Navigation</SectionLabel>
+          <div className="space-y-1">
+            {NAV.map((i) => <NavLink key={i.href} item={i} />)}
+          </div>
         </div>
 
-        <SectionLabel>Entities</SectionLabel>
-        <div className="space-y-0.5">
-          {CATS.map((i) => <NavLink key={i.href} item={i} />)}
+        <div>
+          <SectionLabel>Entities</SectionLabel>
+          <div className="space-y-1">
+            {CATS.map((i) => <NavLink key={i.href} item={i} />)}
+          </div>
         </div>
 
         {currentUser?.role === "admin" && (
-          <>
+          <div>
             <SectionLabel>Admin</SectionLabel>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {ADMIN.map((i) => <NavLink key={i.href} item={i} />)}
             </div>
-          </>
+          </div>
         )}
       </nav>
 
       {/* Footer */}
-      <div className={cn("border-t border-sb-border", collapsed ? "p-2" : "px-4 py-3")}>
+      <div className={cn("border-t border-sb-border", collapsed ? "p-2" : "px-5 py-4")}>
         {collapsed ? (
           <div className="flex flex-col items-center gap-1.5">
             <div className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2.5">
               <span className="w-2 h-2 rounded-full bg-emerald animate-pulse-glow" />
               <span className="text-[11px] font-medium text-sb-fg">System Active</span>
             </div>
             {currentUser && (
-              <p className="text-[10px] text-sb-fg/60 font-medium mb-2">
+              <p className="text-[10px] text-sb-fg/50 font-medium mb-2">
                 {CLEARANCE_LABELS[(currentUser.clearance ?? 1) as ClearanceLevel]} (L{currentUser.clearance ?? 1})
               </p>
             )}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-5">
               <div>
                 <span className="text-lg font-extrabold text-sb-bright font-mono">{db.entries.length}</span>
-                <p className="text-[9px] text-sb-fg/60 uppercase tracking-widest">Entities</p>
+                <p className="text-[9px] text-sb-fg/50 uppercase tracking-[0.15em]">Entities</p>
               </div>
               <div>
                 <span className="text-lg font-extrabold text-sb-bright font-mono">{totalLinks}</span>
-                <p className="text-[9px] text-sb-fg/60 uppercase tracking-widest">Links</p>
+                <p className="text-[9px] text-sb-fg/50 uppercase tracking-[0.15em]">Links</p>
               </div>
             </div>
           </>

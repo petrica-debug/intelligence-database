@@ -34,7 +34,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Topbar onMenuClick={() => setSidebarOpen(true)} />
         <NotificationPanel />
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 scrollbar-thin">
           <div className="animate-fade-in">{children}</div>
         </main>
       </div>
