@@ -9,8 +9,11 @@ import type { Entry, SensitivityLevel } from "@/types";
 import {
   Users, Building2, Link2, Globe,
   Radio, FileText, Bell, AlertCircle,
-  CheckCircle2, TrendingUp, Sparkles, ArrowUpRight
+  CheckCircle2, TrendingUp, Sparkles, ArrowUpRight,
+  Shield, Calendar
 } from "lucide-react";
+import { CLEARANCE_LABELS } from "@/types";
+import type { ClearanceLevel } from "@/types";
 
 const C = {
   blue: "#3b82f6", purple: "#7c3aed",
@@ -145,8 +148,56 @@ export default function DashboardPage() {
     { bg: "bg-surface-3", shadow: "", bar: "gradient-green", textColor: "text-text-3" },
   ];
 
+  const clearance = (currentUser?.clearance ?? 1) as ClearanceLevel;
+  const clearanceLabel = CLEARANCE_LABELS[clearance];
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const dateStr = now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
   return (
-    <div className="animate-fade-in space-y-5">
+    <div className="animate-fade-in space-y-6">
+
+      {/* Welcome Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1a2e4a] via-[#1e3a5f] to-[#243b5e] px-7 py-6"
+      >
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 0.5px, transparent 0)", backgroundSize: "24px 24px" }} />
+        <div className="absolute top-0 right-0 w-[300px] h-[300px] rounded-full bg-white/[0.03] blur-[80px] -translate-y-1/2 translate-x-1/4" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2.5 mb-1">
+              <h1 className="text-[22px] font-bold text-white tracking-tight">
+                {greeting}, {currentUser?.fullName || currentUser?.username}
+              </h1>
+            </div>
+            <p className="text-[13px] text-white/50 flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <Calendar size={12} />
+                {dateStr}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span>{entries.length} entities in database</span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span>{db.reports.length} reports filed</span>
+            </p>
+          </div>
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-white/[0.08] border border-white/[0.08]">
+              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                <Shield size={16} className="text-white/70" />
+              </div>
+              <div>
+                <p className="text-[12px] font-semibold text-white leading-tight">{clearanceLabel}</p>
+                <p className="text-[10px] text-white/40 font-medium">Clearance Level {clearance} · {currentUser?.access === "full" ? "Full Access" : "Basic Access"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
