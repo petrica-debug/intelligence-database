@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, Search, PenSquare, Users, Building2, Phone, MapPin, Car,
   Clock, Network, FileCheck, ScrollText, RotateCcw, Radio, UserCog, Globe, BarChart3,
-  ChevronLeft, ChevronRight, FileText, Brain, X, Shield
+  ChevronLeft, ChevronRight, FileText, Brain, X, Shield, Sparkles
 } from "lucide-react";
 import { CLEARANCE_LABELS } from "@/types";
 import type { ClearanceLevel } from "@/types";
@@ -52,6 +52,7 @@ export function Sidebar({ pathname, mobileOpen = false, onMobileClose }: Sidebar
     { href: "/analytics", label: "Analytics", icon: <BarChart3 size={16} /> },
     { href: "/reports", label: "Reports", icon: <FileText size={16} />, badge: (db.reports ?? []).length || undefined },
     { href: "/intelligence", label: "Intelligence", icon: <Brain size={16} />, badge: (db.inferredConnections ?? []).filter(c => c.status === "new").length || undefined },
+    { href: "/synthesis", label: "Synthesis", icon: <Sparkles size={16} /> },
     { href: "/timeline", label: "Timeline", icon: <Clock size={16} /> },
   ];
 
