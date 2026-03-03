@@ -90,73 +90,90 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       {/* ── Desktop header ── */}
-      <div className="hidden md:flex items-center justify-between px-5 py-2">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
+      <div className="hidden md:flex items-center justify-between px-5 py-2.5 gap-4">
+        {/* Quick Actions */}
+        <div className="flex items-center gap-2 shrink-0">
           {actions.map((a) => (
             <Link
               key={a.label}
               href={a.href}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-lg transition-all duration-200 shrink-0
+              className={`flex items-center gap-2 px-4 py-2 text-[12px] font-semibold rounded-xl transition-all duration-200 shrink-0
                 ${a.primary
-                  ? "gradient-blue text-white shadow-glow-blue hover:shadow-lg"
-                  : "text-text-3 hover:bg-surface-3 hover:text-text"
+                  ? "gradient-blue text-white shadow-glow-blue hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                  : "text-text-2 bg-surface-2/80 border border-border/50 hover:bg-surface-3 hover:text-text hover:border-border"
                 }`}
             >
-              <a.icon size={13} />
+              <a.icon size={14} strokeWidth={a.primary ? 2.2 : 1.8} />
               {a.label}
             </Link>
           ))}
-          <div className="w-px h-5 bg-border/40 mx-1" />
-          <span className="text-[10px] text-text-3 font-medium shrink-0">{dayName}, {monthDay}</span>
-          <span className="text-[10px] font-semibold text-text font-mono tabular-nums shrink-0">{db.entries.length} entities</span>
-          <span className="text-[10px] font-semibold text-text font-mono tabular-nums shrink-0">{totalLinks} links</span>
+        </div>
+
+        {/* Center Stats */}
+        <div className="flex items-center gap-2 flex-1 justify-center min-w-0">
+          <span className="text-[11px] text-text-2 font-medium shrink-0">{dayName}, {monthDay}</span>
+          <div className="w-1 h-1 rounded-full bg-border shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[12px] font-bold text-text font-mono tabular-nums">{db.entries.length}</span>
+            <span className="text-[10px] text-text-3 font-medium">entities</span>
+          </div>
+          <div className="w-1 h-1 rounded-full bg-border shrink-0" />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-[12px] font-bold text-text font-mono tabular-nums">{totalLinks}</span>
+            <span className="text-[10px] text-text-3 font-medium">links</span>
+          </div>
           {signals > 0 && (
-            <span className="inline-flex items-center gap-1 text-accent font-bold bg-accent-muted px-2 py-0.5 rounded text-[10px] shrink-0">
-              <Zap size={9} className="fill-current" /> {signals}
-            </span>
+            <>
+              <div className="w-1 h-1 rounded-full bg-border shrink-0" />
+              <span className="inline-flex items-center gap-1.5 text-accent font-bold bg-accent-muted px-2.5 py-1 rounded-lg text-[11px] shrink-0">
+                <Zap size={11} className="fill-current" /> {signals} active
+              </span>
+            </>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0 ml-3">
+
+        {/* Right: Search, Notifications, User */}
+        <div className="flex items-center gap-2.5 shrink-0">
           <button
             onClick={() => router.push("/search")}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-3/60 border border-border/50 hover:bg-surface-3 transition-all text-text-3 text-[11px]"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-2/80 border border-border/50 hover:bg-surface-3 hover:border-border transition-all text-text-3 text-[12px] cursor-pointer"
           >
-            <Search size={12} />
-            <span>Search</span>
-            <kbd className="ml-2 flex items-center gap-0.5 text-[9px] font-mono text-text-3/50 bg-surface/80 px-1 py-px rounded border border-border/40">
+            <Search size={13} />
+            <span className="font-medium">Search</span>
+            <kbd className="ml-1 flex items-center gap-0.5 text-[9px] font-mono text-text-3/50 bg-surface/80 px-1.5 py-0.5 rounded border border-border/40">
               <Command size={8} />K
             </kbd>
           </button>
 
           <button
-            className="relative p-2 rounded-lg hover:bg-surface-3 transition-all group"
+            className="relative p-2.5 rounded-xl hover:bg-surface-3 transition-all group cursor-pointer"
             onClick={() => document.getElementById("notifPanel")?.classList.toggle("hidden")}
           >
-            <Bell size={16} className="text-text-3 group-hover:text-text transition-colors" />
+            <Bell size={17} className="text-text-3 group-hover:text-text transition-colors" />
             {unread > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 gradient-orange text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+              <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] gradient-orange text-white text-[8px] font-bold rounded-full flex items-center justify-center shadow-sm">
                 {unread}
               </span>
             )}
           </button>
 
-          <div className="w-px h-6 bg-border/40" />
+          <div className="w-px h-7 bg-border/40" />
 
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full gradient-blue flex items-center justify-center text-[10px] font-bold text-white ring-1 ring-stat-blue/15">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full gradient-blue flex items-center justify-center text-[11px] font-bold text-white ring-2 ring-stat-blue/15 ring-offset-1 ring-offset-surface">
               {currentUser.username[0].toUpperCase()}
             </div>
             <div>
-              <p className="text-[11px] font-semibold text-text leading-tight">{currentUser.fullName ?? currentUser.username}</p>
-              <p className="text-[9px] text-text-3 font-medium">L{clearance} · {CLEARANCE_LABELS[clearance]}</p>
+              <p className="text-[12px] font-semibold text-text leading-tight">{currentUser.fullName ?? currentUser.username}</p>
+              <p className="text-[10px] text-text-3 font-medium">L{clearance} · {CLEARANCE_LABELS[clearance]}</p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="p-1.5 rounded-lg text-text-3 hover:text-red hover:bg-red-muted transition-all cursor-pointer"
+            className="p-2 rounded-xl text-text-3 hover:text-red hover:bg-red-muted transition-all cursor-pointer"
             title="Logout"
           >
-            <LogOut size={13} />
+            <LogOut size={14} />
           </button>
         </div>
       </div>
